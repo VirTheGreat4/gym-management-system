@@ -41,6 +41,12 @@ export interface UIMember extends Member {
 }
 
 export default function MembersPage() {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const [members, setMembers] = useState<UIMember[]>([]);
   const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlan[]>(DEFAULT_SUBSCRIPTION_PLANS);
   const [isLoading, setIsLoading] = useState(true);
@@ -390,8 +396,19 @@ export default function MembersPage() {
     }
   };
 
+  if (!isMounted) {
+    return (
+      <div className="space-y-6 sm:space-y-8" suppressHydrationWarning>
+        <BackButton />
+        <div className="bg-[#E2E8F0] p-8 rounded-2xl border-4 border-slate-700 font-comic font-bold text-center">
+          Loading members directory...
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <div className="space-y-6 sm:space-y-8" suppressHydrationWarning>
       <BackButton />
 
       {/* Feedback Toast / Alert */}

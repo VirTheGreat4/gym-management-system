@@ -12,6 +12,15 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  experimental: {
+    serverActions: {
+      allowedOrigins: [
+        '*.app.github.dev',
+        'humble-fiesta-r766gjjxvpg3x995-3000.app.github.dev',
+        'localhost:3000',
+      ],
+    },
+  },
 };
 
 export default nextConfig;

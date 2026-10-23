@@ -204,7 +204,6 @@ export function Sidebar() {
             <span className="w-3 h-3 rounded-full bg-emerald-500 border-2 border-slate-700 animate-pulse" />
           </div>
           <p className="text-sm font-extrabold text-slate-900">{gymName}</p>
-          <p className="text-xs text-slate-600 font-bold">Front-Desk Thumb Optimized</p>
         </div>
       </aside>
 

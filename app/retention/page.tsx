@@ -16,11 +16,16 @@ import { getAtRiskMembers, AtRiskMember } from "@/app/actions/retention";
 import { BackButton } from "@/components/BackButton";
 
 export default function RetentionHubPage() {
+  const [isMounted, setIsMounted] = useState(false);
   const [members, setMembers] = useState<AtRiskMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sentToast, setSentToast] = useState<string | null>(null);
   const [sentIds, setSentIds] = useState<Record<string, boolean>>({});
   const [sendingAll, setSendingAll] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const fetchAtRisk = async () => {
     setIsLoading(true);
@@ -41,6 +46,10 @@ export default function RetentionHubPage() {
   useEffect(() => {
     fetchAtRisk();
   }, []);
+
+  if (!isMounted) {
+    return null;
+  }
 
   const handleSendSMS = (member: AtRiskMember) => {
     window.location.href = member.smsUrl;
@@ -82,10 +91,10 @@ export default function RetentionHubPage() {
             <Sparkles className="w-3.5 h-3.5 text-amber-700" /> Notify Members
           </div>
           <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900">
-            Notify Members
+            Send SMS Reminders
           </h1>
           <p className="text-slate-700 font-bold text-sm mt-1">
-            Send SMS reminders to members who are expiring soon or already expired.
+            Send text reminders to members whose memberships are expiring soon or already expired.
           </p>
         </div>
 
@@ -107,30 +116,18 @@ export default function RetentionHubPage() {
       </div>
 
       {/* Overview Metric Banner */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         <div className="bg-pastel-yellow p-5 sm:p-6 rounded-2xl shadow-soft border-4 border-slate-700 flex items-center gap-4 text-amber-950">
           <div className="p-4 bg-white/95 rounded-2xl text-amber-800 shadow-xs border-2 border-slate-700 shrink-0">
             <Clock className="w-8 h-8" />
           </div>
           <div>
             <span className="text-xs font-extrabold uppercase block">
-              At-Risk / Expiring Queue
+              Expiring Soon
             </span>
             <p className="text-2xl sm:text-3xl font-extrabold mt-1">
               {isLoading ? "..." : `${members.length} Members`}
             </p>
-          </div>
-        </div>
-
-        <div className="bg-pastel-green p-5 sm:p-6 rounded-2xl shadow-soft border-4 border-slate-700 flex items-center gap-4 text-emerald-950">
-          <div className="p-4 bg-white/95 rounded-2xl text-emerald-800 shadow-xs border-2 border-slate-700 shrink-0">
-            <Bot className="w-8 h-8" />
-          </div>
-          <div>
-            <span className="text-xs font-extrabold uppercase block">
-              AI Projected Retention
-            </span>
-            <p className="text-2xl sm:text-3xl font-extrabold mt-1">88.4%</p>
           </div>
         </div>
 
@@ -140,7 +137,7 @@ export default function RetentionHubPage() {
           </div>
           <div>
             <span className="text-xs font-extrabold uppercase block">
-              Reminders Dispatched
+              Reminders Sent
             </span>
             <p className="text-2xl sm:text-3xl font-extrabold mt-1">
               {Object.values(sentIds).filter(Boolean).length} / {members.length}
@@ -153,7 +150,7 @@ export default function RetentionHubPage() {
       <div className="space-y-4">
         <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
           <AlertTriangle className="w-5 h-5 text-amber-600" />
-          High-Risk Retention Queue (&le; 3 Days / Expired)
+          Expiring Members
         </h2>
 
         {isLoading ? (

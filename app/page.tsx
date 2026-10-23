@@ -233,7 +233,7 @@ export default async function DashboardPage() {
   const gymName = gymSettings?.name || "PowerFit Studio";
 
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <div className="space-y-6 sm:space-y-8" suppressHydrationWarning>
       {/* Header Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#E2E8F0] p-5 sm:p-8 rounded-2xl shadow-soft border-4 border-slate-700">
         <div>

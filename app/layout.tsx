@@ -19,11 +19,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full bg-slate-300">
+    <html lang="en" suppressHydrationWarning className="h-full bg-slate-300">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </head>
-      <body className="min-h-screen text-slate-900 bg-slate-300 font-sans antialiased">
+      <body suppressHydrationWarning className="min-h-screen text-slate-900 bg-slate-300 font-sans antialiased">
         <div className="flex min-h-screen flex-col lg:flex-row">
           <Sidebar />
           <main className="flex-1 lg:pl-72 flex flex-col min-h-screen">

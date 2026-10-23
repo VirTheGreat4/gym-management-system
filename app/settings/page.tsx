@@ -17,8 +17,13 @@ import { getGymSettings, updateGymSettings } from "@/app/actions/settings";
 import { BackButton } from "@/components/BackButton";
 
 export default function SettingsPage() {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const [gymName, setGymName] = useState("PowerFit Studio");
-  const [gymDomain, setGymDomain] = useState("powerfit.gymsaas.io");
   const [selectedColor, setSelectedColor] = useState("#3B82F6");
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
@@ -84,8 +89,19 @@ export default function SettingsPage() {
     }
   };
 
+  if (!isMounted) {
+    return (
+      <div className="space-y-6 sm:space-y-8" suppressHydrationWarning>
+        <BackButton />
+        <div className="bg-[#E2E8F0] p-8 rounded-2xl border-4 border-slate-700 font-comic font-bold text-center">
+          Loading gym settings...
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <div className="space-y-6 sm:space-y-8" suppressHydrationWarning>
       <BackButton />
 
       {/* Toast Alert */}
@@ -110,17 +126,6 @@ export default function SettingsPage() {
           <p className="text-slate-700 font-bold text-sm mt-1">
             As the gym owner, you can update your gym name, theme colors, and logo anytime independently.
           </p>
-        </div>
-
-        <div
-          className="px-4 py-3 rounded-2xl font-extrabold text-xs flex items-center gap-2 border-3 shadow-soft self-start md:self-auto"
-          style={{
-            backgroundColor: `${selectedColor}25`,
-            color: selectedColor,
-            borderColor: "#334155",
-          }}
-        >
-          <Building className="w-4 h-4" /> Single-Gym Active
         </div>
       </div>
 
@@ -151,24 +156,6 @@ export default function SettingsPage() {
                   onChange={(e) => setGymName(e.target.value)}
                   className="w-full px-4 py-3.5 rounded-2xl bg-white border-3 border-slate-700 text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-sky-400 font-extrabold min-h-[52px]"
                 />
-              </div>
-
-              <div>
-                <label className="block text-xs font-extrabold text-slate-800 uppercase mb-2">
-                  Custom Domain or Subdomain
-                </label>
-                <div className="flex items-center">
-                  <span className="px-4 py-3.5 bg-slate-300 text-slate-700 rounded-l-2xl border-y-3 border-l-3 border-slate-700 text-sm font-extrabold flex items-center min-h-[52px]">
-                    https://
-                  </span>
-                  <input
-                    type="text"
-                    required
-                    value={gymDomain}
-                    onChange={(e) => setGymDomain(e.target.value)}
-                    className="w-full px-4 py-3.5 rounded-r-2xl bg-white border-3 border-slate-700 text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-sky-400 font-extrabold min-h-[52px]"
-                  />
-                </div>
               </div>
             </div>
 
@@ -306,9 +293,6 @@ export default function SettingsPage() {
                 <h3 className="font-extrabold text-lg text-slate-900 leading-tight truncate">
                   {gymName}
                 </h3>
-                <p className="text-xs font-bold text-slate-700 flex items-center gap-1 mt-0.5 truncate">
-                  <Globe className="w-3 h-3 shrink-0" /> {gymDomain}
-                </p>
               </div>
             </div>
 
@@ -332,12 +316,6 @@ export default function SettingsPage() {
               >
                 Active Membership Plan Badge
               </div>
-            </div>
-
-            <div className="text-xs font-bold text-slate-700 space-y-1">
-              <p>• Font: Comic Sans MS enforced</p>
-              <p>• Minimum Border Radius: 20px (rounded-2xl)</p>
-              <p>• Thick bold outlines & non-glare mid-tone</p>
             </div>
           </div>
         </div>

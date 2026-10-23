@@ -1,17 +1,39 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Dumbbell, Loader2 } from "lucide-react";
+import { Dumbbell } from "lucide-react";
 
 export function RouteLoader({ children }: { children?: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
+  const [progress, setProgress] = useState(10);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 800);
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          return 100;
+        }
+        return prev + 15;
+      });
+    }, 100);
 
-    return () => clearTimeout(timer);
+    const handleLoad = () => {
+      setProgress(100);
+      setIsLoading(false);
+    };
+
+    if (document.readyState === "complete") {
+      handleLoad();
+    } else {
+      window.addEventListener("load", handleLoad);
+      const fallbackTimer = setTimeout(handleLoad, 800);
+      return () => {
+        window.removeEventListener("load", handleLoad);
+        clearTimeout(fallbackTimer);
+        clearInterval(interval);
+      };
+    }
   }, []);
 
   if (isLoading) {
@@ -22,11 +44,13 @@ export function RouteLoader({ children }: { children?: React.ReactNode }) {
             <Dumbbell className="w-9 h-9 animate-spin" />
           </div>
           <div className="text-center space-y-2">
-            <h2 className="text-lg font-extrabold text-slate-900">Loading gym system... please wait</h2>
-            <p className="text-xs font-bold text-slate-600">Preparing front-desk portal and active sync</p>
+            <h2 className="text-lg font-extrabold text-slate-900">Loading...</h2>
           </div>
-          <div className="w-48 h-3 bg-slate-300 rounded-full overflow-hidden border-2 border-slate-700">
-            <div className="h-full bg-sky-500 animate-[pulse_0.8s_infinite] w-3/4 rounded-full" />
+          <div className="h-3 w-48 bg-slate-300 rounded-full border-2 border-slate-700/80 overflow-hidden">
+            <div
+              className="h-full bg-sky-500 transition-all duration-150 rounded-full"
+              style={{ width: `${progress}%` }}
+            />
           </div>
         </div>
       </div>

@@ -75,6 +75,12 @@ export function saveStoredPlans(plans: SubscriptionPlan[]) {
 }
 
 export default function SubscriptionsPage() {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const [plans, setPlans] = useState<SubscriptionPlan[]>(DEFAULT_SUBSCRIPTION_PLANS);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
@@ -196,8 +202,19 @@ export default function SubscriptionsPage() {
     }
   };
 
+  if (!isMounted) {
+    return (
+      <div className="space-y-6 sm:space-y-8" suppressHydrationWarning>
+        <BackButton />
+        <div className="bg-[#E2E8F0] p-8 rounded-2xl border-4 border-slate-700 font-comic font-bold text-center">
+          Loading subscription plans...
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <div className="space-y-6 sm:space-y-8" suppressHydrationWarning>
       <BackButton />
 
       {/* Feedback Toast */}
