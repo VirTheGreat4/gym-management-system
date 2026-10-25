@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import AppLayout from "@/components/AppLayout";
+import RealtimeSync from "@/components/RealtimeSync";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -21,6 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className="h-full">
       <body suppressHydrationWarning className="min-h-screen text-slate-900 bg-[#CBD5E1] font-comic antialiased">
+        <RealtimeSync />
         <AppLayout>{children}</AppLayout>
       </body>
     </html>
