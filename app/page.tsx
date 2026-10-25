@@ -14,6 +14,7 @@ export default function LandingGateway() {
   const [isMounted, setIsMounted] = useState(false);
   const [gymName, setGymName] = useState('PowerFit Studio');
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [activeNode, setActiveNode] = useState<string | null>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -44,12 +45,20 @@ export default function LandingGateway() {
     <div className="relative w-full min-h-screen flex items-center justify-center py-6 px-3 sm:px-6 overflow-hidden select-none" suppressHydrationWarning>
       {/* Minimalist Geometric Background Layer */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Soft Ambient Radial Glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] sm:w-[700px] h-[500px] sm:h-[700px] bg-red-600/10 blur-[130px] rounded-full" />
+        {/* Soft Ambient Radial Glow - Reacts smoothly on shape hover */}
+        <div
+          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] sm:w-[700px] h-[500px] sm:h-[700px] rounded-full blur-[130px] transition-all duration-700 ease-out ${
+            activeNode === 'top-left'
+              ? 'bg-red-500/20 scale-125 -translate-x-3/4 -translate-y-3/4'
+              : activeNode === 'bottom-right'
+              ? 'bg-red-500/20 scale-125 translate-x-0 translate-y-0'
+              : 'bg-red-600/10 scale-100'
+          }`}
+        />
         
         {/* Grid Pattern SVG */}
         <svg
-          className="absolute inset-0 w-full h-full opacity-[0.12] text-slate-400"
+          className="absolute inset-0 w-full h-full opacity-[0.12] text-slate-400 pointer-events-none"
           xmlns="http://www.w3.org/2000/svg"
           width="100%"
           height="100%"
@@ -63,27 +72,144 @@ export default function LandingGateway() {
           <rect width="100%" height="100%" fill="url(#grid-pattern)" />
         </svg>
 
-        {/* Top Left Geometry Wireframe */}
-        <svg className="absolute top-6 left-6 w-36 sm:w-48 h-36 sm:h-48 opacity-25 text-slate-300 hidden sm:block" viewBox="0 0 200 200" fill="none">
-          <rect x="20" y="20" width="160" height="160" stroke="currentColor" strokeWidth="1" transform="rotate(15 100 100)" />
-          <rect x="40" y="40" width="120" height="120" stroke="currentColor" strokeWidth="0.75" transform="rotate(30 100 100)" />
-          <circle cx="100" cy="100" r="70" stroke="currentColor" strokeWidth="0.5" strokeDasharray="4 4" />
-          <line x1="100" y1="0" x2="100" y2="200" stroke="currentColor" strokeWidth="0.5" />
-          <line x1="0" y1="100" x2="200" y2="100" stroke="currentColor" strokeWidth="0.5" />
-        </svg>
+        {/* Top Left Geometry Wireframe - Interactive & Animated */}
+        <div
+          onMouseEnter={() => setActiveNode('top-left')}
+          onMouseLeave={() => setActiveNode(null)}
+          className="absolute top-6 left-6 pointer-events-auto group cursor-pointer hidden sm:block z-0"
+        >
+          <div className="relative p-2">
+            {/* Ambient Backplate Glow on Hover */}
+            <div className="absolute inset-0 bg-red-600/0 group-hover:bg-red-500/10 rounded-full blur-xl transition-all duration-500" />
 
-        {/* Bottom Right Geometry Wireframe */}
-        <svg className="absolute bottom-6 right-6 w-40 sm:w-56 h-40 sm:h-56 opacity-25 text-slate-300 hidden sm:block" viewBox="0 0 200 200" fill="none">
-          <polygon points="100,10 190,190 10,190" stroke="currentColor" strokeWidth="1" />
-          <polygon points="100,50 160,170 40,170" stroke="currentColor" strokeWidth="0.75" />
-          <circle cx="100" cy="130" r="30" stroke="currentColor" strokeWidth="0.5" />
-          <path d="M100 10 L100 190 M10 190 L190 10" stroke="currentColor" strokeWidth="0.5" strokeDasharray="3 3" />
-        </svg>
+            <svg
+              className="w-36 sm:w-48 h-36 sm:h-48 text-slate-400 group-hover:text-red-500 opacity-30 group-hover:opacity-100 scale-100 group-hover:scale-110 transition-all duration-500 ease-out group-hover:drop-shadow-[0_0_18px_rgba(239,68,68,0.75)]"
+              viewBox="0 0 200 200"
+              fill="none"
+            >
+              {/* Outer Square - Rotates continuously, accelerates on hover */}
+              <rect
+                x="20"
+                y="20"
+                width="160"
+                height="160"
+                stroke="currentColor"
+                strokeWidth="1"
+                className="animate-geo-spin group-hover:[animation-duration:8s] transition-all"
+              />
+              {/* Inner Square - Reverse rotates continuously, accelerates on hover */}
+              <rect
+                x="40"
+                y="40"
+                width="120"
+                height="120"
+                stroke="currentColor"
+                strokeWidth="0.75"
+                className="animate-geo-spin-reverse group-hover:[animation-duration:6s] transition-all"
+              />
+              {/* Concentric Circle - Animated dashed stroke */}
+              <circle
+                cx="100"
+                cy="100"
+                r="70"
+                stroke="currentColor"
+                strokeWidth="0.5"
+                strokeDasharray="4 4"
+                className="animate-geo-dash group-hover:stroke-[1.5] transition-all"
+              />
+              {/* Crosshair Lines */}
+              <line
+                x1="100"
+                y1="0"
+                x2="100"
+                y2="200"
+                stroke="currentColor"
+                strokeWidth="0.5"
+                className="group-hover:stroke-red-400 group-hover:stroke-[1] transition-all"
+              />
+              <line
+                x1="0"
+                y1="100"
+                x2="200"
+                y2="100"
+                stroke="currentColor"
+                strokeWidth="0.5"
+                className="group-hover:stroke-red-400 group-hover:stroke-[1] transition-all"
+              />
+            </svg>
 
-        {/* Corner Grid Crosshairs */}
+            {/* Interactive Status Indicator Tooltip */}
+            <div className="absolute -bottom-6 left-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-y-1 font-mono text-[10px] font-extrabold tracking-wider text-red-500 bg-slate-950/90 border border-red-500/50 px-2.5 py-1 rounded-md shadow-xl pointer-events-none flex items-center gap-1.5 backdrop-blur-md">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping shrink-0" />
+              <span>NODE_01 // QUAD_MATRIX</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Right Geometry Wireframe - Interactive & Animated */}
+        <div
+          onMouseEnter={() => setActiveNode('bottom-right')}
+          onMouseLeave={() => setActiveNode(null)}
+          className="absolute bottom-6 right-6 pointer-events-auto group cursor-pointer hidden sm:block z-0"
+        >
+          <div className="relative p-2">
+            {/* Ambient Backplate Glow on Hover */}
+            <div className="absolute inset-0 bg-red-600/0 group-hover:bg-red-500/10 rounded-full blur-xl transition-all duration-500" />
+
+            <svg
+              className="w-40 sm:w-56 h-40 sm:h-56 text-slate-400 group-hover:text-red-500 opacity-30 group-hover:opacity-100 scale-100 group-hover:scale-110 transition-all duration-500 ease-out group-hover:drop-shadow-[0_0_18px_rgba(239,68,68,0.75)]"
+              viewBox="0 0 200 200"
+              fill="none"
+            >
+              {/* Outer Triangle Polygon - Reverse Rotates continuously */}
+              <polygon
+                points="100,10 190,190 10,190"
+                stroke="currentColor"
+                strokeWidth="1"
+                className="animate-geo-spin-reverse group-hover:[animation-duration:9s] transition-all"
+              />
+              {/* Inner Triangle Polygon - Forward Rotates continuously */}
+              <polygon
+                points="100,50 160,170 40,170"
+                stroke="currentColor"
+                strokeWidth="0.75"
+                className="animate-geo-spin group-hover:[animation-duration:7s] transition-all"
+              />
+              {/* Central Pulsing Circle */}
+              <circle
+                cx="100"
+                cy="130"
+                r="30"
+                stroke="currentColor"
+                strokeWidth="0.5"
+                className="animate-geo-pulse group-hover:stroke-[1.5] transition-all"
+              />
+              {/* Diagonal Cross Rays */}
+              <path
+                d="M100 10 L100 190 M10 190 L190 10"
+                stroke="currentColor"
+                strokeWidth="0.5"
+                strokeDasharray="3 3"
+                className="animate-geo-dash group-hover:stroke-red-400 transition-all"
+              />
+            </svg>
+
+            {/* Interactive Status Indicator Tooltip */}
+            <div className="absolute -top-6 right-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:-translate-y-1 font-mono text-[10px] font-extrabold tracking-wider text-red-500 bg-slate-950/90 border border-red-500/50 px-2.5 py-1 rounded-md shadow-xl pointer-events-none flex items-center gap-1.5 backdrop-blur-md">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping shrink-0" />
+              <span>NODE_04 // TRI_VECTOR</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Corner Grid Crosshairs - Interactive */}
         <div className="absolute inset-0 flex justify-between p-6 sm:p-10 opacity-30 text-[10px] sm:text-xs font-mono text-slate-400 pointer-events-none">
-          <div>+ 01.GATEWAY</div>
-          <div>SYS_NODE_04 +</div>
+          <div className="pointer-events-auto cursor-pointer hover:text-red-500 hover:opacity-100 hover:scale-105 transition-all">
+            + 01.GATEWAY
+          </div>
+          <div className="pointer-events-auto cursor-pointer hover:text-red-500 hover:opacity-100 hover:scale-105 transition-all">
+            SYS_NODE_04 +
+          </div>
         </div>
       </div>
 
