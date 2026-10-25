@@ -276,13 +276,14 @@ export default function SettingsPage() {
             <button
               type="button"
               onClick={toggleLiveOpenStatus}
-              className={`w-full sm:w-auto px-8 py-4 text-xl tracking-wide rounded-2xl border-4 border-slate-700/80 transition-all active:scale-95 shadow-soft font-extrabold flex items-center justify-center gap-3 ${
+              className={`w-full sm:w-auto px-6 py-3.5 text-base tracking-wide rounded-lg border-2 border-slate-700/80 transition-all active:scale-95 shadow-sm font-extrabold flex items-center justify-center gap-2 ${
                 schedule.is_open_now
-                  ? "bg-green-400 text-green-950"
-                  : "bg-red-400 text-red-950"
+                  ? "bg-emerald-500 text-white border-emerald-600"
+                  : "bg-rose-500 text-white border-rose-600"
               }`}
             >
-              <span>{schedule.is_open_now ? "🟢 GYM IS OPEN NOW" : "🔴 GYM IS CLOSED NOW"}</span>
+              <span className={`w-2.5 h-2.5 rounded-full ${schedule.is_open_now ? "bg-white animate-pulse" : "bg-white"}`} />
+              <span>{schedule.is_open_now ? "GYM IS OPEN NOW" : "GYM IS CLOSED NOW"}</span>
             </button>
           </div>
         </div>
@@ -350,8 +351,8 @@ export default function SettingsPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-red-100 text-red-800 px-4 py-2 rounded-xl font-bold w-full text-center border-2 border-red-200">
-                    💤 Closed All Day
+                  <div className="bg-red-100 text-red-800 px-4 py-2 rounded-lg font-bold w-full text-center border-2 border-red-200 text-xs">
+                    Closed All Day
                   </div>
                 )}
               </div>
@@ -575,17 +576,19 @@ export default function SettingsPage() {
                 Live Operating Banner
               </span>
               <div
-                className={`p-3 rounded-xl border-2 border-slate-700 font-extrabold text-xs text-center ${
+                className={`p-3 rounded-lg border-2 border-slate-700 font-extrabold text-xs text-center flex items-center justify-center gap-2 ${
                   schedule.is_open_now
                     ? "bg-emerald-200 text-emerald-950"
                     : "bg-rose-200 text-rose-950"
                 }`}
               >
-                {schedule.is_open_now ? "🟢 Gym is OPEN NOW" : "🔴 Gym is CLOSED NOW"}
+                <span className={`w-2 h-2 rounded-full ${schedule.is_open_now ? "bg-emerald-700 animate-pulse" : "bg-rose-700"}`} />
+                <span>{schedule.is_open_now ? "Gym is OPEN NOW" : "Gym is CLOSED NOW"}</span>
               </div>
               {schedule.announcement && (
-                <p className="text-[11px] font-bold text-slate-800 bg-amber-100 p-2 rounded-xl border border-slate-700">
-                  📢 {schedule.announcement}
+                <p className="text-[11px] font-bold text-slate-800 bg-amber-100 p-2 rounded-lg border border-slate-700 flex items-center gap-1.5">
+                  <Megaphone className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                  <span>{schedule.announcement}</span>
                 </p>
               )}
             </div>

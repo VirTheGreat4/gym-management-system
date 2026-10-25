@@ -697,10 +697,10 @@ export default function MembersPage() {
                             setWarningMember(member);
                             setWarningNote("");
                           }}
-                          className="px-3 py-2 rounded-2xl bg-amber-950/80 hover:bg-amber-900 text-amber-300 border border-amber-700 transition font-extrabold text-xs flex items-center gap-1 min-h-[40px] cursor-pointer"
+                          className="px-3 py-2 rounded-lg bg-amber-950/80 hover:bg-amber-900 text-amber-300 border border-amber-700 transition font-extrabold text-xs flex items-center gap-1 min-h-[40px] cursor-pointer"
                           title="Issue Warning"
                         >
-                          <AlertTriangle className="w-3.5 h-3.5" /> ⚠️ Warn
+                          <AlertTriangle className="w-3.5 h-3.5" /> Warn
                         </button>
 
                         <button
@@ -708,7 +708,7 @@ export default function MembersPage() {
                             setBanMemberTarget(member);
                             setBanReasonInput(member.ban_reason || "");
                           }}
-                          className={`px-3 py-2 rounded-2xl border transition font-extrabold text-xs flex items-center gap-1 min-h-[40px] cursor-pointer ${
+                          className={`px-3 py-2 rounded-lg border transition font-extrabold text-xs flex items-center gap-1 min-h-[40px] cursor-pointer ${
                             member.is_banned
                               ? "bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border-emerald-700"
                               : "bg-red-950/80 hover:bg-red-900 text-red-300 border-red-700"
@@ -716,7 +716,7 @@ export default function MembersPage() {
                           title={member.is_banned ? "Lift Ban" : "Ban Member"}
                         >
                           {member.is_banned ? <ShieldCheck className="w-3.5 h-3.5" /> : <ShieldAlert className="w-3.5 h-3.5" />}
-                          {member.is_banned ? "✅ Unban" : "🚫 Ban"}
+                          {member.is_banned ? "Unban" : "Ban"}
                         </button>
 
                         <button

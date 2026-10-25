@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Phone,
   Calendar,
+  CheckCircle2,
 } from "lucide-react";
 import { getDashboardMetrics } from "@/app/actions/dashboard";
 import { getGymSettings } from "@/app/actions/settings";
@@ -193,8 +194,9 @@ async function DashboardMetricsSection() {
                   </span>
                 </div>
               ) : (
-                <div className="p-4 rounded-2xl bg-emerald-950/80 border border-emerald-700 text-center shadow-xs">
-                  <p className="text-xs font-extrabold text-emerald-300">Good Standing! All subscriptions are up to date 🎉</p>
+                <div className="p-4 rounded-lg bg-emerald-950/80 border border-emerald-700 text-center shadow-xs flex items-center justify-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <p className="text-xs font-extrabold text-emerald-300">Good Standing! All subscriptions are up to date</p>
                 </div>
               )}
             </div>
@@ -241,7 +243,7 @@ export default async function DashboardPage() {
             <Activity className="w-3.5 h-3.5 text-red-500" /> Dashboard Overview
           </div>
           <h1 className="text-2xl md:text-3xl font-extrabold text-zinc-100">
-            Welcome back, Gym Manager! 👋
+            Welcome back, Gym Manager!
           </h1>
           <p className="text-zinc-400 font-medium text-sm mt-1">
             Here is what is happening at {gymName} today.

@@ -54,7 +54,7 @@ export default function RetentionHubPage() {
   const handleSendSMS = (member: AtRiskMember) => {
     window.location.href = member.smsUrl;
     setSentIds((prev) => ({ ...prev, [member.id]: true }));
-    setSentToast(`Automated SMS reminder successfully dispatched to ${member.name}! 🚀`);
+    setSentToast(`Automated reminder successfully dispatched to ${member.name}!`);
     setTimeout(() => setSentToast(null), 4000);
   };
 
@@ -67,7 +67,7 @@ export default function RetentionHubPage() {
       });
       setSentIds(allSent);
       setSendingAll(false);
-      setSentToast("Batch SMS reminders sent to all expiring members! 🎉");
+      setSentToast("Batch reminders sent to all expiring members!");
       setTimeout(() => setSentToast(null), 4000);
     }, 1500);
   };
@@ -234,9 +234,9 @@ export default function RetentionHubPage() {
                     ) : (
                       <button
                         onClick={() => handleSendSMS(member)}
-                        className="w-full lg:w-auto px-6 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-sm rounded-2xl shadow-soft border-3 border-slate-700 flex items-center justify-center gap-2 transition-all min-h-[52px]"
+                        className="w-full lg:w-auto px-5 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs sm:text-sm rounded-lg shadow-sm border-2 border-emerald-500/60 flex items-center justify-center gap-2 transition-all min-h-[48px] cursor-pointer"
                       >
-                        💬 Send SMS Reminder
+                        <Send className="w-4 h-4" /> Send Reminder
                       </button>
                     )}
                   </div>
