@@ -1,14 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Comic_Neue } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import AppLayout from "@/components/AppLayout";
 import RealtimeSync from "@/components/RealtimeSync";
 import "./globals.css";
 
-const comicNeue = Comic_Neue({
-  weight: ['400', '700'],
+const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-comic-neue',
+  variable: '--font-inter',
 });
 
 export const metadata: Metadata = {
@@ -31,7 +30,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning className="h-full">
       <body
         suppressHydrationWarning
-        className={`${comicNeue.variable} min-h-screen text-slate-900 bg-[#CBD5E1] antialiased`}
+        className={`${inter.variable} ${inter.className} min-h-screen text-slate-900 bg-[#CBD5E1] antialiased`}
       >
         <RealtimeSync />
         <AppLayout>{children}</AppLayout>

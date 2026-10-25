@@ -9,8 +9,8 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        comic: ['"Comic Sans MS"', 'var(--font-comic-neue)', '"Comic Neue"', 'cursive', 'sans-serif'],
-        sans: ['"Comic Sans MS"', '"Comic Sans"', "cursive", "sans-serif"],
+        sans: ['var(--font-inter)', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+        comic: ['var(--font-inter)', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
       },
       borderRadius: {
         "2xl": "20px",

@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 body, * {
-  font-family: "Comic Sans MS", var(--font-comic-neue), "Comic Neue", cursive, sans-serif !important;
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
 }
 
 @layer base {
   :root {
-    --font-family: "Comic Sans MS", var(--font-comic-neue), "Comic Neue", cursive, sans-serif;
+    --font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     --background: #CBD5E1; /* slate-300 non-glare mid-tone */
     --foreground: #0f172a;
     --primary: #38bdf8;
