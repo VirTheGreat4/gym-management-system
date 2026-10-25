@@ -7,30 +7,47 @@ import { revalidatePath } from 'next/cache';
 const SINGLE_GYM_ID = '00000000-0000-0000-0000-000000000001';
 
 export async function getGymSettings(): Promise<{ data: GymSettings | null; error: string | null }> {
-  const supabase = await createClient();
+  try {
+    const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from('gyms')
-    .select('*')
-    .eq('id', SINGLE_GYM_ID)
-    .single();
+    const { data, error } = await supabase
+      .from('gyms')
+      .select('*')
+      .eq('id', SINGLE_GYM_ID)
+      .single();
 
-  if (error && error.code !== 'PGRST116') {
-    return { data: null, error: error.message };
-  }
+    if (error && error.code !== 'PGRST116') {
+      return { data: null, error: error.message };
+    }
 
-  // Fallback defaults if record is not yet seeded
-  if (!data) {
+    // Fallback defaults if record is not yet seeded
+    if (!data) {
+      const defaultSettings: GymSettings = {
+        id: SINGLE_GYM_ID,
+        name: 'PowerFit Studio',
+        theme_color: '#3B82F6',
+        logo_url: null,
+      };
+      return { data: defaultSettings, error: null };
+    }
+
+    return { data, error: null };
+  } catch (err) {
     const defaultSettings: GymSettings = {
       id: SINGLE_GYM_ID,
       name: 'PowerFit Studio',
       theme_color: '#3B82F6',
       logo_url: null,
+      schedule: {
+        is_open_now: true,
+        manual_override: false,
+        announcement: '',
+        regular_hours: [],
+        special_closed_dates: [],
+      },
     };
     return { data: defaultSettings, error: null };
   }
-
-  return { data, error: null };
 }
 
 export async function updateGymSettings(

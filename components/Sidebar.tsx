@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
@@ -13,11 +13,14 @@ import {
   Menu,
   X,
   Sparkles,
+  LogOut,
 } from "lucide-react";
 import { getGymSettings } from "@/app/actions/settings";
+import { logoutAdmin } from "@/app/actions/auth";
 
-export function Sidebar() {
+export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [gymName, setGymName] = useState("PowerFit Studio");
   const [themeColor, setThemeColor] = useState("#3B82F6");
@@ -35,10 +38,14 @@ export function Sidebar() {
     loadGym();
   }, [pathname]);
 
+  const handleLogout = async () => {
+    await logoutAdmin();
+  };
+
   const navItems = [
     {
       name: "Dashboard",
-      href: "/",
+      href: "/dashboard",
       icon: LayoutDashboard,
       badge: null as string | null,
       badgeStyle: null as string | null,
@@ -187,23 +194,33 @@ export function Sidebar() {
           </nav>
         </div>
 
-        {/* Tenant Info Footer */}
-        <div
-          className="p-4 rounded-2xl border-3 border-slate-700 space-y-2 shadow-soft"
-          style={{
-            backgroundColor: `${themeColor}20`,
-          }}
-        >
-          <div className="flex items-center justify-between">
-            <span
-              className="text-xs font-extrabold uppercase tracking-wider"
-              style={{ color: themeColor }}
-            >
-              Gym Active
-            </span>
-            <span className="w-3 h-3 rounded-full bg-emerald-500 border-2 border-slate-700 animate-pulse" />
+        {/* Bottom Section: Tenant Info + Logout */}
+        <div className="space-y-3">
+          <div
+            className="p-4 rounded-2xl border-3 border-slate-700 space-y-2 shadow-soft"
+            style={{
+              backgroundColor: `${themeColor}20`,
+            }}
+          >
+            <div className="flex items-center justify-between">
+              <span
+                className="text-xs font-extrabold uppercase tracking-wider"
+                style={{ color: themeColor }}
+              >
+                Gym Active
+              </span>
+              <span className="w-3 h-3 rounded-full bg-emerald-500 border-2 border-slate-700 animate-pulse" />
+            </div>
+            <p className="text-sm font-extrabold text-slate-900">{gymName}</p>
           </div>
-          <p className="text-sm font-extrabold text-slate-900">{gymName}</p>
+
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-red-100 hover:bg-red-200 text-red-700 border-3 border-slate-700 font-extrabold text-sm shadow-soft transition-all duration-200 active:translate-y-0.5 cursor-pointer"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Logout</span>
+          </button>
         </div>
       </aside>
 
@@ -232,3 +249,4 @@ export function Sidebar() {
   );
 }
 
+export { Sidebar };

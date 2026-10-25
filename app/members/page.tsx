@@ -20,6 +20,7 @@ import {
   Send,
   ExternalLink,
   Filter,
+  Tag,
 } from "lucide-react";
 import {
   getMembers,
@@ -30,9 +31,9 @@ import {
   banMember,
   unbanMember,
 } from "@/app/actions/members";
-import { Member, SubscriptionPlan } from "@/types/database";
+import { Member, SubscriptionPlan, CustomBadge } from "@/types/database";
 import { BackButton } from "@/components/BackButton";
-import { getStoredPlans, DEFAULT_SUBSCRIPTION_PLANS } from "@/app/subscriptions/page";
+import { getStoredPlans, DEFAULT_SUBSCRIPTION_PLANS, getStoredBadges, DEFAULT_CUSTOM_BADGES, getBadgeColorStyle } from "@/app/subscriptions/page";
 
 export interface UIMember extends Member {
   status: "Active" | "Expired" | "Near Expiry" | "Recently Expired" | "Warnings" | "Banned";
@@ -49,6 +50,7 @@ export default function MembersPage() {
 
   const [members, setMembers] = useState<UIMember[]>([]);
   const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlan[]>(DEFAULT_SUBSCRIPTION_PLANS);
+  const [customBadges, setCustomBadges] = useState<CustomBadge[]>(DEFAULT_CUSTOM_BADGES);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
@@ -58,6 +60,8 @@ export default function MembersPage() {
     "All" | "Active" | "Near Expiry" | "Recently Expired" | "Warnings" | "Banned"
   >("All");
   const [selectedPlanFilter, setSelectedPlanFilter] = useState<string>("All Plans");
+  const [selectedBadgeFilter, setSelectedBadgeFilter] = useState<string>("All Badges");
+  const [discountIndicator, setDiscountIndicator] = useState<string>("");
 
   // Modal States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -71,6 +75,7 @@ export default function MembersPage() {
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
+    badges: [] as string[],
     plan_type: "1 Month Regular",
     amount_paid: 1500,
     payment_method: "Cash" as 'Cash' | 'GCash' | 'Card' | 'Bank Transfer',
@@ -152,6 +157,10 @@ export default function MembersPage() {
     if (loadedPlans && loadedPlans.length > 0) {
       setSubscriptionPlans(loadedPlans);
     }
+    const loadedBadges = getStoredBadges();
+    if (loadedBadges && loadedBadges.length > 0) {
+      setCustomBadges(loadedBadges);
+    }
   }, []);
 
   // Counts for tabs
@@ -171,12 +180,14 @@ export default function MembersPage() {
     setFormData({
       name: "",
       phone: "",
+      badges: [],
       plan_type: defaultPlan.name,
       amount_paid: defaultPlan.price,
       payment_method: "Cash",
       join_date: todayStr,
       expiration_date: expDateStr,
     });
+    setDiscountIndicator("");
     setIsAddModalOpen(true);
   };
 
@@ -185,12 +196,45 @@ export default function MembersPage() {
     setFormData({
       name: member.name,
       phone: member.phone,
+      badges: member.badges || [],
       plan_type: member.plan_type || "1 Month Regular",
       amount_paid: member.amount_paid || 1500,
       payment_method: member.payment_method || "Cash",
       join_date: member.join_date,
       expiration_date: member.expiration_date,
     });
+    setDiscountIndicator("");
+  };
+
+  const handleBadgeToggle = (badgeName: string) => {
+    const currentBadges = formData.badges || [];
+    const isAlreadySelected = currentBadges.includes(badgeName);
+    const updatedBadges = isAlreadySelected
+      ? currentBadges.filter((b) => b !== badgeName)
+      : [...currentBadges, badgeName];
+
+    const currentPlan = subscriptionPlans.find((p) => p.name === formData.plan_type) || subscriptionPlans[0];
+    let basePrice = currentPlan ? currentPlan.price : 1500;
+
+    let maxDiscount = 0;
+    let appliedBadgeName = "";
+    updatedBadges.forEach((bName) => {
+      const bObj = customBadges.find((cb) => cb.name === bName);
+      if (bObj && (bObj.discount_percent || 0) > maxDiscount) {
+        maxDiscount = bObj.discount_percent || 0;
+        appliedBadgeName = bObj.name;
+      }
+    });
+
+    const finalPrice = Math.round(basePrice * (1 - maxDiscount / 100));
+    const indicator = maxDiscount > 0 ? `${maxDiscount}% ${appliedBadgeName} Discount Applied!` : "";
+
+    setFormData((prev) => ({
+      ...prev,
+      badges: updatedBadges,
+      amount_paid: finalPrice,
+    }));
+    setDiscountIndicator(indicator);
   };
 
   const handlePlanSelection = (selectedPlan: SubscriptionPlan) => {
@@ -199,12 +243,26 @@ export default function MembersPage() {
       .toISOString()
       .split("T")[0];
 
-    setFormData(prev => ({
+    let maxDiscount = 0;
+    let appliedBadgeName = "";
+    (formData.badges || []).forEach((bName) => {
+      const bObj = customBadges.find((cb) => cb.name === bName);
+      if (bObj && (bObj.discount_percent || 0) > maxDiscount) {
+        maxDiscount = bObj.discount_percent || 0;
+        appliedBadgeName = bObj.name;
+      }
+    });
+
+    const finalPrice = Math.round(selectedPlan.price * (1 - maxDiscount / 100));
+    const indicator = maxDiscount > 0 ? `${maxDiscount}% ${appliedBadgeName} Discount Applied!` : "";
+
+    setFormData((prev) => ({
       ...prev,
       plan_type: selectedPlan.name,
-      amount_paid: selectedPlan.price,
+      amount_paid: finalPrice,
       expiration_date: calculatedExpiration,
     }));
+    setDiscountIndicator(indicator);
   };
 
   const handleAddMember = async (e: React.FormEvent) => {
@@ -217,6 +275,7 @@ export default function MembersPage() {
       const res = await createMember({
         name: formData.name,
         phone: formData.phone,
+        badges: formData.badges,
         plan_type: formData.plan_type,
         amount_paid: Number(formData.amount_paid),
         payment_method: formData.payment_method,
@@ -249,6 +308,7 @@ export default function MembersPage() {
       const res = await updateMember(editingMember.id, {
         name: formData.name,
         phone: formData.phone,
+        badges: formData.badges,
         plan_type: formData.plan_type,
         amount_paid: Number(formData.amount_paid),
         payment_method: formData.payment_method,
@@ -372,7 +432,10 @@ export default function MembersPage() {
     const matchesPlan =
       selectedPlanFilter === "All Plans" || (member.plan_type || "1 Month Regular") === selectedPlanFilter;
 
-    return matchesSearch && matchesTab && matchesPlan;
+    const matchesBadge =
+      selectedBadgeFilter === "All Badges" || (member.badges && member.badges.includes(selectedBadgeFilter));
+
+    return matchesSearch && matchesTab && matchesPlan && matchesBadge;
   });
 
   const getTemplateForTab = (tabName: string) => {
@@ -488,21 +551,39 @@ export default function MembersPage() {
             })}
           </div>
 
-          {/* Subscription Plan Filter Dropdown */}
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-slate-700" />
-            <select
-              value={selectedPlanFilter}
-              onChange={(e) => setSelectedPlanFilter(e.target.value)}
-              className="px-4 py-3 rounded-2xl bg-white border-3 border-slate-700 text-slate-900 text-xs font-extrabold focus:outline-none min-h-[48px] shadow-xs"
-            >
-              <option value="All Plans">All Subscription Plans</option>
-              {subscriptionPlans.map((p) => (
-                <option key={p.id} value={p.name}>
-                  {p.name} (₱{p.price})
-                </option>
-              ))}
-            </select>
+          {/* Subscription Plan & Badge Filter Dropdowns */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 text-slate-700" />
+              <select
+                value={selectedPlanFilter}
+                onChange={(e) => setSelectedPlanFilter(e.target.value)}
+                className="px-4 py-3 rounded-2xl bg-white border-3 border-slate-700 text-slate-900 text-xs font-extrabold focus:outline-none min-h-[48px] shadow-xs"
+              >
+                <option value="All Plans">All Subscription Plans</option>
+                {subscriptionPlans.map((p) => (
+                  <option key={p.id} value={p.name}>
+                    {p.name} (₱{p.price})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Tag className="w-4 h-4 text-slate-700" />
+              <select
+                value={selectedBadgeFilter}
+                onChange={(e) => setSelectedBadgeFilter(e.target.value)}
+                className="px-4 py-3 rounded-2xl bg-white border-3 border-slate-700 text-slate-900 text-xs font-extrabold focus:outline-none min-h-[48px] shadow-xs"
+              >
+                <option value="All Badges">All Badges</option>
+                {customBadges.map((b) => (
+                  <option key={b.id} value={b.name}>
+                    {b.name} ({b.discount_percent ?? 0}% off)
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
@@ -592,6 +673,22 @@ export default function MembersPage() {
                               </span>
                             )}
                           </div>
+                          {member.badges && member.badges.length > 0 && (
+                            <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                              {member.badges.map((bName) => {
+                                const foundBadge = customBadges.find((b) => b.name === bName || b.id === bName);
+                                const colorClass = foundBadge ? getBadgeColorStyle(foundBadge.color) : "bg-slate-200 text-slate-900 border-slate-700";
+                                return (
+                                  <span
+                                    key={bName}
+                                    className={`rounded-xl border-2 border-slate-700/80 font-comic font-bold text-xs px-2.5 py-0.5 ${colorClass}`}
+                                  >
+                                    {foundBadge ? foundBadge.name : bName}
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          )}
                           <span className="text-xs font-bold text-slate-600 block mt-0.5">
                             Joined: {member.join_date}
                           </span>
@@ -940,6 +1037,47 @@ export default function MembersPage() {
                     />
                   </div>
                 </div>
+              </div>
+
+              {/* Client Badges Multi-select Section */}
+              <div className="space-y-3 pt-3 border-t-3 border-slate-700">
+                <span className="text-xs font-extrabold uppercase tracking-wider text-sky-950 bg-sky-200 px-3 py-1.5 rounded-2xl inline-block border-2 border-slate-700">
+                  Client Badges & Automatic Discounts
+                </span>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {customBadges.map((badge) => {
+                    const isChecked = (formData.badges || []).includes(badge.name);
+                    const colorStyle = getBadgeColorStyle(badge.color);
+                    return (
+                      <button
+                        key={badge.id}
+                        type="button"
+                        onClick={() => handleBadgeToggle(badge.name)}
+                        className={`p-3 rounded-2xl border-3 text-left transition-all flex flex-col justify-between ${
+                          isChecked
+                            ? "bg-slate-900 text-white border-slate-700 shadow-soft"
+                            : "bg-white text-slate-800 border-slate-700 hover:bg-slate-100"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-extrabold truncate">{badge.name}</span>
+                          <span className={`w-4 h-4 rounded-md border-2 border-slate-700 flex items-center justify-center text-[10px] ${isChecked ? "bg-sky-400 text-white font-extrabold" : "bg-white"}`}>
+                            {isChecked ? "✓" : ""}
+                          </span>
+                        </div>
+                        <span className={`text-[10px] font-extrabold mt-1 px-2 py-0.5 rounded-xl border ${isChecked ? "bg-white text-slate-900 border-slate-700" : colorStyle}`}>
+                          {badge.discount_percent ? `${badge.discount_percent}% OFF` : "Standard"}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+                {discountIndicator && (
+                  <div className="p-3 bg-emerald-100 text-emerald-950 font-extrabold text-xs rounded-2xl border-2 border-slate-700 flex items-center gap-2 animate-bounce">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <span>{discountIndicator}</span>
+                  </div>
+                )}
               </div>
 
               {/* Step 2: Dynamic Subscription Plan Selection & Dates */}

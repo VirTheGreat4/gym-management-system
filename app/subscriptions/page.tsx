@@ -14,8 +14,79 @@ import {
   DollarSign,
   Sparkles,
 } from "lucide-react";
-import { SubscriptionPlan } from "@/types/database";
+import { SubscriptionPlan, CustomBadge } from "@/types/database";
 import { BackButton } from "@/components/BackButton";
+
+export const DEFAULT_CUSTOM_BADGES: CustomBadge[] = [
+  {
+    id: "badge-1",
+    name: "Club Member",
+    color: "green",
+    discount_percent: 15,
+    description: "Official gym member status",
+  },
+  {
+    id: "badge-2",
+    name: "Student",
+    color: "blue",
+    discount_percent: 10,
+    description: "Valid Student ID verified",
+  },
+  {
+    id: "badge-3",
+    name: "VIP Athlete",
+    color: "yellow",
+    discount_percent: 20,
+    description: "Premium club tier",
+  },
+  {
+    id: "badge-4",
+    name: "Non-Member Guest",
+    color: "slate",
+    discount_percent: 0,
+    description: "Walk-in day pass user",
+  },
+];
+
+export function getStoredBadges(): CustomBadge[] {
+  if (typeof window === "undefined") return DEFAULT_CUSTOM_BADGES;
+  try {
+    const saved = localStorage.getItem("gym_custom_badges");
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch (e) {
+    console.error("Failed to load badges from localStorage", e);
+  }
+  return DEFAULT_CUSTOM_BADGES;
+}
+
+export function saveStoredBadges(badges: CustomBadge[]) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem("gym_custom_badges", JSON.stringify(badges));
+  } catch (e) {
+    console.error("Failed to save badges to localStorage", e);
+  }
+}
+
+export function getBadgeColorStyle(color: CustomBadge["color"]) {
+  switch (color) {
+    case "green":
+      return "bg-emerald-200 text-emerald-950 border-slate-700";
+    case "blue":
+      return "bg-sky-200 text-sky-950 border-slate-700";
+    case "yellow":
+      return "bg-amber-200 text-amber-950 border-slate-700";
+    case "purple":
+      return "bg-purple-200 text-purple-950 border-slate-700";
+    case "rose":
+      return "bg-rose-200 text-rose-950 border-slate-700";
+    case "slate":
+    default:
+      return "bg-slate-200 text-slate-900 border-slate-700";
+  }
+}
 
 export const DEFAULT_SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
   {
@@ -82,12 +153,18 @@ export default function SubscriptionsPage() {
   }, []);
 
   const [plans, setPlans] = useState<SubscriptionPlan[]>(DEFAULT_SUBSCRIPTION_PLANS);
+  const [badges, setBadgeList] = useState<CustomBadge[]>(DEFAULT_CUSTOM_BADGES);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
   const [deletingPlan, setDeletingPlan] = useState<SubscriptionPlan | null>(null);
+
+  // Badge Modals state
+  const [isBadgeModalOpen, setIsBadgeModalOpen] = useState(false);
+  const [editingBadge, setEditingBadge] = useState<CustomBadge | null>(null);
+  const [deletingBadge, setDeletingBadge] = useState<CustomBadge | null>(null);
 
   // Form data
   const [formData, setFormData] = useState({
@@ -98,9 +175,19 @@ export default function SubscriptionsPage() {
     description: "",
   });
 
+  // Badge Form data
+  const [badgeFormData, setBadgeFormData] = useState({
+    name: "",
+    color: "blue" as CustomBadge["color"],
+    discount_percent: 0,
+    description: "",
+  });
+
   useEffect(() => {
     const loaded = getStoredPlans();
     setPlans(loaded);
+    const loadedBadges = getStoredBadges();
+    setBadgeList(loadedBadges);
   }, []);
 
   const handleOpenAddModal = () => {
@@ -122,6 +209,26 @@ export default function SubscriptionsPage() {
       price: plan.price,
       category: plan.category,
       description: plan.description || "",
+    });
+  };
+
+  const handleOpenAddBadgeModal = () => {
+    setBadgeFormData({
+      name: "",
+      color: "blue",
+      discount_percent: 0,
+      description: "",
+    });
+    setIsBadgeModalOpen(true);
+  };
+
+  const handleOpenEditBadgeModal = (badge: CustomBadge) => {
+    setEditingBadge(badge);
+    setBadgeFormData({
+      name: badge.name,
+      color: badge.color,
+      discount_percent: badge.discount_percent ?? 0,
+      description: badge.description || "",
     });
   };
 
@@ -182,6 +289,66 @@ export default function SubscriptionsPage() {
       setDeletingPlan(null);
     } catch (err: any) {
       setFeedback({ type: "error", message: err?.message || "Failed to delete plan" });
+    } finally {
+      setTimeout(() => setFeedback(null), 4000);
+    }
+  };
+
+  const handleSaveBadge = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!badgeFormData.name) {
+      setFeedback({ type: "error", message: "Please provide a badge name." });
+      return;
+    }
+
+    try {
+      if (editingBadge) {
+        const updated = badges.map((b) =>
+          b.id === editingBadge.id
+            ? {
+                ...b,
+                name: badgeFormData.name,
+                color: badgeFormData.color,
+                discount_percent: Number(badgeFormData.discount_percent),
+                description: badgeFormData.description,
+              }
+            : b
+        );
+        setBadgeList(updated);
+        saveStoredBadges(updated);
+        setFeedback({ type: "success", message: `Badge "${badgeFormData.name}" updated successfully!` });
+        setEditingBadge(null);
+      } else {
+        const newBadge: CustomBadge = {
+          id: `badge-${Date.now()}`,
+          name: badgeFormData.name,
+          color: badgeFormData.color,
+          discount_percent: Number(badgeFormData.discount_percent),
+          description: badgeFormData.description,
+        };
+        const updated = [...badges, newBadge];
+        setBadgeList(updated);
+        saveStoredBadges(updated);
+        setFeedback({ type: "success", message: `Badge "${badgeFormData.name}" created successfully!` });
+        setIsBadgeModalOpen(false);
+      }
+    } catch (err: any) {
+      setFeedback({ type: "error", message: err?.message || "Badge operation failed" });
+    } finally {
+      setTimeout(() => setFeedback(null), 4000);
+    }
+  };
+
+  const handleDeleteBadgeConfirm = () => {
+    if (!deletingBadge) return;
+    try {
+      const updated = badges.filter((b) => b.id !== deletingBadge.id);
+      setBadgeList(updated);
+      saveStoredBadges(updated);
+      setFeedback({ type: "success", message: `Badge "${deletingBadge.name}" deleted successfully!` });
+      setDeletingBadge(null);
+    } catch (err: any) {
+      setFeedback({ type: "error", message: err?.message || "Failed to delete badge" });
     } finally {
       setTimeout(() => setFeedback(null), 4000);
     }
@@ -313,6 +480,84 @@ export default function SubscriptionsPage() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Custom Client Badges Management Section */}
+      <div className="space-y-6 pt-6 border-t-4 border-slate-700">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#E2E8F0] p-5 sm:p-8 rounded-2xl shadow-soft border-4 border-slate-700">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-2xl bg-emerald-200 text-emerald-950 text-xs font-extrabold mb-2 border-2 border-slate-700">
+              <Tag className="w-3.5 h-3.5" /> Client Classification & Discounts
+            </div>
+            <h2 className="text-2xl font-extrabold text-slate-900">
+              Custom Client Badges Management
+            </h2>
+            <p className="text-slate-700 font-bold text-sm mt-1">
+              Configure member badges with automatic discount percentages for check-in registrations.
+            </p>
+          </div>
+
+          <button
+            onClick={handleOpenAddBadgeModal}
+            className="inline-flex items-center justify-center gap-2 px-6 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm rounded-2xl shadow-soft border-3 border-slate-700 transition-all min-h-[56px]"
+          >
+            <Plus className="w-5 h-5" /> Add Custom Badge
+          </button>
+        </div>
+
+        {/* Badges Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {badges.map((badge) => (
+            <div
+              key={badge.id}
+              className="bg-[#E2E8F0] p-6 rounded-2xl shadow-soft border-4 border-slate-700 flex flex-col justify-between space-y-6 transition-transform hover:-translate-y-1"
+              style={{ fontFamily: "'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', cursive, sans-serif" }}
+            >
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className={`px-3 py-1.5 rounded-xl text-xs font-extrabold border-2 ${getBadgeColorStyle(badge.color)} shadow-xs`}>
+                    {badge.name}
+                  </span>
+                  <div className="w-10 h-10 rounded-2xl bg-white text-slate-800 border-2 border-slate-700 flex items-center justify-center shadow-xs font-extrabold text-xs">
+                    {badge.discount_percent ?? 0}%
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-extrabold text-slate-900 leading-tight">{badge.name}</h3>
+                  <p className="text-xs text-slate-600 font-bold mt-1 min-h-[32px]">
+                    {badge.description || "Custom client status badge."}
+                  </p>
+                </div>
+
+                <div className="p-3 bg-white/90 rounded-xl border-2 border-slate-700 space-y-1 shadow-xs">
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+                    <span className="flex items-center gap-1">
+                      <Tag className="w-3.5 h-3.5 text-emerald-600" /> Plan Discount:
+                    </span>
+                    <span className="font-extrabold text-emerald-800">{badge.discount_percent ?? 0}% OFF</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 pt-3 border-t-2 border-slate-300">
+                <button
+                  onClick={() => handleOpenEditBadgeModal(badge)}
+                  className="flex-1 py-2.5 px-3 rounded-xl bg-white hover:bg-sky-200 text-slate-800 font-extrabold text-xs border-2 border-slate-700 flex items-center justify-center gap-1 transition shadow-xs"
+                >
+                  <Pencil className="w-3.5 h-3.5" /> Edit
+                </button>
+                <button
+                  onClick={() => setDeletingBadge(badge)}
+                  className="py-2.5 px-3 rounded-xl bg-white hover:bg-rose-200 text-slate-800 font-extrabold text-xs border-2 border-slate-700 flex items-center justify-center gap-1 transition shadow-xs"
+                  title="Delete Badge"
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-rose-700" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Add / Edit Plan Modal */}
@@ -460,6 +705,145 @@ export default function SubscriptionsPage() {
                 className="px-6 py-3 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs shadow-soft border-3 border-slate-700 min-h-[48px]"
               >
                 Delete Plan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add / Edit Custom Badge Modal */}
+      {(isBadgeModalOpen || editingBadge) && (
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-[#E2E8F0] rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-soft-lg border-4 border-slate-700 space-y-6 my-8">
+            <div className="flex items-center justify-between border-b-3 border-slate-700 pb-4">
+              <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+                <Sparkles className="w-6 h-6 text-emerald-600" />
+                {editingBadge ? "Edit Custom Client Badge" : "Create New Custom Badge"}
+              </h2>
+              <button
+                onClick={() => {
+                  setIsBadgeModalOpen(false);
+                  setEditingBadge(null);
+                }}
+                className="p-3 rounded-2xl bg-white hover:bg-slate-200 text-slate-800 border-2 border-slate-700 min-h-[44px] min-w-[44px] flex items-center justify-center font-bold"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveBadge} className="space-y-4">
+              <div>
+                <label className="block text-xs font-extrabold text-slate-800 uppercase mb-1">
+                  Badge Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Senior Citizen, VIP, Student"
+                  value={badgeFormData.name}
+                  onChange={(e) => setBadgeFormData({ ...badgeFormData, name: e.target.value })}
+                  className="w-full px-4 py-3.5 rounded-2xl bg-white border-3 border-slate-700 text-slate-900 text-sm font-bold focus:outline-none min-h-[48px]"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-extrabold text-slate-800 uppercase mb-1">
+                    Badge Color Tone
+                  </label>
+                  <select
+                    value={badgeFormData.color}
+                    onChange={(e) => setBadgeFormData({ ...badgeFormData, color: e.target.value as any })}
+                    className="w-full px-4 py-3.5 rounded-2xl bg-white border-3 border-slate-700 text-slate-900 text-sm font-extrabold focus:outline-none min-h-[48px]"
+                  >
+                    <option value="blue">Blue Pastel</option>
+                    <option value="green">Green Pastel</option>
+                    <option value="yellow">Yellow Pastel</option>
+                    <option value="purple">Purple Pastel</option>
+                    <option value="rose">Rose Pastel</option>
+                    <option value="slate">Slate</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-extrabold text-slate-800 uppercase mb-1">
+                    Discount Percentage (0 - 100%)
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min={0}
+                    max={100}
+                    value={badgeFormData.discount_percent}
+                    onChange={(e) => setBadgeFormData({ ...badgeFormData, discount_percent: Number(e.target.value) })}
+                    className="w-full px-4 py-3.5 rounded-2xl bg-white border-3 border-slate-700 text-slate-900 text-sm font-extrabold focus:outline-none min-h-[48px]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-extrabold text-slate-800 uppercase mb-1">
+                  Description / Note
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="Optional description of badge privileges..."
+                  value={badgeFormData.description}
+                  onChange={(e) => setBadgeFormData({ ...badgeFormData, description: e.target.value })}
+                  className="w-full p-4 rounded-2xl bg-white border-3 border-slate-700 text-slate-900 text-sm font-bold focus:outline-none"
+                />
+              </div>
+
+              <div className="pt-4 flex items-center justify-end gap-3 border-t-3 border-slate-700">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsBadgeModalOpen(false);
+                    setEditingBadge(null);
+                  }}
+                  className="px-6 py-3.5 rounded-2xl bg-white hover:bg-slate-200 text-slate-800 font-extrabold text-xs border-3 border-slate-700 min-h-[48px]"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-7 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-2xl shadow-soft border-3 border-slate-700 min-h-[48px]"
+                >
+                  {editingBadge ? "Save Changes" : "Create Badge"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Badge Confirmation Modal */}
+      {deletingBadge && (
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+          <div className="bg-[#E2E8F0] rounded-3xl p-6 max-w-md w-full shadow-soft-lg border-4 border-slate-700 space-y-4">
+            <div className="flex items-center gap-3 text-rose-700">
+              <div className="p-3 bg-rose-200 rounded-2xl border-2 border-slate-700">
+                <AlertTriangle className="w-6 h-6" />
+              </div>
+              <h2 className="text-lg font-extrabold text-slate-900">
+                Confirm Badge Deletion
+              </h2>
+            </div>
+            <p className="text-sm font-bold text-slate-700">
+              Are you sure you want to delete the custom badge <strong className="text-slate-900">{deletingBadge.name}</strong>?
+            </p>
+            <div className="pt-2 flex items-center justify-end gap-3">
+              <button
+                onClick={() => setDeletingBadge(null)}
+                className="px-5 py-3 rounded-2xl bg-white hover:bg-slate-200 text-slate-800 font-extrabold text-xs border-3 border-slate-700 min-h-[48px]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteBadgeConfirm}
+                className="px-6 py-3 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs shadow-soft border-3 border-slate-700 min-h-[48px]"
+              >
+                Delete Badge
               </button>
             </div>
           </div>
