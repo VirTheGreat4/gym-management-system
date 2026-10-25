@@ -8,7 +8,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   if (pathname === '/') {
     return (
-      <main className="h-dvh max-h-dvh overflow-hidden flex items-center justify-center p-4 w-full max-w-lg mx-auto bg-[#09090B] text-zinc-100">
+      <main className="min-h-screen w-full flex items-center justify-center p-4 sm:p-6 bg-[#0B0C10] text-zinc-100 relative overflow-hidden">
         {children}
       </main>
     );
