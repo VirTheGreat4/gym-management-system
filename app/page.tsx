@@ -28,12 +28,12 @@ export default function LandingGateway() {
   if (!isMounted) return null;
 
   return (
-    <div className="w-full space-y-8" suppressHydrationWarning>
+    <div className="w-full my-auto space-y-4 sm:space-y-6" suppressHydrationWarning>
       <div className="text-center space-y-4">
-        <div className="w-20 h-20 bg-blue-500 rounded-3xl border-4 border-slate-700/80 text-white flex items-center justify-center mx-auto shadow-soft">
-          <Dumbbell className="w-10 h-10" />
+        <div className="w-14 h-14 sm:w-16 sm:h-16 bg-blue-500 rounded-3xl border-4 border-slate-700/80 text-white flex items-center justify-center mx-auto shadow-soft">
+          <Dumbbell className="w-8 h-8 sm:w-10 sm:h-10" />
         </div>
-        <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900">Gym System Portal</h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">Gym System Portal</h1>
         <p className="text-slate-700 font-bold">Select your access level below to continue.</p>
       </div>
 

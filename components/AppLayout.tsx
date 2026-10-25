@@ -6,6 +6,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isPublicRoute = pathname === '/' || pathname === '/portal';
 
+  if (pathname === '/') {
+    return (
+      <main className="h-dvh max-h-dvh overflow-hidden flex items-center justify-center p-4 w-full max-w-lg mx-auto">
+        {children}
+      </main>
+    );
+  }
+
   if (isPublicRoute) {
     return (
       <main className="flex-1 flex flex-col items-center justify-center min-h-screen p-4 sm:p-6 w-full max-w-xl mx-auto">
