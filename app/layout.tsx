@@ -30,7 +30,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning className="h-full">
       <body
         suppressHydrationWarning
-        className={`${inter.variable} ${inter.className} min-h-screen text-slate-900 bg-[#CBD5E1] antialiased`}
+        className={`${inter.variable} ${inter.className} min-h-screen text-zinc-100 bg-[#09090B] antialiased`}
       >
         <RealtimeSync />
         <AppLayout>{children}</AppLayout>

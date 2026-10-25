@@ -4,72 +4,73 @@ import { createClient } from '@/lib/supabase/server';
 import { GymSettings } from '@/types/database';
 import { revalidatePath } from 'next/cache';
 
-const SINGLE_GYM_ID = '00000000-0000-0000-0000-000000000001';
-
 export async function getGymSettings(): Promise<{ data: GymSettings | null; error: string | null }> {
   try {
     const supabase = await createClient();
-
     const { data, error } = await supabase
-      .from('gyms')
+      .from('gym_settings')
       .select('*')
-      .eq('id', SINGLE_GYM_ID)
-      .single();
+      .limit(1)
+      .maybeSingle();
 
-    if (error && error.code !== 'PGRST116') {
+    if (error) {
       return { data: null, error: error.message };
     }
 
-    // Fallback defaults if record is not yet seeded
     if (!data) {
       const defaultSettings: GymSettings = {
-        id: SINGLE_GYM_ID,
         name: 'PowerFit Studio',
-        theme_color: '#3B82F6',
+        theme_color: '#EF4444',
         logo_url: null,
       };
       return { data: defaultSettings, error: null };
     }
 
     return { data, error: null };
-  } catch (err) {
-    const defaultSettings: GymSettings = {
-      id: SINGLE_GYM_ID,
-      name: 'PowerFit Studio',
-      theme_color: '#3B82F6',
-      logo_url: null,
-      schedule: {
-        is_open_now: true,
-        manual_override: false,
-        announcement: '',
-        regular_hours: [],
-        special_closed_dates: [],
-      },
-    };
-    return { data: defaultSettings, error: null };
+  } catch (err: any) {
+    return { data: null, error: err.message };
   }
 }
 
 export async function updateGymSettings(
   payload: Partial<GymSettings>
 ): Promise<{ success: boolean; error: string | null }> {
-  const supabase = await createClient();
+  try {
+    const supabase = await createClient();
+    
+    // Fetch the existing record's id
+    const { data: existing } = await supabase
+      .from('gym_settings')
+      .select('id')
+      .limit(1)
+      .maybeSingle();
 
-  const { error } = await supabase
-    .from('gyms')
-    .upsert({
-      id: SINGLE_GYM_ID,
-      ...payload,
-    });
+    let mutationError;
 
-  if (error) {
-    return { success: false, error: error.message };
+    if (existing?.id) {
+      const { error } = await supabase
+        .from('gym_settings')
+        .update({ ...payload, updated_at: new Date().toISOString() })
+        .eq('id', existing.id);
+      mutationError = error;
+    } else {
+      const { error } = await supabase
+        .from('gym_settings')
+        .insert([{ ...payload, updated_at: new Date().toISOString() }]);
+      mutationError = error;
+    }
+
+    if (mutationError) {
+      return { success: false, error: mutationError.message };
+    }
+
+    revalidatePath('/settings');
+    revalidatePath('/dashboard');
+    revalidatePath('/');
+    revalidatePath('/portal');
+    return { success: true, error: null };
+  } catch (err: any) {
+    return { success: false, error: err.message };
   }
-
-  revalidatePath('/settings');
-  revalidatePath('/');
-  revalidatePath('/members');
-  revalidatePath('/retention');
-  return { success: true, error: null };
 }
 

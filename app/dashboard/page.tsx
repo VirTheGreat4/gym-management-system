@@ -81,13 +81,13 @@ async function DashboardMetricsSection() {
           return (
             <div
               key={idx}
-              className={`p-5 sm:p-6 rounded-2xl ${metric.bgColor} ${metric.textColor} shadow-soft border-3 border-zinc-700 transition-transform duration-200 hover:-translate-y-1`}
+              className={`p-5 sm:p-6 rounded-2xl bg-[#121214] ${metric.textColor} shadow-md shadow-black/40 border border-zinc-800 transition-transform duration-200 hover:-translate-y-1`}
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-extrabold uppercase tracking-wide text-zinc-400">
                   {metric.title}
                 </span>
-                <div className={`p-3 rounded-2xl shadow-xs border-2 border-zinc-700 ${metric.iconBg}`}>
+                <div className={`p-3 rounded-2xl shadow-xs border border-zinc-800 ${metric.iconBg}`}>
                   <Icon className="w-6 h-6" />
                 </div>
               </div>
@@ -95,7 +95,7 @@ async function DashboardMetricsSection() {
               <div className="mt-4 flex items-baseline justify-between flex-wrap gap-2">
                 <span className="text-2xl sm:text-3xl font-extrabold text-zinc-100">{metric.value}</span>
                 {metric.change && (
-                  <span className="inline-flex items-center text-xs font-extrabold px-2.5 py-1 rounded-2xl bg-zinc-800 text-zinc-200 border border-zinc-700 shadow-xs">
+                  <span className="inline-flex items-center text-xs font-extrabold px-2.5 py-1 rounded-2xl bg-zinc-900 text-zinc-200 border border-zinc-800 shadow-xs">
                     {metric.change}
                   </span>
                 )}
@@ -117,7 +117,7 @@ async function DashboardMetricsSection() {
       {/* Two Column Layout for Activity and Retention Alerts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
         {/* Recent Members Section (2 cols) */}
-        <div className="lg:col-span-2 bg-zinc-900 p-5 sm:p-8 rounded-2xl shadow-soft border-3 border-zinc-700 space-y-6">
+        <div className="lg:col-span-2 bg-[#121214] p-5 sm:p-8 rounded-2xl shadow-md shadow-black/40 border border-zinc-800 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h2 className="text-xl font-extrabold text-zinc-100">Recently Joined Members</h2>
@@ -167,7 +167,7 @@ async function DashboardMetricsSection() {
         </div>
 
         {/* Quick Retention Spotlight Card */}
-        <div className="bg-zinc-900 p-5 sm:p-8 rounded-2xl shadow-soft border-3 border-zinc-700 flex flex-col justify-between space-y-6">
+        <div className="bg-[#121214] p-5 sm:p-8 rounded-2xl shadow-md shadow-black/40 border border-zinc-800 flex flex-col justify-between space-y-6">
           <div>
             <div className="flex items-center justify-between gap-2 mb-4 flex-wrap">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-2xl bg-amber-950/80 text-amber-300 text-xs font-extrabold border border-amber-700">
@@ -217,12 +217,12 @@ function DashboardSkeleton() {
     <div className="space-y-8 animate-pulse">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="p-6 rounded-2xl bg-zinc-900 border-3 border-zinc-700 h-36" />
+          <div key={i} className="p-6 rounded-2xl bg-[#121214] border border-zinc-800 h-36" />
         ))}
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-        <div className="lg:col-span-2 bg-zinc-900 p-8 rounded-2xl border-3 border-zinc-700 h-64" />
-        <div className="bg-zinc-900 p-8 rounded-2xl border-3 border-zinc-700 h-64" />
+        <div className="lg:col-span-2 bg-[#121214] p-8 rounded-2xl border border-zinc-800 h-64" />
+        <div className="bg-[#121214] p-8 rounded-2xl border border-zinc-800 h-64" />
       </div>
     </div>
   );
@@ -235,7 +235,7 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6 sm:space-y-8" suppressHydrationWarning>
       {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-zinc-900 p-5 sm:p-8 rounded-2xl shadow-soft border-3 border-zinc-700">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#121214] p-5 sm:p-8 rounded-2xl shadow-md shadow-black/40 border border-zinc-800">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-2xl bg-zinc-800 text-zinc-300 text-xs font-extrabold mb-2 border-2 border-zinc-700">
             <Activity className="w-3.5 h-3.5 text-red-500" /> Dashboard Overview
