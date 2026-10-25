@@ -9,6 +9,7 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
+        comic: ['"Comic Sans MS"', 'var(--font-comic-neue)', '"Comic Neue"', 'cursive', 'sans-serif'],
         sans: ['"Comic Sans MS"', '"Comic Sans"', "cursive", "sans-serif"],
       },
       borderRadius: {
