@@ -154,7 +154,7 @@ export default function RetentionHubPage() {
         </h2>
 
         {isLoading ? (
-          <div className="bg-[#E2E8F0] p-12 rounded-2xl shadow-soft border-4 border-slate-700 text-center text-slate-700 font-bold">
+          <div className="bg-zinc-900 p-12 rounded-2xl shadow-soft border-3 border-zinc-700 text-center text-zinc-300 font-bold">
             Loading at-risk subscriptions from database...
           </div>
         ) : members.length === 0 ? (

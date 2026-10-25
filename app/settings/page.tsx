@@ -214,7 +214,7 @@ export default function SettingsPage() {
     return (
       <div className="space-y-10" suppressHydrationWarning>
         <BackButton />
-        <div className="bg-[#E2E8F0] p-6 sm:p-8 rounded-2xl border-4 border-slate-700/80 font-['Comic_Sans_MS',cursive,sans-serif] font-bold text-center">
+        <div className="bg-[#121214] p-6 sm:p-8 rounded-2xl border-2 border-zinc-800 text-zinc-300 font-bold text-center">
           Loading gym settings...
         </div>
       </div>
