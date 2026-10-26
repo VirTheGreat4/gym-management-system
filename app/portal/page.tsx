@@ -81,6 +81,28 @@ export default function MemberPortalPage() {
 
   // Load gym info, schedule, badges & restore session
   useEffect(() => {
+    function loadLocalSettings() {
+      try {
+        const savedSettings = localStorage.getItem("gym_settings_data");
+        if (savedSettings) {
+          const parsed = JSON.parse(savedSettings);
+          if (parsed.name) setGymName(parsed.name);
+          if (parsed.logo_url !== undefined) setLogoUrl(parsed.logo_url);
+          if (parsed.schedule?.regular_hours?.length > 0) setSchedule(parsed.schedule);
+        } else {
+          const savedSchedule = localStorage.getItem("gym_schedule_data");
+          if (savedSchedule) {
+            const parsed = JSON.parse(savedSchedule);
+            if (parsed?.regular_hours?.length > 0) setSchedule(parsed);
+          }
+        }
+      } catch (e) {
+        console.error("Error loading settings from localStorage in Portal", e);
+      }
+    }
+
+    loadLocalSettings();
+
     async function initPortal() {
       // 1. Fetch gym settings & badges
       const [settingsRes, badgesRes] = await Promise.all([
@@ -89,25 +111,18 @@ export default function MemberPortalPage() {
       ]);
 
       if (settingsRes.data) {
-        if (settingsRes.data.name) setGymName(settingsRes.data.name);
-        if (settingsRes.data.logo_url) setLogoUrl(settingsRes.data.logo_url);
-        if (settingsRes.data.schedule) setSchedule(settingsRes.data.schedule);
+        const savedSettings = localStorage.getItem("gym_settings_data");
+        if (!savedSettings) {
+          if (settingsRes.data.name) setGymName(settingsRes.data.name);
+          if (settingsRes.data.logo_url) setLogoUrl(settingsRes.data.logo_url);
+          if (settingsRes.data.schedule) setSchedule(settingsRes.data.schedule);
+        }
       }
       if (badgesRes.data) {
         setCustomBadges(badgesRes.data);
       }
 
-      // 2. Check localStorage for schedule fallback
-      try {
-        const savedSchedule = localStorage.getItem("gym_schedule_data");
-        if (savedSchedule) {
-          setSchedule(JSON.parse(savedSchedule));
-        }
-      } catch (e) {
-        console.error("Error loading schedule from localStorage", e);
-      }
-
-      // 3. Restore session if stored
+      // 2. Restore session if stored
       try {
         const sessionName = localStorage.getItem("gym_member_portal_session");
         if (sessionName) {
@@ -146,9 +161,21 @@ export default function MemberPortalPage() {
       }
     };
 
+    const handleSettingsUpdate = (e: any) => {
+      if (e.detail) {
+        if (e.detail.name) setGymName(e.detail.name);
+        if (e.detail.logo_url !== undefined) setLogoUrl(e.detail.logo_url);
+        if (e.detail.schedule) setSchedule(e.detail.schedule);
+      } else {
+        loadLocalSettings();
+      }
+    };
+
     window.addEventListener("supabase-realtime-update", handleRealtime);
+    window.addEventListener("gym-settings-updated", handleSettingsUpdate);
     return () => {
       window.removeEventListener("supabase-realtime-update", handleRealtime);
+      window.removeEventListener("gym-settings-updated", handleSettingsUpdate);
     };
   }, [activeMember?.name]);
 

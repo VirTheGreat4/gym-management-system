@@ -24,14 +24,49 @@ export default function Sidebar() {
   const [logoUrl, setLogoUrl] = useState<string | null>("/jlab-logo.svg");
 
   useEffect(() => {
+    function loadLocalSettings() {
+      try {
+        const saved = localStorage.getItem("gym_settings_data");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.name) setGymName(parsed.name);
+          if (parsed.logo_url !== undefined) setLogoUrl(parsed.logo_url);
+        }
+      } catch (e) {
+        console.error("Error reading gym_settings_data in Sidebar", e);
+      }
+    }
+
+    // 1. Initial check from localStorage
+    loadLocalSettings();
+
+    // 2. Fetch remote DB
     async function loadGym() {
       const { data } = await getGymSettings();
       if (data) {
-        if (data.name) setGymName(data.name);
-        if (data.logo_url !== undefined) setLogoUrl(data.logo_url);
+        const saved = localStorage.getItem("gym_settings_data");
+        if (!saved) {
+          if (data.name) setGymName(data.name);
+          if (data.logo_url !== undefined) setLogoUrl(data.logo_url);
+        }
       }
     }
     loadGym();
+
+    // 3. Listen for live customization updates
+    const handleSettingsUpdate = (e: any) => {
+      if (e.detail) {
+        if (e.detail.name) setGymName(e.detail.name);
+        if (e.detail.logo_url !== undefined) setLogoUrl(e.detail.logo_url);
+      } else {
+        loadLocalSettings();
+      }
+    };
+
+    window.addEventListener("gym-settings-updated", handleSettingsUpdate);
+    return () => {
+      window.removeEventListener("gym-settings-updated", handleSettingsUpdate);
+    };
   }, [pathname]);
 
   const handleLogout = async () => {

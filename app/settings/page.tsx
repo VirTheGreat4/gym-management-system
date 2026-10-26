@@ -73,29 +73,43 @@ export default function SettingsPage() {
   useEffect(() => {
     async function loadSettings() {
       setIsLoading(true);
-      const { data, error } = await getGymSettings();
-      if (error) {
-        setErrorMsg(error);
-      } else if (data) {
-        setGymName(data.name || "JLAB Fitness");
-        setSelectedColor(data.theme_color || "#EF4444");
-        setLogoPreview(data.logo_url || "/jlab-logo.svg");
-        if (data.schedule && data.schedule.regular_hours && data.schedule.regular_hours.length > 0) {
-          setSchedule(data.schedule);
-        }
-      }
 
-      // Check localStorage for schedule fallback
+      // 1. Load from client localStorage cache first (instant display, no flicker)
       try {
-        const savedSchedule = localStorage.getItem("gym_schedule_data");
-        if (savedSchedule) {
-          const parsed = JSON.parse(savedSchedule);
-          if (parsed && parsed.regular_hours && parsed.regular_hours.length > 0) {
-            setSchedule(parsed);
+        const savedSettings = localStorage.getItem("gym_settings_data");
+        if (savedSettings) {
+          const parsed = JSON.parse(savedSettings);
+          if (parsed.name) setGymName(parsed.name);
+          if (parsed.theme_color) setSelectedColor(parsed.theme_color);
+          if (parsed.logo_url !== undefined) setLogoPreview(parsed.logo_url);
+          if (parsed.schedule?.regular_hours?.length > 0) {
+            setSchedule(parsed.schedule);
+          }
+        } else {
+          const savedSchedule = localStorage.getItem("gym_schedule_data");
+          if (savedSchedule) {
+            const parsed = JSON.parse(savedSchedule);
+            if (parsed?.regular_hours?.length > 0) setSchedule(parsed);
           }
         }
       } catch (e) {
-        console.error("Error reading gym_schedule_data from localStorage", e);
+        console.error("Error reading gym_settings_data from localStorage", e);
+      }
+
+      // 2. Fetch remote DB settings
+      const { data, error } = await getGymSettings();
+      if (error) {
+        console.warn("Supabase loadSettings warning:", error);
+      } else if (data) {
+        const localSettingsRaw = localStorage.getItem("gym_settings_data");
+        if (!localSettingsRaw) {
+          if (data.name) setGymName(data.name);
+          if (data.theme_color) setSelectedColor(data.theme_color);
+          if (data.logo_url !== undefined) setLogoPreview(data.logo_url);
+          if (data.schedule && data.schedule.regular_hours && data.schedule.regular_hours.length > 0) {
+            setSchedule(data.schedule);
+          }
+        }
       }
 
       setIsLoading(false);
@@ -184,28 +198,39 @@ export default function SettingsPage() {
     setIsSubmitting(true);
     setErrorMsg(null);
 
-    // Save schedule to localStorage
-    saveScheduleToStorage(schedule);
-
-    const { success, error } = await updateGymSettings({
+    const payload = {
       name: gymName,
       theme_color: selectedColor,
       logo_url: logoPreview,
       schedule: schedule,
-    });
+    };
+
+    // 1. Immediately save full customization payload to localStorage
+    try {
+      localStorage.setItem("gym_settings_data", JSON.stringify(payload));
+      localStorage.setItem("gym_schedule_data", JSON.stringify(schedule));
+    } catch (err) {
+      console.error("Failed to store settings in localStorage:", err);
+    }
+
+    // 2. Broadcast custom event to update Sidebar, Portal, Landing Gateway instantly
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("gym-settings-updated", { detail: payload })
+      );
+    }
+
+    // 3. Persist to Supabase DB
+    const { success, error } = await updateGymSettings(payload);
 
     setIsSubmitting(false);
 
     if (error) {
-      setIsSaved(true);
-      setTimeout(() => setIsSaved(false), 3500);
-      return;
+      console.warn("Supabase save warning (saved locally):", error);
     }
 
-    if (success) {
-      setIsSaved(true);
-      setTimeout(() => setIsSaved(false), 3500);
-    }
+    setIsSaved(true);
+    setTimeout(() => setIsSaved(false), 3500);
   };
 
   if (!isMounted) {
@@ -258,8 +283,26 @@ export default function SettingsPage() {
       <form onSubmit={handleSaveSettings} className="space-y-8">
         {/* SECTION 1: LOGO ASSET & THEME COLOR */}
         <div className="bg-[#121214] p-6 sm:p-8 rounded-2xl shadow-md border border-zinc-800 space-y-8">
+          {/* Gym Name Input Section */}
+          <div className="space-y-3">
+            <h2 className="text-lg font-extrabold text-zinc-100 flex items-center gap-2">
+              <Dumbbell className="w-5 h-5 text-red-500" /> Gym Brand Name
+            </h2>
+            <p className="text-xs font-bold text-zinc-400">
+              Set the official display name for your gym across the portal, sidebar, and headers.
+            </p>
+            <input
+              type="text"
+              required
+              value={gymName}
+              onChange={(e) => setGymName(e.target.value)}
+              placeholder="e.g. JLAB Fitness"
+              className="w-full px-4 py-3.5 rounded-xl bg-zinc-900 border-2 border-zinc-700 text-zinc-100 text-sm font-extrabold focus:outline-none focus:border-red-500 shadow-sm"
+            />
+          </div>
+
           {/* Logo Upload Section */}
-          <div className="space-y-4">
+          <div className="space-y-4 pt-6 border-t border-zinc-800">
             <h2 className="text-lg font-extrabold text-zinc-100 flex items-center gap-2">
               <Upload className="w-5 h-5 text-red-500" /> Gym Logo Asset
             </h2>
