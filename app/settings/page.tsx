@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import {
   Settings,
   Upload,
-  Palette,
   CheckCircle2,
   Dumbbell,
   Sparkles,
@@ -61,14 +60,6 @@ export default function SettingsPage() {
   const [showAddClosedModal, setShowAddClosedModal] = useState(false);
   const [newClosedDate, setNewClosedDate] = useState("");
   const [newClosedReason, setNewClosedReason] = useState("");
-
-  const presetColors = [
-    { name: "Crimson Red", hex: "#EF4444" },
-    { name: "Scarlet Red", hex: "#DC2626" },
-    { name: "Blood Red", hex: "#991B1B" },
-    { name: "Dark Charcoal", hex: "#27272A" },
-    { name: "Dark Silver", hex: "#71717A" },
-  ];
 
   useEffect(() => {
     async function loadSettings() {
@@ -296,7 +287,7 @@ export default function SettingsPage() {
             Customization & Schedule Controls
           </h1>
           <p className="text-zinc-400 font-medium text-sm mt-1">
-            Manage your gym logo asset, theme color accents, live status, broadcast notices, and operating hours.
+            Manage your gym logo asset, live status, broadcast notices, and operating hours.
           </p>
         </div>
       </div>
@@ -309,7 +300,7 @@ export default function SettingsPage() {
 
       {/* Main Settings Form Container */}
       <form onSubmit={handleSaveSettings} className="space-y-8">
-        {/* SECTION 1: LOGO ASSET & THEME COLOR */}
+        {/* SECTION 1: BRAND NAME & LOGO ASSET */}
         <div className="bg-[#121214] p-6 sm:p-8 rounded-2xl shadow-md border border-zinc-800 space-y-8">
           {/* Gym Name Input Section */}
           <div className="space-y-3">
@@ -372,57 +363,6 @@ export default function SettingsPage() {
                   </button>
                 )}
               </div>
-            </div>
-          </div>
-
-          {/* Primary Theme Color Selection */}
-          <div className="space-y-4 pt-6 border-t border-zinc-800">
-            <h2 className="text-lg font-extrabold text-zinc-100 flex items-center gap-2">
-              <Palette className="w-5 h-5 text-red-500" /> Primary Theme Accent Color
-            </h2>
-            <p className="text-xs font-bold text-zinc-400">
-              Choose a primary theme accent color for navigation, buttons, and badges.
-            </p>
-
-            {/* Preset Color Swatches */}
-            <div className="flex flex-wrap items-center gap-3 pt-1">
-              {presetColors.map((color) => (
-                <button
-                  key={color.hex}
-                  type="button"
-                  onClick={() => setSelectedColor(color.hex)}
-                  className={`flex items-center gap-2.5 px-4 py-3 rounded-xl border-2 transition-all cursor-pointer ${
-                    selectedColor === color.hex
-                      ? "border-red-500 bg-zinc-800 text-zinc-100 shadow-sm"
-                      : "border-zinc-800 hover:border-zinc-700 bg-zinc-950/60 text-zinc-300"
-                  }`}
-                >
-                  <span
-                    className="w-4 h-4 rounded-full border border-zinc-600 shrink-0"
-                    style={{ backgroundColor: color.hex }}
-                  />
-                  <span className="text-xs font-extrabold">
-                    {color.name}
-                  </span>
-                </button>
-              ))}
-            </div>
-
-            {/* Hex Custom Color Picker */}
-            <div className="flex items-center gap-3 pt-3">
-              <input
-                type="color"
-                value={selectedColor}
-                onChange={(e) => setSelectedColor(e.target.value)}
-                className="w-11 h-11 rounded-xl border-2 border-zinc-700 cursor-pointer p-0.5 bg-zinc-900"
-              />
-              <input
-                type="text"
-                value={selectedColor}
-                onChange={(e) => setSelectedColor(e.target.value)}
-                className="px-4 py-3 rounded-xl bg-zinc-900 border-2 border-zinc-700 text-xs font-extrabold text-zinc-100 w-36 focus:outline-none focus:border-red-500"
-              />
-              <span className="text-xs font-extrabold text-zinc-400">Custom Hex Code</span>
             </div>
           </div>
         </div>
@@ -587,7 +527,6 @@ export default function SettingsPage() {
             type="submit"
             disabled={isSubmitting}
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 text-white font-extrabold text-sm rounded-xl shadow-soft border-2 border-red-500 transition-all disabled:opacity-50 min-h-[52px] bg-red-600 hover:bg-red-700 cursor-pointer"
-            style={{ backgroundColor: selectedColor }}
           >
             <Save className="w-5 h-5" /> {isSubmitting ? "Saving..." : "Save Customization Settings"}
           </button>
