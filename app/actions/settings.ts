@@ -10,6 +10,7 @@ export async function getGymSettings(): Promise<{ data: GymSettings | null; erro
     const { data, error } = await supabase
       .from('gym_settings')
       .select('*')
+      .order('updated_at', { ascending: false })
       .limit(1)
       .maybeSingle();
 
@@ -42,6 +43,7 @@ export async function updateGymSettings(
     const { data: existing } = await supabase
       .from('gym_settings')
       .select('id')
+      .order('updated_at', { ascending: false })
       .limit(1)
       .maybeSingle();
 

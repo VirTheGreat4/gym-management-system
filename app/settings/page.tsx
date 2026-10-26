@@ -187,7 +187,37 @@ export default function SettingsPage() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setLogoPreview(reader.result as string);
+        const rawUrl = reader.result as string;
+        // Compress image using canvas so dataURL stays under 50KB
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const maxDim = 300;
+          let width = img.width;
+          let height = img.height;
+          if (width > height) {
+            if (width > maxDim) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            }
+          } else {
+            if (height > maxDim) {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            setLogoPreview(canvas.toDataURL("image/png"));
+          } else {
+            setLogoPreview(rawUrl);
+          }
+        };
+        img.onerror = () => setLogoPreview(rawUrl);
+        img.src = rawUrl;
       };
       reader.readAsDataURL(file);
     }
