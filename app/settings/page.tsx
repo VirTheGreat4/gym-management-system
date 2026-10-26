@@ -188,20 +188,18 @@ export default function SettingsPage() {
       const reader = new FileReader();
       reader.onloadend = () => {
         const rawUrl = reader.result as string;
-        // Compress image using canvas so dataURL stays under 50KB
+        // Resize image if necessary to keep memory light and clear
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement("canvas");
-          const maxDim = 300;
+          const maxDim = 400;
           let width = img.width;
           let height = img.height;
-          if (width > height) {
-            if (width > maxDim) {
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
               height = Math.round((height * maxDim) / width);
               width = maxDim;
-            }
-          } else {
-            if (height > maxDim) {
+            } else {
               width = Math.round((width * maxDim) / height);
               height = maxDim;
             }
@@ -346,7 +344,7 @@ export default function SettingsPage() {
                   <img
                     src={logoPreview}
                     alt="Gym Logo"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain p-1"
                   />
                 ) : (
                   <Dumbbell className="w-10 h-10 text-red-500" />

@@ -85,7 +85,7 @@ export default function LandingGateway() {
         <div className="text-center space-y-2.5">
           <div className="w-14 h-14 sm:w-16 sm:h-16 bg-slate-900 rounded-lg border-2 border-slate-800 text-red-500 flex items-center justify-center mx-auto shadow-md overflow-hidden">
             {logoUrl ? (
-              <img src={logoUrl} alt={gymName} className="w-full h-full object-cover" />
+              <img src={logoUrl} alt={gymName} className="w-full h-full object-contain p-1" />
             ) : (
               <Dumbbell className="w-7 h-7 sm:w-8 sm:h-8 text-red-500" />
             )}

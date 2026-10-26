@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { getDashboardMetrics } from "@/app/actions/dashboard";
 import { getGymSettings } from "@/app/actions/settings";
+import DashboardHeader from "@/components/DashboardHeader";
 
 export const instant = false;
 
@@ -233,31 +234,11 @@ function DashboardSkeleton() {
 export default async function DashboardPage() {
   const { data: gymSettings } = await getGymSettings();
   const gymName = gymSettings?.name || "JLAB Fitness";
+  const logoUrl = gymSettings?.logo_url || "/jlab-logo.svg";
 
   return (
     <div className="space-y-6 sm:space-y-8" suppressHydrationWarning>
-      {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#121214] p-5 sm:p-8 rounded-2xl shadow-md shadow-black/40 border border-zinc-800">
-        <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-2xl bg-zinc-800 text-zinc-300 text-xs font-extrabold mb-2 border-2 border-zinc-700">
-            <Activity className="w-3.5 h-3.5 text-red-500" /> Dashboard Overview
-          </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-zinc-100">
-            Welcome back, Gym Manager!
-          </h1>
-          <p className="text-zinc-400 font-medium text-sm mt-1">
-            Here is what is happening at {gymName} today.
-          </p>
-        </div>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          <Link
-            href="/members"
-            className="inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-extrabold text-sm shadow-soft border-2 border-red-500/50 transition-all min-h-[52px]"
-          >
-            <UserPlus className="w-4 h-4" /> Add Member
-          </Link>
-        </div>
-      </div>
+      <DashboardHeader initialGymName={gymName} initialLogoUrl={logoUrl} />
 
       <Suspense fallback={<DashboardSkeleton />}>
         <DashboardMetricsSection />

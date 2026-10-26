@@ -286,7 +286,7 @@ export default function MemberPortalPage() {
           <div className="text-center space-y-3">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-lg bg-zinc-950 border-2 border-zinc-700 shadow-md overflow-hidden mx-auto">
               {logoUrl ? (
-                <img src={logoUrl} alt={gymName} className="w-full h-full object-cover" />
+                <img src={logoUrl} alt={gymName} className="w-full h-full object-contain p-1" />
               ) : (
                 <Dumbbell className="w-8 h-8 text-red-500" />
               )}

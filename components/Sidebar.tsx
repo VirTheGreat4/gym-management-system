@@ -111,7 +111,7 @@ export default function Sidebar() {
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold border-2 border-zinc-700 bg-zinc-950 shadow-soft overflow-hidden">
             {logoUrl ? (
-              <img src={logoUrl} alt={gymName} className="w-full h-full object-cover" />
+              <img src={logoUrl} alt={gymName} className="w-full h-full object-contain p-1" />
             ) : (
               <Dumbbell className="w-5 h-5 text-red-500" />
             )}
@@ -151,7 +151,7 @@ export default function Sidebar() {
           <div className="flex items-center gap-3 px-1">
             <div className="w-11 h-11 rounded-lg flex items-center justify-center text-white border-2 border-zinc-700 bg-zinc-950 shadow-md overflow-hidden">
               {logoUrl ? (
-                <img src={logoUrl} alt={gymName} className="w-full h-full object-cover" />
+                <img src={logoUrl} alt={gymName} className="w-full h-full object-contain p-1" />
               ) : (
                 <Dumbbell className="w-6 h-6 text-red-500" />
               )}
