@@ -19,9 +19,9 @@ export async function getGymSettings(): Promise<{ data: GymSettings | null; erro
 
     if (!data) {
       const defaultSettings: GymSettings = {
-        name: 'PowerFit Studio',
+        name: 'JLAB Fitness',
         theme_color: '#EF4444',
-        logo_url: null,
+        logo_url: '/jlab-logo.svg',
       };
       return { data: defaultSettings, error: null };
     }

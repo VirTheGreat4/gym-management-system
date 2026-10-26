@@ -20,8 +20,8 @@ import { logoutAdmin } from "@/app/actions/auth";
 export default function Sidebar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [gymName, setGymName] = useState("PowerFit Studio");
-  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [gymName, setGymName] = useState("JLAB Fitness");
+  const [logoUrl, setLogoUrl] = useState<string | null>("/jlab-logo.svg");
 
   useEffect(() => {
     async function loadGym() {

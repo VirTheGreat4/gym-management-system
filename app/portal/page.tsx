@@ -64,8 +64,8 @@ function calculateCountdown(expirationDateStr: string): string {
 
 export default function MemberPortalPage() {
   const [isMounted, setIsMounted] = useState(false);
-  const [gymName, setGymName] = useState("PowerFit Studio");
-  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [gymName, setGymName] = useState("JLAB Fitness");
+  const [logoUrl, setLogoUrl] = useState<string | null>("/jlab-logo.svg");
   const [schedule, setSchedule] = useState<GymSchedule>(fallbackSchedule);
   const [customBadges, setCustomBadges] = useState<CustomBadge[]>([]);
 

@@ -13,8 +13,8 @@ export default function LandingGateway() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const [gymName, setGymName] = useState('PowerFit Studio');
-  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [gymName, setGymName] = useState('JLAB Fitness');
+  const [logoUrl, setLogoUrl] = useState<string | null>('/jlab-logo.svg');
 
   useEffect(() => {
     setIsMounted(true);

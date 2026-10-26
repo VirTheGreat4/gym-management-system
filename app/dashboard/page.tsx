@@ -232,7 +232,7 @@ function DashboardSkeleton() {
 
 export default async function DashboardPage() {
   const { data: gymSettings } = await getGymSettings();
-  const gymName = gymSettings?.name || "PowerFit Studio";
+  const gymName = gymSettings?.name || "JLAB Fitness";
 
   return (
     <div className="space-y-6 sm:space-y-8" suppressHydrationWarning>
