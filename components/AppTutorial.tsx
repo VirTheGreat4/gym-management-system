@@ -20,7 +20,6 @@ import {
   Ban,
   Award,
   Search,
-  Building2,
   Clock,
   Check,
   Phone,
@@ -36,7 +35,12 @@ import {
   HelpCircle,
   LogOut,
   Activity,
-  UserPlus
+  UserPlus,
+  Pencil,
+  Trash2,
+  Upload,
+  ImageIcon,
+  BellRing,
 } from "lucide-react";
 
 export interface TutorialStep {
@@ -59,7 +63,7 @@ export const ADMIN_STEPS: TutorialStep[] = [
     targetTag: "Overview Stats",
     category: "Admin Core",
     whatIsIt: "Shows active member count, estimated monthly income, annual projection, and expiring passes.",
-    whyAdded: "Helps gym owners monitor financial revenue and active membership growth."
+    whyAdded: "Helps gym owners monitor financial revenue and active membership growth.",
   },
   {
     id: "dashboard-actions",
@@ -69,7 +73,7 @@ export const ADMIN_STEPS: TutorialStep[] = [
     targetTag: "Pass Expiration Alert",
     category: "Admin Core",
     whatIsIt: "Highlights members expiring within 7 days requiring renewal follow-up.",
-    whyAdded: "Allows front desk staff to quickly identify members who need to renew their pass."
+    whyAdded: "Allows front desk staff to quickly identify members who need to renew their pass.",
   },
   {
     id: "members-list",
@@ -79,7 +83,7 @@ export const ADMIN_STEPS: TutorialStep[] = [
     targetTag: "All Members List",
     category: "Admin Core",
     whatIsIt: "Complete list of registered members with contact info, assigned plans, and badges.",
-    whyAdded: "Keeps member contact numbers, subscription plans, and student discounts organized."
+    whyAdded: "Keeps member contact numbers, subscription plans, and student discounts organized.",
   },
   {
     id: "members-actions",
@@ -89,7 +93,7 @@ export const ADMIN_STEPS: TutorialStep[] = [
     targetTag: "Edit, Strike & Ban",
     category: "Admin Core",
     whatIsIt: "Action buttons to edit member details, issue warning strikes, or restrict accounts.",
-    whyAdded: "Helps staff maintain gym discipline, update contact info, or handle violations."
+    whyAdded: "Helps staff maintain gym discipline, update contact info, or handle violations.",
   },
   {
     id: "subscriptions-plans",
@@ -99,7 +103,7 @@ export const ADMIN_STEPS: TutorialStep[] = [
     targetTag: "Plans & Pricing",
     category: "Operations",
     whatIsIt: "Configures subscription costs and validity duration, like 1 Month (₱1,200).",
-    whyAdded: "Enables gym management to set custom rates for monthly or annual passes."
+    whyAdded: "Enables gym management to set custom rates for monthly or annual passes.",
   },
   {
     id: "subscriptions-badges",
@@ -109,7 +113,7 @@ export const ADMIN_STEPS: TutorialStep[] = [
     targetTag: "Discount Tags",
     category: "Operations",
     whatIsIt: "Creates discount tags like Student (50% Off) or Senior Discount.",
-    whyAdded: "Automates price deductions whenever special badges are assigned to members."
+    whyAdded: "Automates price deductions whenever special badges are assigned to members.",
   },
   {
     id: "settings-branding",
@@ -119,8 +123,8 @@ export const ADMIN_STEPS: TutorialStep[] = [
     targetTag: "Brand Customization",
     category: "Operations",
     whatIsIt: "Customizes your official gym name and uploads custom logo graphics.",
-    whyAdded: "Ensures the web app reflects your exact gym business branding and logo."
-  }
+    whyAdded: "Ensures the web app reflects your exact gym business branding and logo.",
+  },
 ];
 
 export const MEMBER_STEPS: TutorialStep[] = [
@@ -132,7 +136,7 @@ export const MEMBER_STEPS: TutorialStep[] = [
     targetTag: "Member Pass Card",
     category: "Member Portal",
     whatIsIt: "This shows your member name, phone number, plan status, and expiry countdown.",
-    whyAdded: "So members like Virgilio Flor E. Guaño can easily check their remaining pass days."
+    whyAdded: "So members like Virgilio Flor E. Guaño can easily check their remaining pass days.",
   },
   {
     id: "portal-badges",
@@ -142,7 +146,7 @@ export const MEMBER_STEPS: TutorialStep[] = [
     targetTag: "Student Badge (50% Off)",
     category: "Member Portal",
     whatIsIt: "This displays discount badges assigned to your account, like Student (50% Off).",
-    whyAdded: "So eligible students get 50% discount applied to regular rates."
+    whyAdded: "So eligible students get 50% discount applied to regular rates.",
   },
   {
     id: "portal-schedule",
@@ -152,8 +156,8 @@ export const MEMBER_STEPS: TutorialStep[] = [
     targetTag: "Live Schedule",
     category: "Member Portal",
     whatIsIt: "This displays gym opening/closing hours and scheduled holiday closures.",
-    whyAdded: "So members can verify live opening hours before visiting the gym."
-  }
+    whyAdded: "So members can verify live opening hours before visiting the gym.",
+  },
 ];
 
 export function AppTutorial() {
@@ -163,13 +167,14 @@ export function AppTutorial() {
   >("idle");
   const [currentStepIdx, setCurrentStepIdx] = useState(0);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
   const activeSteps = tutorialPhase === "member_tour" ? MEMBER_STEPS : ADMIN_STEPS;
   const currentStep = activeSteps[currentStepIdx] || activeSteps[0];
 
-  // Listen for trigger event
+  // Listen for trigger events
   useEffect(() => {
     const handleStartEvent = (e: CustomEvent) => {
       const stepId = e.detail?.stepId;
@@ -215,16 +220,22 @@ export function AppTutorial() {
     }
   }, [isOpen, tutorialPhase, currentStep]);
 
-  // Handle scroll and resize event listeners for dynamic stickiness
+  // Continuous frame-perfect tracking loop during scroll and layout shifts
   useEffect(() => {
     if (!isOpen || (tutorialPhase !== "admin_tour" && tutorialPhase !== "member_tour")) return;
 
-    const containerEl = containerRef.current;
+    let animId: number;
+    const loop = () => {
+      updateSpotlightPosition();
+      animId = requestAnimationFrame(loop);
+    };
+    animId = requestAnimationFrame(loop);
 
     const handleScrollOrResize = () => {
       updateSpotlightPosition();
     };
 
+    const containerEl = containerRef.current;
     if (containerEl) {
       containerEl.addEventListener("scroll", handleScrollOrResize, { passive: true });
     }
@@ -232,6 +243,7 @@ export function AppTutorial() {
     window.addEventListener("resize", handleScrollOrResize, { passive: true });
 
     return () => {
+      cancelAnimationFrame(animId);
       if (containerEl) {
         containerEl.removeEventListener("scroll", handleScrollOrResize);
       }
@@ -240,7 +252,7 @@ export function AppTutorial() {
     };
   }, [isOpen, tutorialPhase, updateSpotlightPosition]);
 
-  // Scroll into view & update spotlight on step changes
+  // Scroll target element into center on step changes
   useEffect(() => {
     if (!isOpen || (tutorialPhase !== "admin_tour" && tutorialPhase !== "member_tour")) return;
 
@@ -254,7 +266,7 @@ export function AppTutorial() {
       updateSpotlightPosition();
     }, 80);
 
-    const checkTimer = setTimeout(updateSpotlightPosition, 300);
+    const checkTimer = setTimeout(updateSpotlightPosition, 250);
 
     return () => {
       clearTimeout(scrollTimer);
@@ -311,36 +323,37 @@ export function AppTutorial() {
     const targetCenterX = targetRect.left + targetRect.width / 2;
 
     if (isMobile) {
+      const bottomNavHeight = tutorialPhase === "admin_tour" ? 64 : 0;
       if (spaceBelow >= 200) {
         placement = "bottom";
-        const topPos = Math.max(10, Math.min(viewportHeight - 270, targetRect.bottom + 10));
+        const topPos = Math.max(10, Math.min(viewportHeight - 270 - bottomNavHeight, targetRect.bottom + 10));
         const leftPos = Math.max(10, Math.min(viewportWidth - bubbleWidth - 10, targetCenterX - bubbleWidth / 2));
         arrowLeft = Math.max(20, Math.min(bubbleWidth - 20, targetCenterX - leftPos));
         bubbleStyle = {
           top: `${topPos}px`,
           left: `${leftPos}px`,
           width: `${bubbleWidth}px`,
-          maxHeight: "45vh"
+          maxHeight: "45vh",
         };
       } else if (spaceAbove >= 200) {
         placement = "top";
-        const bottomPos = Math.max(10, viewportHeight - targetRect.top + 10);
+        const bottomPos = Math.max(10 + bottomNavHeight, viewportHeight - targetRect.top + 10);
         const leftPos = Math.max(10, Math.min(viewportWidth - bubbleWidth - 10, targetCenterX - bubbleWidth / 2));
         arrowLeft = Math.max(20, Math.min(bubbleWidth - 20, targetCenterX - leftPos));
         bubbleStyle = {
           bottom: `${bottomPos}px`,
           left: `${leftPos}px`,
           width: `${bubbleWidth}px`,
-          maxHeight: "45vh"
+          maxHeight: "45vh",
         };
       } else {
         placement = "center";
         bubbleStyle = {
-          bottom: "16px",
+          bottom: `${12 + bottomNavHeight}px`,
           left: "50%",
           transform: "translateX(-50%)",
           width: `${bubbleWidth}px`,
-          maxHeight: "50vh"
+          maxHeight: "50vh",
         };
       }
     } else {
@@ -354,7 +367,7 @@ export function AppTutorial() {
         bubbleStyle = {
           top: `${topPos}px`,
           left: `${leftPos}px`,
-          width: `${bubbleWidth}px`
+          width: `${bubbleWidth}px`,
         };
       } else if (spaceAbove >= 250) {
         placement = "top";
@@ -366,7 +379,7 @@ export function AppTutorial() {
         bubbleStyle = {
           bottom: `${bottomPos}px`,
           left: `${leftPos}px`,
-          width: `${bubbleWidth}px`
+          width: `${bubbleWidth}px`,
         };
       } else {
         placement = "center";
@@ -374,7 +387,7 @@ export function AppTutorial() {
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          width: `${bubbleWidth}px`
+          width: `${bubbleWidth}px`,
         };
       }
     }
@@ -385,7 +398,7 @@ export function AppTutorial() {
       left: "50%",
       transform: "translate(-50%, -50%)",
       width: `${bubbleWidth}px`,
-      maxHeight: "85vh"
+      maxHeight: "85vh",
     };
   }
 
@@ -478,7 +491,7 @@ export function AppTutorial() {
                   {/* Brand / Logo Header */}
                   <div className="flex items-center gap-3 px-1">
                     <div className="w-14 h-14 rounded-xl flex items-center justify-center text-white border-2 border-zinc-700 bg-zinc-950 shadow-md overflow-hidden shrink-0">
-                      <Dumbbell className="w-7 h-7 text-red-500" />
+                      <img src="/jlab-logo.svg" alt="JLAB Fitness" className="w-full h-full object-contain p-1" />
                     </div>
                     <div>
                       <h1 className="font-black text-base text-zinc-100 leading-tight">JLAB Fitness Gym</h1>
@@ -568,11 +581,11 @@ export function AppTutorial() {
                 </div>
               </aside>
 
-              {/* Mobile Top App Bar (Mobile UI/UX) */}
+              {/* Mobile Top App Bar */}
               <div className="lg:hidden flex items-center justify-between bg-zinc-900/95 border-b-2 border-zinc-700/80 px-4 py-3 shadow-soft sticky top-0 z-30">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold border-2 border-zinc-700 bg-zinc-950 shadow-soft overflow-hidden shrink-0">
-                    <Dumbbell className="w-5 h-5 text-red-500" />
+                    <img src="/jlab-logo.svg" alt="JLAB Fitness" className="w-full h-full object-contain p-1" />
                   </div>
                   <div>
                     <h1 className="font-black text-sm text-zinc-100 leading-none">JLAB Fitness Gym</h1>
@@ -586,19 +599,25 @@ export function AppTutorial() {
                 </div>
               </div>
 
-              {/* Main Workspace Content (Shifted for Left Panel) */}
-              <main className="flex-1 lg:pl-68 p-4 sm:p-6 md:p-8 space-y-6 max-w-7xl w-full pb-24 lg:pb-8">
+              {/* Main Workspace Content */}
+              <main className="flex-1 lg:pl-68 p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 max-w-7xl w-full pb-24 lg:pb-8">
                 
-                {/* ADMIN REPLICA 1: DASHBOARD */}
+                {/* ADMIN REPLICA 1: DASHBOARD (100% Match to app/dashboard/page.tsx & DashboardHeader.tsx) */}
                 {currentStep.viewType === "dashboard" && (
-                  <div className="space-y-6">
+                  <div className="space-y-6 sm:space-y-8">
                     {/* Dashboard Header Component Replica */}
                     <div className="bg-[#121214] p-5 sm:p-7 md:p-8 rounded-2xl shadow-xl border-2 border-zinc-800/90 relative overflow-hidden">
+                      <div className="absolute -top-16 -right-16 w-64 h-64 bg-red-600/10 rounded-full blur-3xl pointer-events-none" />
+
                       <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
                           <div className="relative shrink-0">
-                            <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl bg-zinc-950 border-3 border-zinc-700 shadow-2xl flex items-center justify-center overflow-hidden">
-                              <Dumbbell className="w-10 h-10 text-red-500" />
+                            <div className="w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 rounded-2xl bg-zinc-950 border-3 border-zinc-700 shadow-2xl flex items-center justify-center overflow-hidden">
+                              <img
+                                src="/jlab-logo.svg"
+                                alt="JLAB Fitness Gym"
+                                className="w-full h-full object-contain p-1.5"
+                              />
                             </div>
                             <span className="absolute -bottom-1 -right-1 flex h-4 w-4">
                               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -607,11 +626,11 @@ export function AppTutorial() {
                           </div>
 
                           <div className="space-y-1.5">
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-2xl bg-zinc-900 text-zinc-300 text-xs font-extrabold border border-zinc-700">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-2xl bg-zinc-900 text-zinc-300 text-xs font-extrabold border border-zinc-700 shadow-xs">
                               <Activity className="w-3.5 h-3.5 text-red-500 animate-pulse" />
                               <span>Dashboard Overview</span>
                             </div>
-                            <h1 className="text-2xl sm:text-3xl font-black text-zinc-100 tracking-tight">
+                            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-zinc-100 tracking-tight">
                               Welcome back, Manager!
                             </h1>
                             <div className="flex items-center gap-2 text-zinc-400 font-semibold text-xs sm:text-sm">
@@ -624,12 +643,12 @@ export function AppTutorial() {
                           </div>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
-                          <div className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-zinc-900 text-zinc-200 font-extrabold text-xs sm:text-sm border-2 border-zinc-700">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0 pt-2 md:pt-0">
+                          <div className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-zinc-900 text-zinc-200 font-extrabold text-xs sm:text-sm border-2 border-zinc-700 shadow-sm">
                             <Palette className="w-4 h-4 text-red-500" />
                             <span>Edit Branding</span>
                           </div>
-                          <div className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-red-600 text-white font-extrabold text-xs sm:text-sm border-2 border-red-500">
+                          <div className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-red-600 text-white font-extrabold text-xs sm:text-sm shadow-soft border-2 border-red-500 min-h-[48px]">
                             <UserPlus className="w-4 h-4" />
                             <span>Add Member</span>
                           </div>
@@ -640,86 +659,179 @@ export function AppTutorial() {
                     {/* Target 1: Gym Metrics & Revenue Grid */}
                     <div
                       id="tutorial-metrics-grid"
-                      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-2 rounded-2xl border-2 border-transparent"
+                      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
                     >
-                      <div className="p-5 rounded-2xl bg-[#121214] text-zinc-100 shadow-md border-2 border-zinc-800 space-y-2">
+                      {/* Metric 1 */}
+                      <div className="p-5 sm:p-6 rounded-2xl bg-[#121214] text-zinc-100 shadow-md shadow-black/40 border border-zinc-800">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-extrabold uppercase tracking-wide text-zinc-400">Active Members</span>
-                          <div className="p-3 rounded-2xl bg-zinc-800 text-red-500 border border-zinc-700">
-                            <Users className="w-5 h-5" />
+                          <span className="text-xs font-extrabold uppercase tracking-wide text-zinc-400">
+                            Active Members
+                          </span>
+                          <div className="p-3 rounded-2xl bg-zinc-800 text-red-500 border border-zinc-800">
+                            <Users className="w-6 h-6" />
                           </div>
                         </div>
-                        <div className="text-2xl sm:text-3xl font-extrabold text-zinc-100">24</div>
-                        <p className="text-xs font-medium text-zinc-400">vs last month</p>
+                        <div className="mt-4 flex items-baseline justify-between flex-wrap gap-2">
+                          <span className="text-2xl sm:text-3xl font-extrabold text-zinc-100">24</span>
+                          <span className="inline-flex items-center text-xs font-extrabold px-2.5 py-1 rounded-2xl bg-zinc-900 text-zinc-200 border border-zinc-800 shadow-xs">
+                            0%
+                          </span>
+                        </div>
+                        <p className="text-xs font-medium text-zinc-400 mt-2">vs last month</p>
                       </div>
 
-                      <div className="p-5 rounded-2xl bg-[#121214] text-zinc-100 shadow-md border-2 border-zinc-800 space-y-2">
+                      {/* Metric 2 */}
+                      <div className="p-5 sm:p-6 rounded-2xl bg-[#121214] text-zinc-100 shadow-md shadow-black/40 border border-zinc-800">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-extrabold uppercase tracking-wide text-zinc-400">Est. Monthly Income</span>
-                          <div className="p-3 rounded-2xl bg-zinc-800 text-emerald-400 border border-zinc-700">
-                            <DollarSign className="w-5 h-5" />
+                          <span className="text-xs font-extrabold uppercase tracking-wide text-zinc-400">
+                            Estimated Monthly Income
+                          </span>
+                          <div className="p-3 rounded-2xl bg-zinc-800 text-emerald-400 border border-zinc-800">
+                            <DollarSign className="w-6 h-6" />
                           </div>
                         </div>
-                        <div className="text-2xl sm:text-3xl font-extrabold text-zinc-100">₱28,800</div>
-                        <p className="text-xs font-medium text-zinc-400">vs last month</p>
+                        <div className="mt-4 flex items-baseline justify-between flex-wrap gap-2">
+                          <span className="text-2xl sm:text-3xl font-extrabold text-zinc-100">₱28,800</span>
+                          <span className="inline-flex items-center text-xs font-extrabold px-2.5 py-1 rounded-2xl bg-zinc-900 text-zinc-200 border border-zinc-800 shadow-xs">
+                            0%
+                          </span>
+                        </div>
+                        <p className="text-xs font-medium text-zinc-400 mt-2">vs last month</p>
                       </div>
 
-                      <div className="p-5 rounded-2xl bg-[#121214] text-zinc-100 shadow-md border-2 border-zinc-800 space-y-2">
+                      {/* Metric 3 */}
+                      <div className="p-5 sm:p-6 rounded-2xl bg-[#121214] text-zinc-100 shadow-md shadow-black/40 border border-zinc-800">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-extrabold uppercase tracking-wide text-zinc-400">Projected Annual</span>
-                          <div className="p-3 rounded-2xl bg-zinc-800 text-purple-400 border border-zinc-700">
-                            <TrendingUp className="w-5 h-5" />
+                          <span className="text-xs font-extrabold uppercase tracking-wide text-zinc-400">
+                            Projected Annual Income
+                          </span>
+                          <div className="p-3 rounded-2xl bg-zinc-800 text-purple-400 border border-zinc-800">
+                            <TrendingUp className="w-6 h-6" />
                           </div>
                         </div>
-                        <div className="text-2xl sm:text-3xl font-extrabold text-zinc-100">₱345,600</div>
-                        <p className="text-xs font-medium text-zinc-400">12-month projection</p>
+                        <div className="mt-4 flex items-baseline justify-between flex-wrap gap-2">
+                          <span className="text-2xl sm:text-3xl font-extrabold text-zinc-100">₱345,600</span>
+                          <span className="inline-flex items-center text-xs font-extrabold px-2.5 py-1 rounded-2xl bg-zinc-900 text-zinc-200 border border-zinc-800 shadow-xs">
+                            0%
+                          </span>
+                        </div>
+                        <p className="text-xs font-medium text-zinc-400 mt-2">12-month projection</p>
                       </div>
 
-                      <div className="p-5 rounded-2xl bg-[#121214] text-zinc-100 shadow-md border-2 border-zinc-800 space-y-2">
+                      {/* Metric 4 */}
+                      <div className="p-5 sm:p-6 rounded-2xl bg-[#121214] text-zinc-100 shadow-md shadow-black/40 border border-zinc-800">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-extrabold uppercase tracking-wide text-zinc-400">Expiring This Week</span>
-                          <div className="p-3 rounded-2xl bg-zinc-800 text-amber-400 border border-zinc-700">
-                            <Clock className="w-5 h-5" />
+                          <span className="text-xs font-extrabold uppercase tracking-wide text-zinc-400">
+                            Expiring This Week
+                          </span>
+                          <div className="p-3 rounded-2xl bg-zinc-800 text-amber-400 border border-zinc-800">
+                            <Clock className="w-6 h-6" />
                           </div>
                         </div>
-                        <div className="flex items-baseline justify-between">
-                          <span className="text-2xl sm:text-3xl font-extrabold text-amber-400">3</span>
-                          <span className="text-xs font-extrabold px-2.5 py-1 rounded-2xl border bg-amber-950/80 text-amber-300 border-amber-700">
+                        <div className="mt-4 flex items-baseline justify-between flex-wrap gap-2">
+                          <span className="text-2xl sm:text-3xl font-extrabold text-zinc-100">3</span>
+                          <span className="text-xs font-extrabold px-2.5 py-1 rounded-2xl border shadow-xs bg-amber-950/80 text-amber-300 border-amber-700">
                             Needs attention
                           </span>
                         </div>
-                        <p className="text-xs font-medium text-zinc-400">Requires renewal follow-up</p>
+                        <p className="text-xs font-medium text-zinc-400 mt-2">Requires renewal follow-up</p>
                       </div>
                     </div>
 
-                    {/* Target 2: Expiring Soon Follow-up Card */}
-                    <div
-                      id="tutorial-quick-actions"
-                      className="p-6 sm:p-8 rounded-2xl bg-[#121214] border-2 border-zinc-800 space-y-5 shadow-xl"
-                    >
-                      <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-2xl bg-amber-950/80 text-amber-300 text-xs font-extrabold border border-amber-700">
-                          <Clock className="w-3.5 h-3.5" /> Needs Renewal Follow-up
+                    {/* Two Column Layout (100% Match to app/dashboard/page.tsx) */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+                      {/* Recently Joined Members Section (2 cols) */}
+                      <div className="lg:col-span-2 bg-[#121214] p-5 sm:p-8 rounded-2xl shadow-md shadow-black/40 border border-zinc-800 space-y-6">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <div>
+                            <h2 className="text-xl font-extrabold text-zinc-100">Recently Joined Members</h2>
+                            <p className="text-xs font-medium text-zinc-400">Newly registered gym members (Name, Phone, Expiration Date)</p>
+                          </div>
+                          <div className="text-xs font-extrabold text-red-400 flex items-center gap-1 bg-zinc-800 px-3.5 py-2 rounded-xl border border-zinc-700 self-start sm:self-auto shadow-xs">
+                            View Directory <ChevronRight className="w-4 h-4" />
+                          </div>
                         </div>
-                        <span className="text-xs font-extrabold px-2.5 py-1 rounded-2xl bg-zinc-800 text-zinc-200 border border-zinc-700">
-                          3 Members
-                        </span>
+
+                        <div className="divide-y divide-zinc-800">
+                          {/* Member Row 1 */}
+                          <div className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 first:pt-0 last:pb-0">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-2xl bg-zinc-800 text-zinc-100 font-extrabold flex items-center justify-center text-sm border-2 border-zinc-700 shadow-xs">
+                                VI
+                              </div>
+                              <div>
+                                <p className="font-extrabold text-sm text-zinc-100">Virgilio Flor E. Guaño</p>
+                                <p className="text-xs font-medium text-zinc-400 flex items-center gap-1 mt-0.5">
+                                  <Phone className="w-3 h-3 text-zinc-500" /> 09754100345
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-1">
+                              <span className="inline-flex items-center text-xs font-extrabold px-3 py-1 rounded-2xl bg-zinc-950 text-zinc-300 border border-zinc-700">
+                                <Calendar className="w-3 h-3 mr-1 text-zinc-500" /> Exp: Oct 31, 2026
+                              </span>
+                              <p className="text-xs font-medium text-zinc-400">Joined: Oct 01, 2026</p>
+                            </div>
+                          </div>
+
+                          {/* Member Row 2 */}
+                          <div className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 first:pt-0 last:pb-0">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-2xl bg-zinc-800 text-zinc-100 font-extrabold flex items-center justify-center text-sm border-2 border-zinc-700 shadow-xs">
+                                MA
+                              </div>
+                              <div>
+                                <p className="font-extrabold text-sm text-zinc-100">Maria Santos</p>
+                                <p className="text-xs font-medium text-zinc-400 flex items-center gap-1 mt-0.5">
+                                  <Phone className="w-3 h-3 text-zinc-500" /> 09171234567
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-1">
+                              <span className="inline-flex items-center text-xs font-extrabold px-3 py-1 rounded-2xl bg-zinc-950 text-zinc-300 border border-zinc-700">
+                                <Calendar className="w-3 h-3 mr-1 text-zinc-500" /> Exp: Nov 15, 2026
+                              </span>
+                              <p className="text-xs font-medium text-zinc-400">Joined: Sep 15, 2026</p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
 
-                      <div>
-                        <h3 className="text-xl font-extrabold text-zinc-100">Expiring Soon (Within 7 Days)</h3>
-                        <p className="text-xs font-medium text-zinc-400 mt-1">
-                          Follow up with members who are expiring soon or already expired.
-                        </p>
-                      </div>
-
-                      <div className="p-4 sm:p-5 rounded-2xl bg-amber-950/80 border-2 border-amber-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      {/* Target 2: Quick Retention Spotlight Card (1 col) */}
+                      <div
+                        id="tutorial-quick-actions"
+                        className="bg-[#121214] p-5 sm:p-8 rounded-2xl shadow-md shadow-black/40 border border-zinc-800 flex flex-col justify-between space-y-6"
+                      >
                         <div>
-                          <p className="font-black text-base text-amber-100">Virgilio Flor E. Guaño</p>
-                          <p className="text-xs font-bold text-amber-300 mt-0.5">Expires in 4 days (Phone: 09754100345)</p>
+                          <div className="flex items-center justify-between gap-2 mb-4 flex-wrap">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-2xl bg-amber-950/80 text-amber-300 text-xs font-extrabold border border-amber-700">
+                              <BellRing className="w-3.5 h-3.5" /> Needs Reminder This Week
+                            </div>
+                            <span className="text-xs font-extrabold px-2.5 py-1 rounded-2xl bg-zinc-800 text-zinc-200 border border-zinc-700">
+                              3 Members
+                            </span>
+                          </div>
+
+                          <h2 className="text-xl font-extrabold text-zinc-100">Expiring Soon (Within 7 Days)</h2>
+                          <p className="text-xs font-medium text-zinc-400 mt-1">
+                            Follow up with members who are expiring soon or already expired.
+                          </p>
+
+                          <div className="mt-5 space-y-3">
+                            <div className="p-4 rounded-2xl bg-amber-950/80 border border-amber-700 flex items-center justify-between shadow-xs">
+                              <div>
+                                <p className="font-extrabold text-sm text-amber-200">Virgilio Flor E. Guaño</p>
+                                <p className="text-xs font-medium text-amber-300 mt-0.5">Expires in 4 days (Phone: 09754100345)</p>
+                              </div>
+                              <span className="text-xs font-extrabold px-2.5 py-1 rounded-2xl bg-amber-900 text-amber-200 border border-amber-600">
+                                Action
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="px-4 py-2 bg-red-600 text-white font-extrabold text-xs rounded-xl shadow-md inline-flex items-center gap-1.5 self-start sm:self-auto">
-                          View Pass <ArrowUpRight className="w-4 h-4" />
+
+                        <div className="w-full mt-4 py-3.5 px-4 bg-red-600 text-white font-extrabold text-center text-sm rounded-2xl shadow-soft border-2 border-red-500/50 flex items-center justify-center gap-2 transition-all min-h-[52px]">
+                          View Expiring Members <ArrowUpRight className="w-4 h-4" />
                         </div>
                       </div>
                     </div>
@@ -845,124 +957,191 @@ export function AppTutorial() {
 
                 {/* ADMIN REPLICA 3: SUBSCRIPTIONS & BADGES */}
                 {currentStep.viewType === "subscriptions" && (
-                  <div className="space-y-6">
-                    <div>
-                      <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">Subscriptions & Custom Badges</h2>
-                      <p className="text-xs text-zinc-400 font-semibold mt-1">Configure pricing plans and discount badges</p>
+                  <div className="space-y-8">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#121214] p-6 sm:p-8 rounded-2xl shadow-md border border-zinc-800">
+                      <div>
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-2xl bg-zinc-800 text-zinc-300 text-xs font-extrabold mb-2 border border-zinc-700">
+                          <CreditCard className="w-3.5 h-3.5 text-red-500" /> Live Database Management
+                        </div>
+                        <h1 className="text-2xl md:text-3xl font-extrabold text-zinc-100">
+                          Subscription Plans Management
+                        </h1>
+                        <p className="text-zinc-400 font-medium text-sm mt-1">
+                          Configure live database gym plans, pricing tiers, durations, and category discount tags.
+                        </p>
+                      </div>
+
+                      <div className="inline-flex items-center justify-center gap-2 px-6 py-4 bg-red-600 text-white font-extrabold text-sm rounded-2xl shadow-soft border-2 border-red-500/50 min-h-[56px] self-start md:self-auto">
+                        <Plus className="w-5 h-5" /> Add New Plan
+                      </div>
                     </div>
 
                     {/* Target 5: Subscription Plans Grid */}
-                    <div className="space-y-3">
-                      <h3 className="text-lg font-black text-white">1. Subscription Plans</h3>
-                      <div
-                        id="tutorial-plans-grid"
-                        className="grid grid-cols-1 sm:grid-cols-2 gap-4"
-                      >
-                        <div className="p-6 rounded-2xl bg-[#121214] border-2 border-zinc-800 space-y-3 shadow-xl">
+                    <div
+                      id="tutorial-plans-grid"
+                      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+                    >
+                      <div className="bg-zinc-900 p-6 rounded-2xl shadow-soft border-3 border-zinc-700 flex flex-col justify-between space-y-6">
+                        <div className="space-y-4">
                           <div className="flex items-center justify-between">
-                            <span className="px-2.5 py-1 rounded-lg bg-red-950 border border-red-800 text-red-400 text-xs font-black uppercase">
-                              Regular Plan
+                            <span className="px-3 py-1 rounded-xl text-xs font-extrabold border bg-amber-950 text-amber-300 border-amber-800">
+                              Standard
                             </span>
-                            <span className="text-2xl font-black text-white">₱1,200</span>
+                            <div className="w-10 h-10 rounded-2xl bg-zinc-800 text-zinc-200 border-2 border-zinc-700 flex items-center justify-center shadow-xs">
+                              <CreditCard className="w-5 h-5 text-red-500" />
+                            </div>
                           </div>
                           <div>
-                            <h4 className="text-lg font-black text-white">1 Month Regular Plan</h4>
-                            <p className="text-xs text-zinc-400 font-semibold">Valid for 30 consecutive calendar days</p>
+                            <h3 className="text-lg font-extrabold text-zinc-100 leading-tight">1 Month Regular Plan</h3>
+                            <p className="text-xs text-zinc-400 font-medium mt-1">
+                              30 days full gym access including workout machines and free weights.
+                            </p>
+                          </div>
+                          <div className="p-3 bg-zinc-950 rounded-xl border-2 border-zinc-800 space-y-1 shadow-xs">
+                            <div className="flex items-center justify-between text-xs font-medium text-zinc-400">
+                              <span className="flex items-center gap-1">
+                                <Clock className="w-3.5 h-3.5 text-red-500" /> Duration:
+                              </span>
+                              <span className="font-extrabold text-zinc-200">30 Days</span>
+                            </div>
+                            <div className="flex items-center justify-between text-sm font-extrabold text-emerald-400 pt-1 border-t border-zinc-800">
+                              <span className="flex items-center gap-1 text-xs text-zinc-400 font-medium">
+                                <DollarSign className="w-3.5 h-3.5 text-emerald-500" /> Price:
+                              </span>
+                              <span className="text-base text-emerald-400">₱1,200</span>
+                            </div>
                           </div>
                         </div>
-
-                        <div className="p-6 rounded-2xl bg-[#121214] border-2 border-zinc-800 space-y-3 shadow-xl">
-                          <div className="flex items-center justify-between">
-                            <span className="px-2.5 py-1 rounded-lg bg-blue-950 border border-blue-800 text-blue-400 text-xs font-black uppercase">
-                              Annual VIP
-                            </span>
-                            <span className="text-2xl font-black text-white">₱10,000</span>
+                        <div className="flex items-center gap-2 pt-3 border-t border-zinc-800">
+                          <div className="flex-1 py-2.5 px-3 rounded-xl bg-zinc-800 text-zinc-200 font-extrabold text-xs border-2 border-zinc-700 flex items-center justify-center gap-1 shadow-xs">
+                            <Pencil className="w-3.5 h-3.5" /> Edit
                           </div>
-                          <div>
-                            <h4 className="text-lg font-black text-white">1 Year Full Pass</h4>
-                            <p className="text-xs text-zinc-400 font-semibold">Valid for 365 days with full access</p>
+                          <div className="py-2.5 px-3 rounded-xl bg-zinc-800 text-zinc-200 font-extrabold text-xs border-2 border-zinc-700 flex items-center justify-center gap-1 shadow-xs">
+                            <Trash2 className="w-3.5 h-3.5 text-red-400" />
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    {/* Target 6: Custom Badges Grid */}
-                    <div className="space-y-3 pt-2">
-                      <h3 className="text-lg font-black text-white">2. Custom Discount Badges</h3>
-                      <div
-                        id="tutorial-badges-grid"
-                        className="grid grid-cols-1 sm:grid-cols-2 gap-4"
-                      >
-                        <div className="p-6 rounded-2xl bg-[#121214] border-2 border-emerald-500/80 space-y-2 shadow-xl">
-                          <div className="flex items-center justify-between">
-                            <span className="px-3 py-1 rounded-xl bg-emerald-950 border border-emerald-500 text-emerald-300 text-xs font-black">
-                              Student Badge (50% OFF)
-                            </span>
-                            <span className="text-xs font-extrabold text-emerald-400">50% Price Reduction</span>
+                    {/* Target 6: Custom Database Badges Section */}
+                    <div className="space-y-6 pt-6 border-t-3 border-zinc-700">
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-zinc-900 p-5 sm:p-8 rounded-2xl shadow-soft border-3 border-zinc-700">
+                        <div>
+                          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-2xl bg-zinc-800 text-zinc-300 text-xs font-extrabold mb-2 border-2 border-zinc-700">
+                            <Tag className="w-3.5 h-3.5 text-red-500" /> Live Database Client Classification
                           </div>
-                          <p className="text-xs font-semibold text-zinc-300">
-                            Applied to students with valid student ID like Virgilio Flor E. Guaño.
+                          <h2 className="text-2xl font-extrabold text-zinc-100">
+                            Custom Database Badges Management
+                          </h2>
+                          <p className="text-zinc-400 font-medium text-sm mt-1">
+                            Configure live database member badges with automatic discount percentages for check-in registrations.
                           </p>
                         </div>
 
-                        <div className="p-6 rounded-2xl bg-[#121214] border-2 border-zinc-800 space-y-2 shadow-xl">
-                          <div className="flex items-center justify-between">
-                            <span className="px-3 py-1 rounded-xl bg-purple-950 border border-purple-800 text-purple-300 text-xs font-black">
-                              Senior Discount (20% OFF)
-                            </span>
-                            <span className="text-xs font-extrabold text-purple-400">20% Price Reduction</span>
+                        <div className="inline-flex items-center justify-center gap-2 px-6 py-4 bg-red-600 text-white font-extrabold text-sm rounded-2xl shadow-soft border-2 border-red-500/50 min-h-[56px] self-start md:self-auto">
+                          <Plus className="w-5 h-5" /> Add Custom Badge
+                        </div>
+                      </div>
+
+                      <div
+                        id="tutorial-badges-grid"
+                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+                      >
+                        <div className="bg-zinc-900 p-6 rounded-2xl shadow-soft border-3 border-zinc-700 flex flex-col justify-between space-y-6">
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <span className="px-3 py-1.5 rounded-xl text-xs font-extrabold border bg-red-950 text-red-300 border-red-800 shadow-xs">
+                                Student Badge (50% OFF)
+                              </span>
+                              <div className="w-10 h-10 rounded-2xl bg-zinc-800 text-zinc-200 border-2 border-zinc-700 flex items-center justify-center shadow-xs font-extrabold text-xs">
+                                50%
+                              </div>
+                            </div>
+
+                            <div>
+                              <h3 className="text-lg font-extrabold text-zinc-100 leading-tight">Student Badge (50% OFF)</h3>
+                              <p className="text-xs text-zinc-400 font-medium mt-1">
+                                Applied for active high school and college students presenting valid school ID.
+                              </p>
+                            </div>
                           </div>
-                          <p className="text-xs font-semibold text-zinc-400">
-                            Applied to senior citizens aged 60 and above.
-                          </p>
+
+                          <div className="flex items-center gap-2 pt-3 border-t border-zinc-800">
+                            <div className="flex-1 py-2.5 px-3 rounded-xl bg-zinc-800 text-zinc-200 font-extrabold text-xs border-2 border-zinc-700 flex items-center justify-center gap-1 shadow-xs">
+                              <Pencil className="w-3.5 h-3.5" /> Edit
+                            </div>
+                            <div className="py-2.5 px-3 rounded-xl bg-zinc-800 text-zinc-200 font-extrabold text-xs border-2 border-zinc-700 flex items-center justify-center gap-1 shadow-xs">
+                              <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* ADMIN REPLICA 4: CUSTOMIZATION / SETTINGS */}
+                {/* ADMIN REPLICA 4: SETTINGS & BRANDING */}
                 {currentStep.viewType === "settings" && (
-                  <div className="space-y-6">
-                    <div>
-                      <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">Gym Customization & Settings</h2>
-                      <p className="text-xs text-zinc-400 font-semibold mt-1">Configure business name and custom logo</p>
+                  <div className="space-y-8">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#121214] p-6 sm:p-8 rounded-2xl shadow-md border border-zinc-800">
+                      <div>
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-2xl bg-zinc-800 text-zinc-300 text-xs font-extrabold mb-2 border border-zinc-700">
+                          <Sparkles className="w-3.5 h-3.5 text-red-500" /> Customization & Schedule
+                        </div>
+                        <h1 className="text-2xl md:text-3xl font-extrabold text-zinc-100">
+                          Customization & Schedule Controls
+                        </h1>
+                        <p className="text-zinc-400 font-medium text-sm mt-1">
+                          Manage your gym logo asset, live status, broadcast notices, and operating hours.
+                        </p>
+                      </div>
                     </div>
 
-                    {/* Target 7: Settings Branding */}
+                    {/* Target 7: Settings Branding Section (100% Match to app/settings/page.tsx) */}
                     <div
                       id="tutorial-settings-branding"
-                      className="p-6 sm:p-8 rounded-2xl bg-[#121214] border-2 border-zinc-800 space-y-6 shadow-xl"
+                      className="bg-[#121214] p-6 sm:p-8 rounded-2xl shadow-md border border-zinc-800 space-y-8"
                     >
-                      <div className="flex items-center gap-2 border-b border-zinc-800 pb-4">
-                        <Building2 className="w-6 h-6 text-red-500" />
-                        <div>
-                          <h3 className="text-xl font-black text-white">Gym Branding & Graphics</h3>
-                          <p className="text-xs font-semibold text-zinc-400">Customize official gym logo and business name</p>
-                        </div>
+                      <div className="space-y-3">
+                        <h2 className="text-lg font-extrabold text-zinc-100 flex items-center gap-2">
+                          <Dumbbell className="w-5 h-5 text-red-500" /> Gym Brand Name
+                        </h2>
+                        <p className="text-xs font-bold text-zinc-400">
+                          Set the official display name for your gym across the portal, sidebar, and headers.
+                        </p>
+                        <input
+                          type="text"
+                          readOnly
+                          value="JLAB Fitness Gym"
+                          className="w-full px-4 py-3.5 rounded-xl bg-zinc-900 border-2 border-zinc-700 text-zinc-100 text-sm font-extrabold"
+                        />
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <label className="text-xs font-extrabold text-zinc-300">Official Gym Name</label>
-                          <input
-                            type="text"
-                            readOnly
-                            value="JLAB Fitness Gym"
-                            className="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-800 text-white font-extrabold text-sm"
-                          />
-                        </div>
+                      <div className="space-y-4 pt-6 border-t border-zinc-800">
+                        <h2 className="text-lg font-extrabold text-zinc-100 flex items-center gap-2">
+                          <Upload className="w-5 h-5 text-red-500" /> Gym Logo Asset
+                        </h2>
+                        <p className="text-xs font-bold text-zinc-400">
+                          Upload your gym logo or use the default JLAB Fitness logo asset (PNG, SVG, or JPEG).
+                        </p>
 
-                        <div className="space-y-2">
-                          <label className="text-xs font-extrabold text-zinc-300">Gym Logo Graphic</label>
-                          <div className="p-3 rounded-2xl bg-zinc-950 border border-zinc-800 flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-center font-black text-red-500 text-lg">
-                              <Dumbbell className="w-6 h-6 text-red-500" />
+                        <div className="flex flex-col sm:flex-row items-center gap-6 pt-2">
+                          <div className="w-24 h-24 rounded-2xl bg-zinc-950 border-2 border-zinc-700 flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
+                            <img
+                              src="/jlab-logo.svg"
+                              alt="Gym Logo"
+                              className="w-full h-full object-contain p-1"
+                            />
+                          </div>
+
+                          <div className="flex-1 w-full space-y-3">
+                            <div className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-zinc-800 text-zinc-100 font-extrabold text-xs cursor-pointer border-2 border-zinc-700">
+                              <ImageIcon className="w-4 h-4 text-red-500" />
+                              <span>Upload New Logo</span>
                             </div>
-                            <div>
-                              <div className="text-xs font-black text-zinc-200">jlab-logo.svg</div>
-                              <div className="text-[10px] font-bold text-emerald-400">Active Official Graphic</div>
-                            </div>
+                            <p className="text-[11px] font-bold text-emerald-400">
+                              Active official graphic loaded: /jlab-logo.svg
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -971,7 +1150,7 @@ export function AppTutorial() {
                 )}
               </main>
 
-              {/* Mobile Sticky Bottom Thumb Navigation Bar (100% Match to Mobile Sidebar) */}
+              {/* Mobile Sticky Bottom Thumb Navigation Bar */}
               <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#101116] border-t-2 border-zinc-800 px-2 py-1.5 shadow-2xl flex items-center justify-around">
                 <div
                   className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-lg min-w-[64px] min-h-[48px] border-2 ${
@@ -1029,7 +1208,7 @@ export function AppTutorial() {
               <div className="flex items-center justify-between pb-4 border-b-2 border-zinc-800">
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 rounded-xl bg-zinc-950 border-2 border-zinc-700 flex items-center justify-center font-black text-red-500 text-sm overflow-hidden shadow-md">
-                    <span className="text-red-500 font-extrabold">JLAB</span>
+                    <img src="/jlab-logo.svg" alt="JLAB Fitness" className="w-full h-full object-contain p-1" />
                   </div>
                   <div>
                     <h1 className="text-base sm:text-lg font-black text-zinc-100 tracking-tight">
@@ -1218,7 +1397,7 @@ export function AppTutorial() {
             top: `${Math.max(4, targetRect.top - 6)}px`,
             left: `${Math.max(4, targetRect.left - 6)}px`,
             width: `${Math.min(viewportWidth - 8, targetRect.width + 12)}px`,
-            height: `${targetRect.height + 12}px`
+            height: `${targetRect.height + 12}px`,
           }}
         >
           <div className="absolute -top-3 left-3 sm:left-4 px-2.5 py-0.5 rounded-full bg-blue-600 text-[10px] font-black tracking-wider text-white uppercase shadow-md flex items-center gap-1">
