@@ -11,8 +11,13 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Gym Management SaaS | White-Label Portal",
+  title: "JLAB Fitness Gym",
   description: "Modern Local Gym Management SaaS with AI Retention and White-Labeling",
+  icons: {
+    icon: "/jlab-logo.svg",
+    shortcut: "/jlab-logo.svg",
+    apple: "/jlab-logo.svg",
+  },
 };
 
 export const viewport: Viewport = {
