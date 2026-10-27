@@ -1,102 +1,61 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import {
-  HelpCircle,
   X,
   ChevronRight,
   ChevronLeft,
   Sparkles,
   CheckCircle2,
   Compass,
-  Play,
-  RotateCcw,
-  ShieldCheck,
-  UserCheck,
   Zap,
-  Tag,
-  Calendar,
-  Layers,
-  Settings as SettingsIcon,
-  Bot
+  ShieldCheck,
+  MessageSquare
 } from "lucide-react";
 
 export interface TutorialStep {
   id: string;
   route: string;
-  targetSelector: string; // CSS selector or data-attribute
+  targetSelector: string;
   title: string;
   targetTag: string;
-  category: "Landing & Portal" | "Admin Core" | "Operations";
+  category: "Member Portal" | "Admin Core" | "Operations";
   whatIsIt: string;
   whyAdded: string;
-  tip?: string;
 }
 
 export const TUTORIAL_STEPS: TutorialStep[] = [
-  // --- LANDING PAGE STEPS ---
-  {
-    id: "landing-header",
-    route: "/",
-    targetSelector: "#tutorial-landing-header",
-    title: "JLAB Gym Gateway & Branding",
-    targetTag: "Landing Page Header",
-    category: "Landing & Portal",
-    whatIsIt: "The welcoming header showing the official JLAB Fitness Gym logo and title.",
-    whyAdded: "Establishes instant white-label brand trust and identity for members and staff entering the system."
-  },
-  {
-    id: "member-lookup",
-    route: "/",
-    targetSelector: "#tutorial-member-lookup",
-    title: "Instant Member Access",
-    targetTag: "Member Phone Lookup",
-    category: "Landing & Portal",
-    whatIsIt: "A quick phone search form for members to check their subscription and status.",
-    whyAdded: "Allows gym members to verify their active plan, expiration date, and student discounts without needing a login password."
-  },
-  {
-    id: "admin-login-btn",
-    route: "/",
-    targetSelector: "#tutorial-admin-btn",
-    title: "Staff & Admin Access",
-    targetTag: "Admin Access Toggle",
-    category: "Landing & Portal",
-    whatIsIt: "A secure login portal button reserved for gym owners and desk administrators.",
-    whyAdded: "Keeps public member checks separate from administrative management, financial records, and member editing tools."
-  },
-
   // --- MEMBER PORTAL STEPS ---
   {
     id: "portal-card",
     route: "/portal",
     targetSelector: "#tutorial-portal-card",
-    title: "Digital Member Pass",
-    targetTag: "Member Status Overview",
-    category: "Landing & Portal",
-    whatIsIt: "Displays active membership details for members like Virgilio Flor E. Guaño.",
-    whyAdded: "Provides members real-time proof of membership, exact expiration countdown, and subscription status (Active, Expiring, or Overdue)."
+    title: "Member Pass",
+    targetTag: "Member Pass Card",
+    category: "Member Portal",
+    whatIsIt: "This shows your member name, plan, and when your gym pass ends.",
+    whyAdded: "So members can easily check how many days they have left on their pass."
   },
   {
     id: "portal-badges",
     route: "/portal",
     targetSelector: "#tutorial-portal-badges",
-    title: "Badges & Discount Verification",
-    targetTag: "Student Badge & Promo",
-    category: "Landing & Portal",
-    whatIsIt: "Highlights verified tags like the Student badge with custom discount percentages (50% Off).",
-    whyAdded: "Automatically applies discount promos during check-in/renewal while showing members their applied discount perks transparently."
+    title: "Student Discount Badge",
+    targetTag: "Student Badge (50% Off)",
+    category: "Member Portal",
+    whatIsIt: "This shows discount badges like the Student badge (50% Off).",
+    whyAdded: "So students like Virgilio Flor E. Guaño get half-price discounts."
   },
   {
     id: "portal-schedule",
     route: "/portal",
     targetSelector: "#tutorial-portal-schedule",
-    title: "Live Gym Operating Hours",
-    targetTag: "Live Open/Closed Status",
-    category: "Landing & Portal",
-    whatIsIt: "Shows live operating hours, holiday closures, and real-time open/closed gym status.",
-    whyAdded: "Prevents unnecessary trips by informing members when the gym is open or closed for maintenance/holidays."
+    title: "Gym Operating Hours",
+    targetTag: "Live Schedule",
+    category: "Member Portal",
+    whatIsIt: "This shows gym opening and closing times for each day.",
+    whyAdded: "So members know if the gym is open before going."
   },
 
   // --- ADMIN DASHBOARD STEPS ---
@@ -104,21 +63,21 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     id: "dashboard-metrics",
     route: "/dashboard",
     targetSelector: "#tutorial-metrics-grid",
-    title: "Gym Health & Metrics",
-    targetTag: "Dashboard Metrics Cards",
+    title: "Gym Numbers & Income",
+    targetTag: "Overview Stats",
     category: "Admin Core",
-    whatIsIt: "At-a-glance stat cards displaying total active members, expiring counts, monthly revenue, and active alerts.",
-    whyAdded: "Gives gym management an instant financial and operational overview every morning without digging through reports."
+    whatIsIt: "This shows total members, expiring passes, and monthly gym income.",
+    whyAdded: "Helps gym owners see how well the gym is doing every day."
   },
   {
     id: "dashboard-actions",
     route: "/dashboard",
     targetSelector: "#tutorial-quick-actions",
-    title: "Quick Operation Hub",
-    targetTag: "Quick Action Shortcuts",
+    title: "Quick Buttons",
+    targetTag: "Action Shortcuts",
     category: "Admin Core",
-    whatIsIt: "One-click shortcut buttons to register members, modify plans, or run AI retention.",
-    whyAdded: "Accelerates daily front-desk operations so staff can register new walk-in members in under 10 seconds."
+    whatIsIt: "Shortcuts to quickly add new members or open pages.",
+    whyAdded: "Helps front desk staff register new walk-in members in seconds."
   },
 
   // --- MEMBER MANAGEMENT STEPS ---
@@ -126,21 +85,21 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     id: "members-list",
     route: "/members",
     targetSelector: "#tutorial-members-table",
-    title: "Member Directory & Roster",
-    targetTag: "Member Records & Badges",
+    title: "Member Roster",
+    targetTag: "All Members List",
     category: "Admin Core",
-    whatIsIt: "Central database of all gym members including permanent student member Virgilio Flor E. Guaño.",
-    whyAdded: "Tracks member phone numbers, assigned subscription plans, custom discount badges, and warning histories in real time."
+    whatIsIt: "List of all registered gym members, like student member Virgilio Flor E. Guaño.",
+    whyAdded: "Keeps all member phone numbers, plans, and badges saved in one place."
   },
   {
     id: "members-actions",
     route: "/members",
     targetSelector: "#tutorial-members-actions",
-    title: "Member Control & Compliance",
-    targetTag: "Edit, Warn & Ban Tools",
+    title: "Member Action Buttons",
+    targetTag: "Edit, Warn & Ban",
     category: "Admin Core",
-    whatIsIt: "Tools to update subscriptions, issue warning strikes, or ban policy violators.",
-    whyAdded: "Maintains gym discipline and accurate billing by allowing staff to record rule violations or extend plans easily."
+    whatIsIt: "Buttons to edit member info, send warning strikes, or ban users.",
+    whyAdded: "Helps staff fix member details or handle rule violations."
   },
 
   // --- SUBSCRIPTIONS STEPS ---
@@ -148,21 +107,21 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     id: "subscriptions-plans",
     route: "/subscriptions",
     targetSelector: "#tutorial-plans-grid",
-    title: "Subscription Tier Builder",
-    targetTag: "1 Month (1200 PHP) Plan",
+    title: "Pass Prices & Plans",
+    targetTag: "1 Month (1200 PHP)",
     category: "Operations",
-    whatIsIt: "Management dashboard for subscription duration and pricing (e.g., 1 Month @ 1200 Pesos).",
-    whyAdded: "Allows owners to create custom pricing tiers, promotional packages, and regular monthly/daily passes."
+    whatIsIt: "Sets pass prices and duration, like 1 Month for 1200 Pesos.",
+    whyAdded: "Allows gym owners to set custom plan costs and validity days."
   },
   {
     id: "subscriptions-badges",
     route: "/subscriptions",
     targetSelector: "#tutorial-badges-grid",
-    title: "Custom Badge & Discount Engine",
-    targetTag: "Custom Badge Discounts",
+    title: "Discount Tags",
+    targetTag: "Discount Badges",
     category: "Operations",
-    whatIsIt: "Create reusable badges (e.g., Student 50%, Senior, VIP) linked to automatic discounts.",
-    whyAdded: "Eliminates manual pricing math for desk staff by auto-calculating discounted fees upon member enrollment."
+    whatIsIt: "Create discount tags like Student (50% Off) or VIP.",
+    whyAdded: "Automatically calculates lower prices when adding students."
   },
 
   // --- RETENTION STEPS ---
@@ -170,11 +129,11 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     id: "retention-hub",
     route: "/retention",
     targetSelector: "#tutorial-retention-hub",
-    title: "AI Member Retention Engine",
-    targetTag: "Smart Renewal Reminders",
+    title: "Text Message Reminders",
+    targetTag: "SMS Renewal Alerts",
     category: "Operations",
-    whatIsIt: "Automated AI tool that detects expiring members (0-3 days) and lapsed members (-1 to -3 days).",
-    whyAdded: "Prevents membership drop-offs by generating targeted SMS/WhatsApp renewal messages to keep gym revenue steady."
+    whatIsIt: "Finds members whose passes expire in 0-3 days.",
+    whyAdded: "Sends text messages so members renew their passes on time."
   },
 
   // --- SETTINGS STEPS ---
@@ -182,11 +141,11 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     id: "settings-branding",
     route: "/settings",
     targetSelector: "#tutorial-settings-branding",
-    title: "White-Label Gym Customization",
-    targetTag: "Logo & Theme Settings",
+    title: "Gym Name & Logo",
+    targetTag: "Brand Settings",
     category: "Operations",
-    whatIsIt: "Upload custom gym logos, update gym name, and set brand colors.",
-    whyAdded: "Ensures the system matches your gym's physical brand identity seamlessly."
+    whatIsIt: "Change your gym logo image and gym name here.",
+    whyAdded: "Customizes the web app with your gym's official logo and name."
   }
 ];
 
@@ -200,7 +159,7 @@ export function AppTutorial() {
 
   const currentStep = TUTORIAL_STEPS[currentStepIdx] || TUTORIAL_STEPS[0];
 
-  // Global listener to trigger tutorial from anywhere
+  // Global listener to trigger tutorial
   useEffect(() => {
     const handleStartEvent = (e: CustomEvent) => {
       const stepId = e.detail?.stepId;
@@ -219,17 +178,15 @@ export function AppTutorial() {
     };
   }, []);
 
-  // Update position & navigate if route changes
+  // Update spotlight & element bounds
   const updateSpotlightPosition = useCallback(() => {
     if (!isOpen || !currentStep) return;
 
-    // Check if we need to navigate first
     if (pathname !== currentStep.route) {
       router.push(currentStep.route);
       return;
     }
 
-    // Locate element on DOM
     const el = document.querySelector(currentStep.targetSelector);
     if (el) {
       const rect = el.getBoundingClientRect();
@@ -242,7 +199,7 @@ export function AppTutorial() {
 
   useEffect(() => {
     updateSpotlightPosition();
-    const timer = setTimeout(updateSpotlightPosition, 300);
+    const timer = setTimeout(updateSpotlightPosition, 250);
     window.addEventListener("resize", updateSpotlightPosition);
     window.addEventListener("scroll", updateSpotlightPosition);
 
@@ -273,127 +230,184 @@ export function AppTutorial() {
     setIsOpen(false);
   };
 
-  return (
-    <div className="fixed inset-0 z-[99999] pointer-events-auto overflow-hidden">
-      {/* Dark Blurred Backdrop */}
-      <div className="absolute inset-0 bg-black/75 backdrop-blur-md transition-all duration-300" />
+  // Compute Bubble Position & Arrow Pointer Offset
+  const viewportWidth = typeof window !== "undefined" ? window.innerWidth : 1000;
+  const viewportHeight = typeof window !== "undefined" ? window.innerHeight : 800;
 
-      {/* Target Element Spotlight Highlight */}
+  const bubbleWidth = Math.min(420, viewportWidth - 32);
+  let placement: "bottom" | "top" | "center" = "center";
+  let bubbleStyle: React.CSSProperties = {};
+  let arrowLeft = bubbleWidth / 2;
+
+  if (targetRect) {
+    const spaceBelow = viewportHeight - targetRect.bottom;
+    const spaceAbove = targetRect.top;
+    const targetCenterX = targetRect.left + targetRect.width / 2;
+
+    if (spaceBelow >= 260 || spaceBelow > spaceAbove) {
+      placement = "bottom";
+      const topPos = Math.min(viewportHeight - 320, targetRect.bottom + 16);
+      let leftPos = targetCenterX - bubbleWidth / 2;
+      leftPos = Math.max(16, Math.min(viewportWidth - bubbleWidth - 16, leftPos));
+
+      arrowLeft = Math.max(24, Math.min(bubbleWidth - 24, targetCenterX - leftPos));
+      bubbleStyle = {
+        top: `${topPos}px`,
+        left: `${leftPos}px`,
+        width: `${bubbleWidth}px`
+      };
+    } else if (spaceAbove >= 260) {
+      placement = "top";
+      const bottomPos = Math.min(viewportHeight - 16, viewportHeight - targetRect.top + 16);
+      let leftPos = targetCenterX - bubbleWidth / 2;
+      leftPos = Math.max(16, Math.min(viewportWidth - bubbleWidth - 16, leftPos));
+
+      arrowLeft = Math.max(24, Math.min(bubbleWidth - 24, targetCenterX - leftPos));
+      bubbleStyle = {
+        bottom: `${bottomPos}px`,
+        left: `${leftPos}px`,
+        width: `${bubbleWidth}px`
+      };
+    } else {
+      placement = "center";
+      bubbleStyle = {
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        width: `${bubbleWidth}px`
+      };
+    }
+  } else {
+    placement = "center";
+    bubbleStyle = {
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      width: `${bubbleWidth}px`
+    };
+  }
+
+  return (
+    <div className="fixed inset-0 z-[99999] pointer-events-auto overflow-hidden select-none">
+      {/* Dark Blurred Backdrop */}
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-md transition-all duration-300" />
+
+      {/* Target Element Glowing Pulse Box */}
       {targetRect && (
         <div
-          className="absolute border-2 border-blue-500/90 rounded-2xl shadow-[0_0_50px_rgba(59,130,246,0.75)] pointer-events-none transition-all duration-300 ease-out bg-blue-500/10 animate-pulse"
+          className="absolute border-2 border-amber-400 sm:border-blue-400 rounded-2xl shadow-[0_0_40px_rgba(59,130,246,0.9)] pointer-events-none transition-all duration-300 ease-out bg-blue-500/10 animate-pulse"
           style={{
-            top: `${Math.max(10, targetRect.top - 8)}px`,
-            left: `${Math.max(10, targetRect.left - 8)}px`,
-            width: `${targetRect.width + 16}px`,
-            height: `${targetRect.height + 16}px`,
+            top: `${Math.max(8, targetRect.top - 6)}px`,
+            left: `${Math.max(8, targetRect.left - 6)}px`,
+            width: `${targetRect.width + 12}px`,
+            height: `${targetRect.height + 12}px`
           }}
         >
-          <div className="absolute -top-3 left-4 px-2.5 py-0.5 rounded-full bg-blue-600 text-[10px] font-black tracking-widest text-white uppercase shadow-md flex items-center gap-1">
-            <Sparkles className="w-3 h-3 text-yellow-300 animate-spin" /> Highlighted Feature
+          <div className="absolute -top-3 left-4 px-2.5 py-0.5 rounded-full bg-blue-600 text-[10px] font-black tracking-wider text-white uppercase shadow-md flex items-center gap-1">
+            <Sparkles className="w-3 h-3 text-yellow-300 animate-spin" /> Target Feature
           </div>
         </div>
       )}
 
-      {/* Tutorial Explanation Card Box */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4 sm:p-6">
-        <div className="w-full max-w-xl bg-zinc-900/95 border-2 border-zinc-700/80 rounded-2xl shadow-2xl shadow-black/90 p-6 sm:p-8 backdrop-blur-xl relative space-y-6 text-zinc-100 animate-in fade-in zoom-in-95 duration-200">
-          
-          {/* Top Header & Progress */}
-          <div className="flex items-start justify-between border-b border-zinc-800 pb-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-1 rounded-md bg-blue-950/80 border border-blue-700/60 text-blue-300 text-xs font-black uppercase tracking-wider flex items-center gap-1">
-                  <Compass className="w-3.5 h-3.5 text-blue-400" />
-                  {currentStep.category}
-                </span>
-                <span className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 text-xs font-extrabold">
-                  {currentStep.targetTag}
-                </span>
-              </div>
-              <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2 pt-1">
-                {currentStep.title}
-              </h2>
+      {/* Chat Bubble Box */}
+      <div
+        className="fixed z-20 bg-zinc-900/98 border-2 border-blue-500/80 rounded-2xl shadow-2xl shadow-black/95 p-5 text-zinc-100 backdrop-blur-xl space-y-4 animate-in fade-in zoom-in-95 duration-200"
+        style={bubbleStyle}
+      >
+        {/* Chat Bubble Arrow Pointer */}
+        {placement === "bottom" && (
+          <div
+            className="absolute -top-3 w-0 h-0 border-l-8 border-l-transparent border-r-8 border-r-transparent border-b-8 border-b-blue-500"
+            style={{ left: `${arrowLeft - 8}px` }}
+          />
+        )}
+        {placement === "top" && (
+          <div
+            className="absolute -bottom-3 w-0 h-0 border-l-8 border-l-transparent border-r-8 border-r-transparent border-t-8 border-t-blue-500"
+            style={{ left: `${arrowLeft - 8}px` }}
+          />
+        )}
+
+        {/* Bubble Header */}
+        <div className="flex items-start justify-between border-b border-zinc-800 pb-3">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-0.5 rounded-md bg-blue-950 border border-blue-700/80 text-blue-300 text-[11px] font-black uppercase flex items-center gap-1">
+                <Compass className="w-3 h-3 text-blue-400" />
+                {currentStep.category}
+              </span>
+              <span className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 text-[11px] font-bold">
+                {currentStep.targetTag}
+              </span>
             </div>
+            <h2 className="text-lg font-black text-white tracking-tight flex items-center gap-1.5 pt-0.5">
+              <MessageSquare className="w-4 h-4 text-amber-400 shrink-0" />
+              {currentStep.title}
+            </h2>
+          </div>
+
+          <button
+            onClick={handleSkip}
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition"
+            title="Close Tutorial"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Super Simple Explanations */}
+        <div className="space-y-2.5">
+          {/* What is this? */}
+          <div className="p-3 rounded-xl bg-zinc-950/90 border border-zinc-800 space-y-0.5">
+            <div className="text-[11px] font-black uppercase tracking-wider text-blue-400 flex items-center gap-1">
+              <Zap className="w-3.5 h-3.5 text-blue-400" /> What is this?
+            </div>
+            <p className="text-xs font-semibold text-zinc-200 leading-snug">
+              {currentStep.whatIsIt}
+            </p>
+          </div>
+
+          {/* Why was it added? */}
+          <div className="p-3 rounded-xl bg-emerald-950/30 border border-emerald-900/50 space-y-0.5">
+            <div className="text-[11px] font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Why is this added?
+            </div>
+            <p className="text-xs font-semibold text-zinc-300 leading-snug">
+              {currentStep.whyAdded}
+            </p>
+          </div>
+        </div>
+
+        {/* Footer Navigation */}
+        <div className="flex items-center justify-between pt-2 border-t border-zinc-800">
+          <div className="text-[11px] font-extrabold text-zinc-400">
+            Step <span className="text-blue-400">{currentStepIdx + 1}</span> / {TUTORIAL_STEPS.length}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handlePrev}
+              disabled={currentStepIdx === 0}
+              className="px-3 py-1.5 rounded-lg text-xs font-extrabold border border-zinc-700 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed text-zinc-200 transition flex items-center gap-1"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" /> Back
+            </button>
 
             <button
-              onClick={handleSkip}
-              className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800 transition border border-transparent hover:border-zinc-700"
-              title="Close Tutorial"
+              onClick={handleNext}
+              className="px-4 py-1.5 rounded-lg text-xs font-extrabold bg-blue-600 hover:bg-blue-500 text-white transition flex items-center gap-1 shadow-md shadow-blue-600/30"
             >
-              <X className="w-5 h-5" />
+              {currentStepIdx === TUTORIAL_STEPS.length - 1 ? (
+                <>
+                  <CheckCircle2 className="w-3.5 h-3.5" /> Done
+                </>
+              ) : (
+                <>
+                  Next <ChevronRight className="w-3.5 h-3.5" />
+                </>
+              )}
             </button>
           </div>
-
-          {/* Simple Direct Explanation Cards */}
-          <div className="space-y-4">
-            {/* What is it */}
-            <div className="p-4 rounded-xl bg-zinc-950/80 border border-zinc-800 space-y-1">
-              <div className="text-xs font-black uppercase tracking-wider text-blue-400 flex items-center gap-1.5">
-                <Zap className="w-4 h-4 text-blue-400" /> What is this?
-              </div>
-              <p className="text-sm font-medium text-zinc-200 leading-relaxed">
-                {currentStep.whatIsIt}
-              </p>
-            </div>
-
-            {/* Why it was added */}
-            <div className="p-4 rounded-xl bg-emerald-950/20 border border-emerald-900/40 space-y-1">
-              <div className="text-xs font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" /> Why is this added as a feature?
-              </div>
-              <p className="text-sm font-medium text-zinc-300 leading-relaxed">
-                {currentStep.whyAdded}
-              </p>
-            </div>
-          </div>
-
-          {/* Bottom Bar: Steps Indicator & Action Navigation */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-zinc-800">
-            {/* Step Counter */}
-            <div className="flex items-center gap-3">
-              <div className="text-xs font-bold text-zinc-400">
-                Step <span className="text-blue-400 font-extrabold">{currentStepIdx + 1}</span> of{" "}
-                <span className="text-zinc-200">{TUTORIAL_STEPS.length}</span>
-              </div>
-              {/* Progress Bar */}
-              <div className="w-24 h-2 bg-zinc-800 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-blue-500 transition-all duration-300 rounded-full"
-                  style={{
-                    width: `${((currentStepIdx + 1) / TUTORIAL_STEPS.length) * 100}%`,
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Buttons */}
-            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-              <button
-                onClick={handlePrev}
-                disabled={currentStepIdx === 0}
-                className="px-3.5 py-2 rounded-xl text-xs font-bold border border-zinc-700 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed text-zinc-200 transition flex items-center gap-1"
-              >
-                <ChevronLeft className="w-4 h-4" /> Back
-              </button>
-
-              <button
-                onClick={handleNext}
-                className="px-5 py-2 rounded-xl text-xs font-extrabold bg-blue-600 hover:bg-blue-500 text-white transition flex items-center gap-1.5 shadow-lg shadow-blue-600/30"
-              >
-                {currentStepIdx === TUTORIAL_STEPS.length - 1 ? (
-                  <>
-                    <CheckCircle2 className="w-4 h-4" /> Finish Tour
-                  </>
-                ) : (
-                  <>
-                    Next Step <ChevronRight className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-
         </div>
       </div>
     </div>

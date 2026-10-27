@@ -2,12 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Dumbbell, Users, Lock, ChevronRight, Sparkles, KeyRound, ShieldAlert, ShieldCheck, HelpCircle } from 'lucide-react';
+import { Dumbbell, Users, Lock, ChevronRight, Sparkles, KeyRound, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { loginAdmin } from '@/app/actions/auth';
 import { getGymSettings } from '@/app/actions/settings';
 import GeometricBackground from '@/components/GeometricBackground';
 import { DEFAULT_GYM_NAME, DEFAULT_LOGO_URL } from '@/lib/config';
-import { startAppTutorial } from '@/components/AppTutorial';
 
 export default function LandingGateway() {
   const router = useRouter();
@@ -126,7 +125,7 @@ export default function LandingGateway() {
       {/* Main Card - Soft Off-White Aesthetic Container */}
       <div className="relative w-full max-w-sm sm:max-w-md mx-auto z-10 !bg-[#f0f2f5] rounded-xl !border-2 !border-slate-300/90 shadow-2xl shadow-slate-950/30 p-5 sm:p-7 space-y-5">
         {/* Card Header Branding */}
-        <div id="tutorial-landing-header" className="text-center space-y-3 p-2 rounded-xl transition">
+        <div className="text-center space-y-3 p-2 rounded-xl transition">
           <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 bg-slate-900 rounded-2xl border-2 border-slate-800 text-red-500 flex items-center justify-center mx-auto shadow-xl overflow-hidden shrink-0">
             {logoUrl ? (
               <img src={logoUrl} alt={gymName} className="w-full h-full object-contain p-1.5" />
@@ -153,7 +152,6 @@ export default function LandingGateway() {
         <div className="space-y-3">
           {/* Member Access Button */}
           <button
-            id="tutorial-member-lookup"
             type="button"
             onClick={() => router.push('/portal')}
             className="w-full !bg-white hover:!bg-slate-50 p-3.5 sm:p-4 rounded-lg !border-2 !border-slate-300 hover:!border-red-600 shadow-sm active:scale-[0.99] transition-all flex items-center justify-between group text-left cursor-pointer"
@@ -177,7 +175,6 @@ export default function LandingGateway() {
           {/* Admin / Staff Access Button or Form */}
           {!showAdminLogin ? (
             <button
-              id="tutorial-admin-btn"
               type="button"
               onClick={() => setShowAdminLogin(true)}
               className="w-full !bg-white hover:!bg-slate-50 p-3.5 sm:p-4 rounded-lg !border-2 !border-slate-300 hover:!border-amber-600 shadow-sm active:scale-[0.99] transition-all flex items-center justify-between group text-left cursor-pointer"
@@ -256,16 +253,6 @@ export default function LandingGateway() {
             </form>
           )}
         </div>
-
-        {/* Interactive App Tutorial Trigger Button */}
-        <button
-          type="button"
-          onClick={() => startAppTutorial()}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs py-3 px-4 rounded-lg shadow-md shadow-blue-600/30 flex items-center justify-center gap-2 transition cursor-pointer active:scale-[0.98]"
-        >
-          <HelpCircle className="w-4 h-4 text-white" />
-          <span>Start Interactive Tutorial Tour</span>
-        </button>
 
         {/* Card Footer Detail */}
         <div className="pt-2 border-t border-slate-200/80 flex items-center justify-between text-[11px] font-semibold text-slate-500">
