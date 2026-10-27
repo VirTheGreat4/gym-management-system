@@ -2,10 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Activity, UserPlus, Palette, Dumbbell, Sparkles, HelpCircle } from "lucide-react";
+import { Activity, UserPlus, Palette, Dumbbell, Sparkles } from "lucide-react";
 import { getGymSettings } from "@/app/actions/settings";
 import { DEFAULT_GYM_NAME, DEFAULT_LOGO_URL } from "@/lib/config";
-import { startAppTutorial } from "@/components/AppTutorial";
 
 interface DashboardHeaderProps {
   initialGymName?: string;
@@ -162,15 +161,6 @@ export default function DashboardHeader({
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0 pt-2 md:pt-0">
-          <button
-            type="button"
-            onClick={() => startAppTutorial()}
-            className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs sm:text-sm shadow-md shadow-blue-600/30 border border-blue-500 transition-all cursor-pointer active:scale-95"
-          >
-            <HelpCircle className="w-4 h-4 text-white" />
-            <span>App Tutorial</span>
-          </button>
-
           <Link
             href="/settings"
             className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-200 font-extrabold text-xs sm:text-sm border-2 border-zinc-700 transition-all cursor-pointer shadow-sm active:scale-95"

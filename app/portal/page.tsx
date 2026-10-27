@@ -324,19 +324,21 @@ export default function MemberPortalPage() {
     <div className="space-y-6 sm:space-y-8 max-w-4xl mx-auto" suppressHydrationWarning>
       <div className="flex items-center justify-between gap-4">
         <BackButton />
-        <button
-          type="button"
-          onClick={() => startAppTutorial('portal-card')}
-          className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs shadow-md shadow-blue-600/30 flex items-center gap-2 transition cursor-pointer"
-        >
-          <HelpCircle className="w-4 h-4 text-white" />
-          <span>Interactive Tutorial</span>
-        </button>
+        {activeMember && (
+          <button
+            type="button"
+            onClick={() => startAppTutorial('portal-card')}
+            className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs shadow-md shadow-blue-600/30 flex items-center gap-2 transition cursor-pointer"
+          >
+            <HelpCircle className="w-4 h-4 text-white" />
+            <span>Interactive Tutorial</span>
+          </button>
+        )}
       </div>
 
       {/* VIEW A: PASSWORDLESS LOOKUP (When Not Logged In) */}
       {!activeMember ? (
-        <div id="tutorial-portal-card" className="bg-[#121318] p-6 sm:p-9 rounded-xl border-2 border-zinc-700/80 shadow-2xl space-y-6">
+        <div className="bg-[#121318] p-6 sm:p-9 rounded-xl border-2 border-zinc-700/80 shadow-2xl space-y-6">
           {/* Header Branding */}
           <div className="text-center space-y-3">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-lg bg-zinc-950 border-2 border-zinc-700 shadow-md overflow-hidden mx-auto">
@@ -447,7 +449,7 @@ export default function MemberPortalPage() {
           </div>
 
           {/* My Membership Card */}
-          <div className="bg-[#121318] p-5 sm:p-7 rounded-xl border-2 border-zinc-700/80 shadow-soft space-y-6">
+          <div id="tutorial-portal-card" className="bg-[#121318] p-5 sm:p-7 rounded-xl border-2 border-zinc-700/80 shadow-soft space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-800">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-zinc-950 border-2 border-zinc-700 flex items-center justify-center font-black text-xl text-zinc-200 shadow-xs">
