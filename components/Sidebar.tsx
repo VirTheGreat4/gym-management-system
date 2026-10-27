@@ -39,7 +39,7 @@ export default function Sidebar() {
         const saved = localStorage.getItem("gym_settings_data");
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (parsed.logo_url && parsed.logo_url !== "/gym-logo.svg" && parsed.logo_url !== "/logo.svg") {
+          if (parsed.logo_url) {
             return parsed.logo_url;
           }
         }
@@ -57,7 +57,7 @@ export default function Sidebar() {
           if (parsed.name && parsed.name !== "JLAB Fitness") setGymName(parsed.name);
           else setGymName(DEFAULT_GYM_NAME);
 
-          if (parsed.logo_url && parsed.logo_url !== "/gym-logo.svg" && parsed.logo_url !== "/logo.svg") {
+          if (parsed.logo_url) {
             setLogoUrl(parsed.logo_url);
           } else {
             setLogoUrl(DEFAULT_LOGO_URL);
@@ -80,7 +80,7 @@ export default function Sidebar() {
           if (data.name && data.name !== "JLAB Fitness") setGymName(data.name);
           else setGymName(DEFAULT_GYM_NAME);
 
-          if (data.logo_url && data.logo_url !== "/gym-logo.svg" && data.logo_url !== "/logo.svg") {
+          if (data.logo_url) {
             setLogoUrl(data.logo_url);
           } else {
             setLogoUrl(DEFAULT_LOGO_URL);
@@ -96,7 +96,7 @@ export default function Sidebar() {
         if (e.detail.name && e.detail.name !== "JLAB Fitness") setGymName(e.detail.name);
         else if (e.detail.name) setGymName(DEFAULT_GYM_NAME);
 
-        if (e.detail.logo_url && e.detail.logo_url !== "/gym-logo.svg" && e.detail.logo_url !== "/logo.svg") {
+        if (e.detail.logo_url) {
           setLogoUrl(e.detail.logo_url);
         } else if (e.detail.logo_url !== undefined) {
           setLogoUrl(DEFAULT_LOGO_URL);
