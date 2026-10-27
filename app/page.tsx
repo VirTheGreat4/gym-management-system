@@ -20,7 +20,7 @@ export default function LandingGateway() {
         const saved = localStorage.getItem("gym_settings_data");
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (parsed.name) return parsed.name;
+          if (parsed.name && parsed.name !== "JLAB Fitness") return parsed.name;
         }
       } catch (e) {}
     }
@@ -32,7 +32,9 @@ export default function LandingGateway() {
         const saved = localStorage.getItem("gym_settings_data");
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (parsed.logo_url !== undefined) return parsed.logo_url;
+          if (parsed.logo_url && parsed.logo_url !== "/gym-logo.svg" && parsed.logo_url !== "/logo.svg") {
+            return parsed.logo_url;
+          }
         }
       } catch (e) {}
     }
@@ -47,8 +49,14 @@ export default function LandingGateway() {
         const saved = localStorage.getItem("gym_settings_data");
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (parsed.name) setGymName(parsed.name);
-          if (parsed.logo_url !== undefined) setLogoUrl(parsed.logo_url);
+          if (parsed.name && parsed.name !== "JLAB Fitness") setGymName(parsed.name);
+          else setGymName(DEFAULT_GYM_NAME);
+
+          if (parsed.logo_url && parsed.logo_url !== "/gym-logo.svg" && parsed.logo_url !== "/logo.svg") {
+            setLogoUrl(parsed.logo_url);
+          } else {
+            setLogoUrl(DEFAULT_LOGO_URL);
+          }
         }
       } catch (e) {
         console.error("Error reading gym_settings_data in LandingGateway", e);
@@ -62,8 +70,14 @@ export default function LandingGateway() {
       if (data) {
         const saved = localStorage.getItem("gym_settings_data");
         if (!saved) {
-          if (data.name) setGymName(data.name);
-          if (data.logo_url) setLogoUrl(data.logo_url);
+          if (data.name && data.name !== "JLAB Fitness") setGymName(data.name);
+          else setGymName(DEFAULT_GYM_NAME);
+
+          if (data.logo_url && data.logo_url !== "/gym-logo.svg" && data.logo_url !== "/logo.svg") {
+            setLogoUrl(data.logo_url);
+          } else {
+            setLogoUrl(DEFAULT_LOGO_URL);
+          }
         }
       }
     }
@@ -71,8 +85,14 @@ export default function LandingGateway() {
 
     const handleSettingsUpdate = (e: any) => {
       if (e.detail) {
-        if (e.detail.name) setGymName(e.detail.name);
-        if (e.detail.logo_url !== undefined) setLogoUrl(e.detail.logo_url);
+        if (e.detail.name && e.detail.name !== "JLAB Fitness") setGymName(e.detail.name);
+        else if (e.detail.name) setGymName(DEFAULT_GYM_NAME);
+
+        if (e.detail.logo_url && e.detail.logo_url !== "/gym-logo.svg" && e.detail.logo_url !== "/logo.svg") {
+          setLogoUrl(e.detail.logo_url);
+        } else if (e.detail.logo_url !== undefined) {
+          setLogoUrl(DEFAULT_LOGO_URL);
+        }
       } else {
         loadLocalSettings();
       }

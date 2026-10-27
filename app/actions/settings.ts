@@ -28,6 +28,13 @@ export async function getGymSettings(): Promise<{ data: GymSettings | null; erro
       return { data: defaultSettings, error: null };
     }
 
+    if (!data.logo_url || data.logo_url === '/gym-logo.svg' || data.logo_url === '/logo.svg') {
+      data.logo_url = DEFAULT_LOGO_URL;
+    }
+    if (!data.name || data.name === 'JLAB Fitness') {
+      data.name = DEFAULT_GYM_NAME;
+    }
+
     return { data, error: null };
   } catch (err: any) {
     return { data: null, error: err.message };

@@ -71,7 +71,7 @@ export default function MemberPortalPage() {
         const savedSettings = localStorage.getItem("gym_settings_data");
         if (savedSettings) {
           const parsed = JSON.parse(savedSettings);
-          if (parsed.name) return parsed.name;
+          if (parsed.name && parsed.name !== "JLAB Fitness") return parsed.name;
         }
       } catch (e) {}
     }
@@ -83,7 +83,9 @@ export default function MemberPortalPage() {
         const savedSettings = localStorage.getItem("gym_settings_data");
         if (savedSettings) {
           const parsed = JSON.parse(savedSettings);
-          if (parsed.logo_url !== undefined) return parsed.logo_url;
+          if (parsed.logo_url && parsed.logo_url !== "/gym-logo.svg" && parsed.logo_url !== "/logo.svg") {
+            return parsed.logo_url;
+          }
         }
       } catch (e) {}
     }
@@ -109,8 +111,14 @@ export default function MemberPortalPage() {
         const savedSettings = localStorage.getItem("gym_settings_data");
         if (savedSettings) {
           const parsed = JSON.parse(savedSettings);
-          if (parsed.name) setGymName(parsed.name);
-          if (parsed.logo_url !== undefined) setLogoUrl(parsed.logo_url);
+          if (parsed.name && parsed.name !== "JLAB Fitness") setGymName(parsed.name);
+          else setGymName(DEFAULT_GYM_NAME);
+
+          if (parsed.logo_url && parsed.logo_url !== "/gym-logo.svg" && parsed.logo_url !== "/logo.svg") {
+            setLogoUrl(parsed.logo_url);
+          } else {
+            setLogoUrl(DEFAULT_LOGO_URL);
+          }
           if (parsed.schedule?.regular_hours?.length > 0) setSchedule(parsed.schedule);
         } else {
           const savedSchedule = localStorage.getItem("gym_schedule_data");
@@ -136,8 +144,14 @@ export default function MemberPortalPage() {
       if (settingsRes.data) {
         const savedSettings = localStorage.getItem("gym_settings_data");
         if (!savedSettings) {
-          if (settingsRes.data.name) setGymName(settingsRes.data.name);
-          if (settingsRes.data.logo_url) setLogoUrl(settingsRes.data.logo_url);
+          if (settingsRes.data.name && settingsRes.data.name !== "JLAB Fitness") setGymName(settingsRes.data.name);
+          else setGymName(DEFAULT_GYM_NAME);
+
+          if (settingsRes.data.logo_url && settingsRes.data.logo_url !== "/gym-logo.svg" && settingsRes.data.logo_url !== "/logo.svg") {
+            setLogoUrl(settingsRes.data.logo_url);
+          } else {
+            setLogoUrl(DEFAULT_LOGO_URL);
+          }
           if (settingsRes.data.schedule) setSchedule(settingsRes.data.schedule);
         }
       }
@@ -186,8 +200,14 @@ export default function MemberPortalPage() {
 
     const handleSettingsUpdate = (e: any) => {
       if (e.detail) {
-        if (e.detail.name) setGymName(e.detail.name);
-        if (e.detail.logo_url !== undefined) setLogoUrl(e.detail.logo_url);
+        if (e.detail.name && e.detail.name !== "JLAB Fitness") setGymName(e.detail.name);
+        else if (e.detail.name) setGymName(DEFAULT_GYM_NAME);
+
+        if (e.detail.logo_url && e.detail.logo_url !== "/gym-logo.svg" && e.detail.logo_url !== "/logo.svg") {
+          setLogoUrl(e.detail.logo_url);
+        } else if (e.detail.logo_url !== undefined) {
+          setLogoUrl(DEFAULT_LOGO_URL);
+        }
         if (e.detail.schedule) setSchedule(e.detail.schedule);
       } else {
         loadLocalSettings();

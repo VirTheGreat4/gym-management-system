@@ -3,10 +3,19 @@ import { cookies } from 'next/headers';
 
 export async function createClient() {
   const cookieStore = await cookies();
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  const supabaseUrl = url && key ? url : 'https://placeholder.supabase.co';
+  const supabaseKey = url && key ? key : 'placeholder-anon-key';
+
+  if (!url || !key) {
+    console.warn("Supabase credentials are unconfigured. Using placeholder server client.");
+  }
 
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseKey,
     {
       cookies: {
         get(name: string) {

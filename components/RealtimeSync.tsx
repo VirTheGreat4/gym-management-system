@@ -8,6 +8,13 @@ export default function RealtimeSync() {
   const router = useRouter();
 
   useEffect(() => {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!url || !key || url.includes('placeholder') || key.includes('placeholder')) {
+      return;
+    }
+
     const supabase = createClient();
     
     // Subscribe to all changes on all tables in the public schema
@@ -30,3 +37,4 @@ export default function RealtimeSync() {
 
   return null; // Headless component, renders nothing
 }
+
