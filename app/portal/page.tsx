@@ -17,7 +17,9 @@ import {
   AlertCircle,
   CheckCircle2,
   Tag,
+  HelpCircle,
 } from "lucide-react";
+import { startAppTutorial } from "@/components/AppTutorial";
 import { getMembers } from "@/app/actions/members";
 import { getGymSettings } from "@/app/actions/settings";
 import { getCustomBadges } from "@/app/actions/badges";
@@ -83,7 +85,7 @@ export default function MemberPortalPage() {
         const savedSettings = localStorage.getItem("gym_settings_data");
         if (savedSettings) {
           const parsed = JSON.parse(savedSettings);
-          if (parsed.logo_url && parsed.logo_url !== "/gym-logo.svg" && parsed.logo_url !== "/logo.svg") {
+          if (parsed.logo_url) {
             return parsed.logo_url;
           }
         }
@@ -114,7 +116,7 @@ export default function MemberPortalPage() {
           if (parsed.name && parsed.name !== "JLAB Fitness") setGymName(parsed.name);
           else setGymName(DEFAULT_GYM_NAME);
 
-          if (parsed.logo_url && parsed.logo_url !== "/gym-logo.svg" && parsed.logo_url !== "/logo.svg") {
+          if (parsed.logo_url) {
             setLogoUrl(parsed.logo_url);
           } else {
             setLogoUrl(DEFAULT_LOGO_URL);
@@ -147,7 +149,7 @@ export default function MemberPortalPage() {
           if (settingsRes.data.name && settingsRes.data.name !== "JLAB Fitness") setGymName(settingsRes.data.name);
           else setGymName(DEFAULT_GYM_NAME);
 
-          if (settingsRes.data.logo_url && settingsRes.data.logo_url !== "/gym-logo.svg" && settingsRes.data.logo_url !== "/logo.svg") {
+          if (settingsRes.data.logo_url) {
             setLogoUrl(settingsRes.data.logo_url);
           } else {
             setLogoUrl(DEFAULT_LOGO_URL);
@@ -203,7 +205,7 @@ export default function MemberPortalPage() {
         if (e.detail.name && e.detail.name !== "JLAB Fitness") setGymName(e.detail.name);
         else if (e.detail.name) setGymName(DEFAULT_GYM_NAME);
 
-        if (e.detail.logo_url && e.detail.logo_url !== "/gym-logo.svg" && e.detail.logo_url !== "/logo.svg") {
+        if (e.detail.logo_url) {
           setLogoUrl(e.detail.logo_url);
         } else if (e.detail.logo_url !== undefined) {
           setLogoUrl(DEFAULT_LOGO_URL);
@@ -320,11 +322,21 @@ export default function MemberPortalPage() {
 
   return (
     <div className="space-y-6 sm:space-y-8 max-w-4xl mx-auto" suppressHydrationWarning>
-      <BackButton />
+      <div className="flex items-center justify-between gap-4">
+        <BackButton />
+        <button
+          type="button"
+          onClick={() => startAppTutorial('portal-card')}
+          className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs shadow-md shadow-blue-600/30 flex items-center gap-2 transition cursor-pointer"
+        >
+          <HelpCircle className="w-4 h-4 text-white" />
+          <span>Interactive Tutorial</span>
+        </button>
+      </div>
 
       {/* VIEW A: PASSWORDLESS LOOKUP (When Not Logged In) */}
       {!activeMember ? (
-        <div className="bg-[#121318] p-6 sm:p-9 rounded-xl border-2 border-zinc-700/80 shadow-2xl space-y-6">
+        <div id="tutorial-portal-card" className="bg-[#121318] p-6 sm:p-9 rounded-xl border-2 border-zinc-700/80 shadow-2xl space-y-6">
           {/* Header Branding */}
           <div className="text-center space-y-3">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-lg bg-zinc-950 border-2 border-zinc-700 shadow-md overflow-hidden mx-auto">
@@ -509,7 +521,7 @@ export default function MemberPortalPage() {
             </div>
 
             {/* Assigned Badges */}
-            <div className="space-y-3 pt-2">
+            <div id="tutorial-portal-badges" className="space-y-3 pt-2 p-2 rounded-xl transition">
               <span className="text-xs font-extrabold text-zinc-300 uppercase tracking-wide flex items-center gap-1.5">
                 <Award className="w-4 h-4 text-red-500" /> Assigned Member Badges
               </span>
@@ -578,7 +590,7 @@ export default function MemberPortalPage() {
           </div>
 
           {/* Gym Schedule & Calendar Card */}
-          <div className="bg-[#121318] p-5 sm:p-7 rounded-xl border-2 border-zinc-700/80 shadow-soft space-y-6">
+          <div id="tutorial-portal-schedule" className="bg-[#121318] p-5 sm:p-7 rounded-xl border-2 border-zinc-700/80 shadow-soft space-y-6">
             <h2 className="text-lg sm:text-xl font-black text-zinc-100 flex items-center gap-2">
               <Calendar className="w-5 h-5 text-red-500" /> Operating Schedule & Holiday Closures
             </h2>

@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Activity, UserPlus, Palette, Dumbbell, Sparkles } from "lucide-react";
+import { Activity, UserPlus, Palette, Dumbbell, Sparkles, HelpCircle } from "lucide-react";
 import { getGymSettings } from "@/app/actions/settings";
 import { DEFAULT_GYM_NAME, DEFAULT_LOGO_URL } from "@/lib/config";
+import { startAppTutorial } from "@/components/AppTutorial";
 
 interface DashboardHeaderProps {
   initialGymName?: string;
@@ -33,7 +34,7 @@ export default function DashboardHeader({
         const saved = localStorage.getItem("gym_settings_data");
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (parsed.logo_url && parsed.logo_url !== "/gym-logo.svg" && parsed.logo_url !== "/logo.svg") {
+          if (parsed.logo_url) {
             return parsed.logo_url;
           }
         }
@@ -51,7 +52,7 @@ export default function DashboardHeader({
           if (parsed.name && parsed.name !== "JLAB Fitness") setGymName(parsed.name);
           else setGymName(DEFAULT_GYM_NAME);
 
-          if (parsed.logo_url && parsed.logo_url !== "/gym-logo.svg" && parsed.logo_url !== "/logo.svg") {
+          if (parsed.logo_url) {
             setLogoUrl(parsed.logo_url);
           } else {
             setLogoUrl(DEFAULT_LOGO_URL);
@@ -74,7 +75,7 @@ export default function DashboardHeader({
           if (data.name && data.name !== "JLAB Fitness") setGymName(data.name);
           else setGymName(DEFAULT_GYM_NAME);
 
-          if (data.logo_url && data.logo_url !== "/gym-logo.svg" && data.logo_url !== "/logo.svg") {
+          if (data.logo_url) {
             setLogoUrl(data.logo_url);
           } else {
             setLogoUrl(DEFAULT_LOGO_URL);
@@ -90,7 +91,7 @@ export default function DashboardHeader({
         if (e.detail.name && e.detail.name !== "JLAB Fitness") setGymName(e.detail.name);
         else if (e.detail.name) setGymName(DEFAULT_GYM_NAME);
 
-        if (e.detail.logo_url && e.detail.logo_url !== "/gym-logo.svg" && e.detail.logo_url !== "/logo.svg") {
+        if (e.detail.logo_url) {
           setLogoUrl(e.detail.logo_url);
         } else if (e.detail.logo_url !== undefined) {
           setLogoUrl(DEFAULT_LOGO_URL);
@@ -161,6 +162,15 @@ export default function DashboardHeader({
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0 pt-2 md:pt-0">
+          <button
+            type="button"
+            onClick={() => startAppTutorial()}
+            className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs sm:text-sm shadow-md shadow-blue-600/30 border border-blue-500 transition-all cursor-pointer active:scale-95"
+          >
+            <HelpCircle className="w-4 h-4 text-white" />
+            <span>App Tutorial</span>
+          </button>
+
           <Link
             href="/settings"
             className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-200 font-extrabold text-xs sm:text-sm border-2 border-zinc-700 transition-all cursor-pointer shadow-sm active:scale-95"

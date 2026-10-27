@@ -334,7 +334,7 @@ export default function SubscriptionsPage() {
       </div>
 
       {/* Plans Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div id="tutorial-plans-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {plans.map((plan) => (
           <div
             key={plan.id}
@@ -416,7 +416,7 @@ export default function SubscriptionsPage() {
         </div>
 
         {/* Badges Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div id="tutorial-badges-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {badges.map((badge) => (
             <div
               key={badge.id}

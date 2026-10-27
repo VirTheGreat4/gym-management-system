@@ -302,7 +302,7 @@ export default function SettingsPage() {
       {/* Main Settings Form Container */}
       <form onSubmit={handleSaveSettings} className="space-y-8">
         {/* SECTION 1: BRAND NAME & LOGO ASSET */}
-        <div className="bg-[#121214] p-6 sm:p-8 rounded-2xl shadow-md border border-zinc-800 space-y-8">
+        <div id="tutorial-settings-branding" className="bg-[#121214] p-6 sm:p-8 rounded-2xl shadow-md border border-zinc-800 space-y-8">
           {/* Gym Name Input Section */}
           <div className="space-y-3">
             <h2 className="text-lg font-extrabold text-zinc-100 flex items-center gap-2">

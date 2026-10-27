@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from 'next/font/google';
 import AppLayout from "@/components/AppLayout";
 import RealtimeSync from "@/components/RealtimeSync";
+import { AppTutorial } from "@/components/AppTutorial";
 import "./globals.css";
 
 const inter = Inter({
@@ -39,6 +40,7 @@ export default function RootLayout({
       >
         <RealtimeSync />
         <AppLayout>{children}</AppLayout>
+        <AppTutorial />
       </body>
     </html>
   );

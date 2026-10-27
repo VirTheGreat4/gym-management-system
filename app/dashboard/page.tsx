@@ -78,7 +78,7 @@ async function DashboardMetricsSection() {
   return (
     <div className="space-y-6 sm:space-y-8">
       {/* Metrics Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div id="tutorial-metrics-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {metrics.map((metric, idx) => {
           const Icon = metric.icon;
           return (
@@ -170,7 +170,7 @@ async function DashboardMetricsSection() {
         </div>
 
         {/* Quick Retention Spotlight Card */}
-        <div className="bg-[#121214] p-5 sm:p-8 rounded-2xl shadow-md shadow-black/40 border border-zinc-800 flex flex-col justify-between space-y-6">
+        <div id="tutorial-quick-actions" className="bg-[#121214] p-5 sm:p-8 rounded-2xl shadow-md shadow-black/40 border border-zinc-800 flex flex-col justify-between space-y-6">
           <div>
             <div className="flex items-center justify-between gap-2 mb-4 flex-wrap">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-2xl bg-amber-950/80 text-amber-300 text-xs font-extrabold border border-amber-700">

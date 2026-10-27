@@ -13,10 +13,12 @@ import {
   X,
   Sparkles,
   LogOut,
+  HelpCircle,
 } from "lucide-react";
 import { getGymSettings } from "@/app/actions/settings";
 import { logoutAdmin } from "@/app/actions/auth";
 import { DEFAULT_GYM_NAME, DEFAULT_LOGO_URL } from "@/lib/config";
+import { startAppTutorial } from "@/components/AppTutorial";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -245,8 +247,20 @@ export default function Sidebar() {
           </nav>
         </div>
 
-        {/* Bottom Section: Tenant Info + Logout */}
+        {/* Bottom Section: Tenant Info + Tutorial + Logout */}
         <div className="space-y-2.5">
+          <button
+            type="button"
+            onClick={() => {
+              setMobileOpen(false);
+              startAppTutorial();
+            }}
+            className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs shadow-md shadow-blue-600/30 transition-all duration-200 cursor-pointer active:scale-95"
+          >
+            <HelpCircle className="w-4 h-4 text-white" />
+            <span>Interactive Tutorial</span>
+          </button>
+
           <div className="p-3.5 rounded-lg border-2 border-zinc-800 bg-zinc-950 space-y-1.5 shadow-sm">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-extrabold uppercase tracking-wider text-red-500">

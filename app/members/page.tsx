@@ -588,7 +588,7 @@ export default function MembersPage() {
       </div>
 
       {/* Members Data Table */}
-      <div className="bg-zinc-900 rounded-2xl shadow-soft border-3 border-zinc-700 overflow-hidden">
+      <div id="tutorial-members-table" className="bg-zinc-900 rounded-2xl shadow-soft border-3 border-zinc-700 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-sm">
             <thead>
@@ -702,7 +702,7 @@ export default function MembersPage() {
                         )}
                       </div>
                     </td>
-                    <td className="py-4 px-6 text-right">
+                    <td id="tutorial-members-actions" className="py-4 px-6 text-right">
                       <div className="inline-flex items-center gap-1.5 flex-wrap justify-end">
                         <button
                           onClick={() => {
