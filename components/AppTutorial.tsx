@@ -12,7 +12,6 @@ import {
   ShieldCheck,
   MessageSquare,
   Users,
-  QrCode,
   Calendar,
   TrendingUp,
   Plus,
@@ -20,20 +19,22 @@ import {
   AlertTriangle,
   Ban,
   Percent,
-  Send,
-  Image as ImageIcon,
   Award,
   Search,
   Building2,
   Clock,
   Check,
   Phone,
-  Tag
+  Tag,
+  DollarSign,
+  ArrowUpRight,
+  ShieldAlert,
+  Megaphone
 } from "lucide-react";
 
 export interface TutorialStep {
   id: string;
-  viewType: "portal" | "dashboard" | "members" | "subscriptions" | "retention" | "settings";
+  viewType: "portal" | "dashboard" | "members" | "subscriptions" | "settings";
   targetSelector: string;
   title: string;
   targetTag: string;
@@ -51,8 +52,8 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     title: "Member Pass",
     targetTag: "Member Pass Card",
     category: "Member Portal",
-    whatIsIt: "This shows your member name, plan, and when your gym pass ends.",
-    whyAdded: "So members can easily check how many days they have left on their pass."
+    whatIsIt: "This shows your member name, phone number, plan status, and expiry countdown.",
+    whyAdded: "So members like Virgilio Flor E. Guaño can easily check their remaining pass days."
   },
   {
     id: "portal-badges",
@@ -61,8 +62,8 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     title: "Student Discount Badge",
     targetTag: "Student Badge (50% Off)",
     category: "Member Portal",
-    whatIsIt: "This shows discount badges like the Student badge (50% Off).",
-    whyAdded: "So students like Virgilio Flor E. Guaño get half-price discounts."
+    whatIsIt: "This displays discount badges assigned to your account, like Student (50% Off).",
+    whyAdded: "So eligible students get 50% discount applied to regular rates."
   },
   {
     id: "portal-schedule",
@@ -71,8 +72,8 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     title: "Gym Operating Hours",
     targetTag: "Live Schedule",
     category: "Member Portal",
-    whatIsIt: "This shows gym opening and closing times for each day.",
-    whyAdded: "So members know if the gym is open before going."
+    whatIsIt: "This displays gym opening/closing hours and scheduled holiday closures.",
+    whyAdded: "So members can verify live opening hours before visiting the gym."
   },
 
   // --- ADMIN DASHBOARD STEPS ---
@@ -80,21 +81,21 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     id: "dashboard-metrics",
     viewType: "dashboard",
     targetSelector: "#tutorial-metrics-grid",
-    title: "Gym Numbers & Income",
+    title: "Gym Metrics & Revenue",
     targetTag: "Overview Stats",
     category: "Admin Core",
-    whatIsIt: "This shows total members, expiring passes, and monthly gym income.",
-    whyAdded: "Helps gym owners see how well the gym is doing every day."
+    whatIsIt: "Shows active member count, estimated monthly income, annual projection, and expiring passes.",
+    whyAdded: "Helps gym owners monitor financial revenue and active membership growth."
   },
   {
     id: "dashboard-actions",
     viewType: "dashboard",
     targetSelector: "#tutorial-quick-actions",
-    title: "Quick Buttons",
-    targetTag: "Action Shortcuts",
+    title: "Expiring Member Follow-up",
+    targetTag: "Pass Expiration Alert",
     category: "Admin Core",
-    whatIsIt: "Shortcuts to quickly add new members or open pages.",
-    whyAdded: "Helps front desk staff register new walk-in members in seconds."
+    whatIsIt: "Highlights members expiring within 7 days requiring renewal follow-up.",
+    whyAdded: "Allows front desk staff to quickly identify members who need to renew their pass."
   },
 
   // --- MEMBER MANAGEMENT STEPS ---
@@ -102,21 +103,21 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     id: "members-list",
     viewType: "members",
     targetSelector: "#tutorial-members-table",
-    title: "Member Roster",
+    title: "Member Directory",
     targetTag: "All Members List",
     category: "Admin Core",
-    whatIsIt: "List of all registered gym members, like student member Virgilio Flor E. Guaño.",
-    whyAdded: "Keeps all member phone numbers, plans, and badges saved in one place."
+    whatIsIt: "Complete list of registered members with contact info, assigned plans, and badges.",
+    whyAdded: "Keeps member contact numbers, subscription plans, and student discounts organized."
   },
   {
     id: "members-actions",
     viewType: "members",
     targetSelector: "#tutorial-members-actions",
-    title: "Member Action Buttons",
-    targetTag: "Edit, Warn & Ban",
+    title: "Member Control Actions",
+    targetTag: "Edit, Strike & Ban",
     category: "Admin Core",
-    whatIsIt: "Buttons to edit member info, send warning strikes, or ban users.",
-    whyAdded: "Helps staff fix member details or handle rule violations."
+    whatIsIt: "Action buttons to edit member details, issue warning strikes, or restrict accounts.",
+    whyAdded: "Helps staff maintain gym discipline, update contact info, or handle violations."
   },
 
   // --- SUBSCRIPTIONS STEPS ---
@@ -124,33 +125,21 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     id: "subscriptions-plans",
     viewType: "subscriptions",
     targetSelector: "#tutorial-plans-grid",
-    title: "Pass Prices & Plans",
-    targetTag: "1 Month (1200 PHP)",
+    title: "Pass Rates & Plans",
+    targetTag: "Plans & Pricing",
     category: "Operations",
-    whatIsIt: "Sets pass prices and duration, like 1 Month for 1200 Pesos.",
-    whyAdded: "Allows gym owners to set custom plan costs and validity days."
+    whatIsIt: "Configures subscription costs and validity duration, like 1 Month (₱1,200).",
+    whyAdded: "Enables gym management to set custom rates for monthly or annual passes."
   },
   {
     id: "subscriptions-badges",
     viewType: "subscriptions",
     targetSelector: "#tutorial-badges-grid",
-    title: "Discount Tags",
-    targetTag: "Discount Badges",
+    title: "Custom Discount Badges",
+    targetTag: "Discount Tags",
     category: "Operations",
-    whatIsIt: "Create discount tags like Student (50% Off) or VIP.",
-    whyAdded: "Automatically calculates lower prices when adding students."
-  },
-
-  // --- RETENTION STEPS ---
-  {
-    id: "retention-hub",
-    viewType: "retention",
-    targetSelector: "#tutorial-retention-hub",
-    title: "Text Message Reminders",
-    targetTag: "SMS Renewal Alerts",
-    category: "Operations",
-    whatIsIt: "Finds members whose passes expire in 0-3 days.",
-    whyAdded: "Sends text messages so members renew their passes on time."
+    whatIsIt: "Creates discount tags like Student (50% Off) or Senior Discount.",
+    whyAdded: "Automates price deductions whenever special badges are assigned to members."
   },
 
   // --- SETTINGS STEPS ---
@@ -158,11 +147,11 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     id: "settings-branding",
     viewType: "settings",
     targetSelector: "#tutorial-settings-branding",
-    title: "Gym Name & Logo",
-    targetTag: "Brand Settings",
+    title: "Gym Branding & Title",
+    targetTag: "Brand Customization",
     category: "Operations",
-    whatIsIt: "Change your gym logo image and gym name here.",
-    whyAdded: "Customizes the web app with your gym's official logo and name."
+    whatIsIt: "Customizes your official gym name and uploads custom logo graphics.",
+    whyAdded: "Ensures the web app reflects your exact gym business branding and logo."
   }
 ];
 
@@ -171,6 +160,7 @@ export function AppTutorial() {
   const [currentStepIdx, setCurrentStepIdx] = useState(0);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
 
+  const containerRef = useRef<HTMLDivElement>(null);
   const currentStep = TUTORIAL_STEPS[currentStepIdx] || TUTORIAL_STEPS[0];
 
   // Listen for trigger event
@@ -333,38 +323,68 @@ export function AppTutorial() {
   return (
     <div className="fixed inset-0 z-[99999] pointer-events-auto overflow-hidden select-none bg-[#09090B]">
       {/* Dynamic Sandbox Replica Background UI */}
-      <div className="w-full h-full overflow-y-auto p-4 sm:p-8 space-y-6 opacity-90 filter blur-[0.5px]">
+      <div ref={containerRef} className="w-full h-full overflow-y-auto p-4 sm:p-8 space-y-6 opacity-95">
         {/* Sandbox Navigation Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-zinc-800">
+        <div className="flex items-center justify-between pb-4 border-b-2 border-zinc-800 max-w-5xl mx-auto">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-red-600/20 border border-red-500/40 flex items-center justify-center font-black text-red-500">
-              JLAB
+            <div className="w-11 h-11 rounded-xl bg-zinc-950 border-2 border-zinc-700 flex items-center justify-center font-black text-red-500 text-sm overflow-hidden shadow-md">
+              <span className="text-red-500 font-extrabold">JLAB</span>
             </div>
             <div>
               <h1 className="text-base sm:text-lg font-black text-zinc-100 tracking-tight">
                 JLAB Fitness Gym
               </h1>
-              <p className="text-xs text-zinc-400 font-semibold flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-amber-400" /> Interactive Guided Tour
+              <p className="text-xs text-zinc-400 font-bold flex items-center gap-1">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Interactive Guided Tour
               </p>
             </div>
           </div>
 
           <div className="hidden sm:flex items-center gap-2">
-            <span className={`px-3 py-1 rounded-lg text-xs font-bold border ${currentStep.viewType === "portal" ? "bg-red-950 border-red-600 text-red-400" : "bg-zinc-900 border-zinc-800 text-zinc-500"}`}>
+            <span
+              className={`px-3 py-1.5 rounded-lg text-xs font-black border-2 transition ${
+                currentStep.viewType === "portal"
+                  ? "bg-red-600 border-red-500 text-white shadow-md"
+                  : "bg-zinc-950 border-zinc-800 text-zinc-400"
+              }`}
+            >
               Member Portal
             </span>
-            <span className={`px-3 py-1 rounded-lg text-xs font-bold border ${currentStep.viewType === "dashboard" ? "bg-red-950 border-red-600 text-red-400" : "bg-zinc-900 border-zinc-800 text-zinc-500"}`}>
+            <span
+              className={`px-3 py-1.5 rounded-lg text-xs font-black border-2 transition ${
+                currentStep.viewType === "dashboard"
+                  ? "bg-red-600 border-red-500 text-white shadow-md"
+                  : "bg-zinc-950 border-zinc-800 text-zinc-400"
+              }`}
+            >
               Dashboard
             </span>
-            <span className={`px-3 py-1 rounded-lg text-xs font-bold border ${currentStep.viewType === "members" ? "bg-red-950 border-red-600 text-red-400" : "bg-zinc-900 border-zinc-800 text-zinc-500"}`}>
+            <span
+              className={`px-3 py-1.5 rounded-lg text-xs font-black border-2 transition ${
+                currentStep.viewType === "members"
+                  ? "bg-red-600 border-red-500 text-white shadow-md"
+                  : "bg-zinc-950 border-zinc-800 text-zinc-400"
+              }`}
+            >
               Members Roster
             </span>
-            <span className={`px-3 py-1 rounded-lg text-xs font-bold border ${currentStep.viewType === "subscriptions" ? "bg-red-950 border-red-600 text-red-400" : "bg-zinc-900 border-zinc-800 text-zinc-500"}`}>
+            <span
+              className={`px-3 py-1.5 rounded-lg text-xs font-black border-2 transition ${
+                currentStep.viewType === "subscriptions"
+                  ? "bg-red-600 border-red-500 text-white shadow-md"
+                  : "bg-zinc-950 border-zinc-800 text-zinc-400"
+              }`}
+            >
               Subscriptions & Badges
             </span>
-            <span className={`px-3 py-1 rounded-lg text-xs font-bold border ${currentStep.viewType === "retention" ? "bg-red-950 border-red-600 text-red-400" : "bg-zinc-900 border-zinc-800 text-zinc-500"}`}>
-              SMS Retention
+            <span
+              className={`px-3 py-1.5 rounded-lg text-xs font-black border-2 transition ${
+                currentStep.viewType === "settings"
+                  ? "bg-red-600 border-red-500 text-white shadow-md"
+                  : "bg-zinc-950 border-zinc-800 text-zinc-400"
+              }`}
+            >
+              Customization
             </span>
           </div>
         </div>
@@ -372,59 +392,121 @@ export function AppTutorial() {
         {/* --- REPLICA VIEW 1: MEMBER PORTAL --- */}
         {currentStep.viewType === "portal" && (
           <div className="max-w-4xl mx-auto space-y-6">
+            {/* Gym Status Banner */}
+            <div className="p-4 sm:p-5 rounded-xl border-2 bg-emerald-950/90 border-emerald-700/80 text-emerald-100 flex items-center justify-between shadow-soft">
+              <div className="flex items-center gap-3">
+                <CheckCircle2 className="w-6 h-6 text-emerald-400" />
+                <div>
+                  <h2 className="text-base sm:text-lg font-black text-zinc-100 leading-tight flex items-center gap-2">
+                    <span>Gym is OPEN NOW</span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                  </h2>
+                  <p className="text-xs font-extrabold text-zinc-200 mt-0.5 flex items-center gap-1.5">
+                    <Megaphone className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    <span>Welcome to JLAB Fitness Gym Member Portal</span>
+                  </p>
+                </div>
+              </div>
+              <div className="hidden sm:block text-xs font-extrabold text-zinc-300 bg-zinc-900/80 px-3.5 py-1.5 rounded-lg border border-zinc-700">
+                Welcome, <span className="text-zinc-100 font-black">Virgilio Flor E. Guaño</span>
+              </div>
+            </div>
+
             {/* Member Pass Card */}
             <div
               id="tutorial-portal-card"
-              className="bg-[#121214] border-2 border-zinc-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl relative overflow-hidden"
+              className="bg-[#121318] p-5 sm:p-7 rounded-xl border-2 border-zinc-700/80 shadow-soft space-y-6"
             >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-zinc-800">
-                <div className="space-y-1">
-                  <span className="text-xs font-extrabold uppercase tracking-widest text-emerald-400 flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" /> Active Member Pass
-                  </span>
-                  <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                    Virgilio Flor E. Guaño
-                  </h2>
-                  <p className="text-sm font-semibold text-zinc-400 flex items-center gap-1.5">
-                    <Phone className="w-3.5 h-3.5 text-zinc-500" /> 09754100345
-                  </p>
-                </div>
-
-                <div className="p-3 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center gap-3 shrink-0">
-                  <QrCode className="w-10 h-10 text-red-500" />
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-800">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-zinc-950 border-2 border-zinc-700 flex items-center justify-center font-black text-xl text-zinc-200 shadow-xs">
+                    V
+                  </div>
                   <div>
-                    <div className="text-[10px] font-black uppercase text-zinc-500">QR Member ID</div>
-                    <div className="text-xs font-black text-zinc-200">JLAB-2026-9901</div>
+                    <h2 className="text-xl sm:text-2xl font-black text-zinc-100">
+                      Virgilio Flor E. Guaño
+                    </h2>
+                    <p className="text-xs font-extrabold text-zinc-400 flex items-center gap-1.5 mt-0.5">
+                      <Phone className="w-3.5 h-3.5 text-zinc-500" /> 09754100345
+                    </p>
                   </div>
                 </div>
+
+                <span className="px-3.5 py-1.5 rounded-2xl bg-emerald-950/80 text-emerald-300 font-extrabold text-xs border border-emerald-700 uppercase tracking-wider inline-flex items-center gap-1 shadow-xs self-start sm:self-auto">
+                  <Check className="w-3.5 h-3.5 text-emerald-400" /> Active Pass
+                </span>
+              </div>
+
+              {/* Plan Details Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                <div className="bg-zinc-950 p-4 rounded-lg border-2 border-zinc-800 space-y-1">
+                  <span className="text-[11px] font-extrabold uppercase text-zinc-500 block">
+                    Membership Plan
+                  </span>
+                  <p className="text-base font-black text-zinc-100">1 Month Regular Plan</p>
+                </div>
+
+                <div className="bg-zinc-950 p-4 rounded-lg border-2 border-zinc-800 space-y-1">
+                  <span className="text-[11px] font-extrabold uppercase text-zinc-500 block">
+                    Start Date
+                  </span>
+                  <p className="text-sm font-extrabold text-zinc-300">Oct 01, 2026</p>
+                </div>
+
+                <div className="bg-zinc-950 p-4 rounded-lg border-2 border-zinc-800 space-y-1">
+                  <span className="text-[11px] font-extrabold uppercase text-zinc-500 block">
+                    Expiration Date
+                  </span>
+                  <p className="text-sm font-extrabold text-zinc-300">Oct 31, 2026</p>
+                </div>
+              </div>
+
+              {/* Countdown Banner */}
+              <div className="p-4 rounded-lg border-2 border-red-500/60 flex items-center justify-between gap-3 text-white shadow-soft bg-red-600">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-5 h-5 shrink-0" />
+                  <span className="text-xs font-extrabold uppercase">Plan Countdown</span>
+                </div>
+                <span className="text-sm sm:text-base font-black bg-black/40 px-3 py-1.5 rounded-lg border border-white/30">
+                  4 Days Remaining
+                </span>
               </div>
 
               {/* Student Discount Badge Container */}
               <div
                 id="tutorial-portal-badges"
-                className="p-4 rounded-2xl bg-zinc-900/90 border-2 border-emerald-500/60 space-y-2"
+                className="space-y-3 pt-2 p-3 bg-zinc-950 rounded-xl border-2 border-emerald-500/80 shadow-md"
               >
-                <div className="text-xs font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-                  <Award className="w-4 h-4 text-emerald-400" /> Active Student Discount Badge
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="px-3 py-1.5 rounded-xl bg-emerald-950 border border-emerald-500/80 text-emerald-300 font-extrabold text-xs flex items-center gap-1.5 shadow-md">
-                    <Tag className="w-3.5 h-3.5" /> Student Badge (50% OFF)
-                  </span>
-                  <span className="text-xs font-semibold text-zinc-400">
-                    Half price discount applied to all regular subscriptions
-                  </span>
+                <span className="text-xs font-extrabold text-zinc-300 uppercase tracking-wide flex items-center gap-1.5">
+                  <Award className="w-4 h-4 text-emerald-400" /> Assigned Member Badges
+                </span>
+
+                <div className="flex flex-wrap gap-2">
+                  <div className="px-3 py-1.5 rounded-lg font-extrabold text-xs border border-emerald-500 bg-emerald-950/90 text-emerald-300 flex items-center gap-1.5 shadow-xs">
+                    <Tag className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Student Badge (50% OFF)</span>
+                    <span className="text-[10px] bg-red-950 text-red-300 px-1.5 py-0.5 rounded-md border border-red-700">
+                      50% OFF
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-1">
-                  <div className="text-xs font-extrabold text-zinc-400">Active Subscription</div>
-                  <div className="text-lg font-black text-white">1 Month Regular Plan</div>
-                </div>
-                <div className="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-1">
-                  <div className="text-xs font-extrabold text-zinc-400">Pass Expires In</div>
-                  <div className="text-lg font-black text-amber-400">28 Days Remaining</div>
+              {/* Disciplinary Standing */}
+              <div className="space-y-2 pt-1">
+                <span className="text-xs font-extrabold text-zinc-300 uppercase tracking-wide flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-emerald-500" /> Disciplinary Standing
+                </span>
+                <div className="p-3.5 bg-emerald-950/80 rounded-lg border-2 border-emerald-700/80 flex items-center gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                  <div>
+                    <p className="font-extrabold text-xs text-emerald-200">
+                      Good Standing (0 warnings)
+                    </p>
+                    <p className="text-[11px] font-semibold text-zinc-400">
+                      Thank you for adhering to all gym etiquette and rules!
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -432,31 +514,40 @@ export function AppTutorial() {
             {/* Operating Schedule */}
             <div
               id="tutorial-portal-schedule"
-              className="bg-[#121214] border-2 border-zinc-800 rounded-3xl p-6 space-y-4 shadow-xl"
+              className="bg-[#121318] p-5 sm:p-7 rounded-xl border-2 border-zinc-700/80 shadow-soft space-y-4"
             >
-              <div className="flex items-center gap-2 border-b border-zinc-800 pb-3">
-                <Clock className="w-5 h-5 text-red-500" />
-                <h3 className="text-lg font-black text-white">Gym Operating Hours</h3>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                <div className="p-3 bg-zinc-900 rounded-xl border border-zinc-800">
-                  <div className="font-extrabold text-zinc-400">Monday - Friday</div>
-                  <div className="font-black text-zinc-100 text-sm pt-1">6:00 AM - 10:00 PM</div>
+              <h2 className="text-lg font-black text-zinc-100 flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-red-500" /> Operating Schedule & Holiday Closures
+              </h2>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2 text-center text-xs">
+                <div className="p-2.5 rounded-lg bg-zinc-950 border-2 border-zinc-700 space-y-1">
+                  <span className="block font-black text-zinc-300">Mon</span>
+                  <span className="block text-[10px] font-extrabold text-emerald-400">6:00 AM - 10:00 PM</span>
                 </div>
-                <div className="p-3 bg-zinc-900 rounded-xl border border-zinc-800">
-                  <div className="font-extrabold text-zinc-400">Saturday</div>
-                  <div className="font-black text-zinc-100 text-sm pt-1">7:00 AM - 9:00 PM</div>
+                <div className="p-2.5 rounded-lg bg-zinc-950 border-2 border-zinc-700 space-y-1">
+                  <span className="block font-black text-zinc-300">Tue</span>
+                  <span className="block text-[10px] font-extrabold text-emerald-400">6:00 AM - 10:00 PM</span>
                 </div>
-                <div className="p-3 bg-zinc-900 rounded-xl border border-zinc-800">
-                  <div className="font-extrabold text-zinc-400">Sunday</div>
-                  <div className="font-black text-zinc-100 text-sm pt-1">8:00 AM - 6:00 PM</div>
+                <div className="p-2.5 rounded-lg bg-zinc-950 border-2 border-zinc-700 space-y-1">
+                  <span className="block font-black text-zinc-300">Wed</span>
+                  <span className="block text-[10px] font-extrabold text-emerald-400">6:00 AM - 10:00 PM</span>
                 </div>
-                <div className="p-3 bg-emerald-950/50 rounded-xl border border-emerald-800/50 flex items-center gap-2">
-                  <Check className="w-5 h-5 text-emerald-400 shrink-0" />
-                  <div>
-                    <div className="font-extrabold text-emerald-400 text-[10px]">Status</div>
-                    <div className="font-black text-emerald-200">OPEN NOW</div>
-                  </div>
+                <div className="p-2.5 rounded-lg bg-zinc-950 border-2 border-zinc-700 space-y-1">
+                  <span className="block font-black text-zinc-300">Thu</span>
+                  <span className="block text-[10px] font-extrabold text-emerald-400">6:00 AM - 10:00 PM</span>
+                </div>
+                <div className="p-2.5 rounded-lg bg-zinc-950 border-2 border-zinc-700 space-y-1">
+                  <span className="block font-black text-zinc-300">Fri</span>
+                  <span className="block text-[10px] font-extrabold text-emerald-400">6:00 AM - 10:00 PM</span>
+                </div>
+                <div className="p-2.5 rounded-lg bg-zinc-950 border-2 border-zinc-700 space-y-1">
+                  <span className="block font-black text-zinc-300">Sat</span>
+                  <span className="block text-[10px] font-extrabold text-emerald-400">7:00 AM - 9:00 PM</span>
+                </div>
+                <div className="p-2.5 rounded-lg bg-zinc-950 border-2 border-zinc-700 space-y-1">
+                  <span className="block font-black text-zinc-300">Sun</span>
+                  <span className="block text-[10px] font-extrabold text-emerald-400">8:00 AM - 6:00 PM</span>
                 </div>
               </div>
             </div>
@@ -469,58 +560,87 @@ export function AppTutorial() {
             {/* Overview Stats Grid */}
             <div
               id="tutorial-metrics-grid"
-              className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
             >
-              <div className="p-6 rounded-3xl bg-[#121214] border-2 border-zinc-800 space-y-2 shadow-xl">
+              <div className="p-5 rounded-2xl bg-[#121214] text-zinc-100 shadow-md border border-zinc-800 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-black uppercase text-zinc-400">Total Members</span>
-                  <Users className="w-5 h-5 text-blue-500" />
+                  <span className="text-xs font-extrabold uppercase tracking-wide text-zinc-400">Active Members</span>
+                  <div className="p-3 rounded-2xl bg-zinc-800 text-red-500 border border-zinc-700">
+                    <Users className="w-5 h-5" />
+                  </div>
                 </div>
-                <div className="text-3xl font-black text-white">24</div>
-                <div className="text-xs font-semibold text-emerald-400">+4 registered this week</div>
+                <div className="text-2xl sm:text-3xl font-extrabold text-zinc-100">24</div>
+                <p className="text-xs font-medium text-zinc-400">vs last month</p>
               </div>
 
-              <div className="p-6 rounded-3xl bg-[#121214] border-2 border-zinc-800 space-y-2 shadow-xl">
+              <div className="p-5 rounded-2xl bg-[#121214] text-zinc-100 shadow-md border border-zinc-800 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-black uppercase text-zinc-400">Expiring Soon</span>
-                  <AlertTriangle className="w-5 h-5 text-amber-500" />
+                  <span className="text-xs font-extrabold uppercase tracking-wide text-zinc-400">Est. Monthly Income</span>
+                  <div className="p-3 rounded-2xl bg-zinc-800 text-emerald-400 border border-zinc-700">
+                    <DollarSign className="w-5 h-5" />
+                  </div>
                 </div>
-                <div className="text-3xl font-black text-amber-400">3</div>
-                <div className="text-xs font-semibold text-amber-300">Requires SMS renewal reminders</div>
+                <div className="text-2xl sm:text-3xl font-extrabold text-zinc-100">₱28,800</div>
+                <p className="text-xs font-medium text-zinc-400">vs last month</p>
               </div>
 
-              <div className="p-6 rounded-3xl bg-[#121214] border-2 border-zinc-800 space-y-2 shadow-xl">
+              <div className="p-5 rounded-2xl bg-[#121214] text-zinc-100 shadow-md border border-zinc-800 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-black uppercase text-zinc-400">Monthly Revenue</span>
-                  <TrendingUp className="w-5 h-5 text-emerald-500" />
+                  <span className="text-xs font-extrabold uppercase tracking-wide text-zinc-400">Projected Annual</span>
+                  <div className="p-3 rounded-2xl bg-zinc-800 text-purple-400 border border-zinc-700">
+                    <TrendingUp className="w-5 h-5" />
+                  </div>
                 </div>
-                <div className="text-3xl font-black text-emerald-400">₱28,800</div>
-                <div className="text-xs font-semibold text-zinc-400">Calculated from active passes</div>
+                <div className="text-2xl sm:text-3xl font-extrabold text-zinc-100">₱345,600</div>
+                <p className="text-xs font-medium text-zinc-400">12-month projection</p>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-[#121214] text-zinc-100 shadow-md border border-zinc-800 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-extrabold uppercase tracking-wide text-zinc-400">Expiring This Week</span>
+                  <div className="p-3 rounded-2xl bg-zinc-800 text-amber-400 border border-zinc-700">
+                    <Clock className="w-5 h-5" />
+                  </div>
+                </div>
+                <div className="flex items-baseline justify-between">
+                  <span className="text-2xl sm:text-3xl font-extrabold text-amber-400">3</span>
+                  <span className="text-xs font-extrabold px-2.5 py-1 rounded-2xl border bg-amber-950/80 text-amber-300 border-amber-700">
+                    Needs attention
+                  </span>
+                </div>
+                <p className="text-xs font-medium text-zinc-400">Requires renewal follow-up</p>
               </div>
             </div>
 
-            {/* Quick Actions Shortcuts */}
+            {/* Expiring Follow-up Card */}
             <div
               id="tutorial-quick-actions"
-              className="p-6 sm:p-8 rounded-3xl bg-[#121214] border-2 border-zinc-800 space-y-4 shadow-xl"
+              className="p-6 rounded-2xl bg-[#121214] border-2 border-zinc-800 space-y-4 shadow-xl"
             >
               <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-                <h3 className="text-lg font-black text-white flex items-center gap-2">
-                  <Zap className="w-5 h-5 text-red-500" /> Quick Staff Shortcuts
-                </h3>
-                <span className="text-xs font-bold text-zinc-400">Fast Front Desk Operations</span>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-2xl bg-amber-950/80 text-amber-300 text-xs font-extrabold border border-amber-700">
+                  <Clock className="w-3.5 h-3.5" /> Needs Renewal Follow-up
+                </div>
+                <span className="text-xs font-extrabold px-2.5 py-1 rounded-2xl bg-zinc-800 text-zinc-200 border border-zinc-700">
+                  3 Members
+                </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="p-4 rounded-2xl bg-red-600 hover:bg-red-500 text-white font-extrabold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-red-600/20">
-                  <Plus className="w-4 h-4" /> Register New Member
+              <div>
+                <h3 className="text-xl font-extrabold text-zinc-100">Expiring Soon (Within 7 Days)</h3>
+                <p className="text-xs font-medium text-zinc-400 mt-1">
+                  Follow up with members who are expiring soon or already expired.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-amber-950/80 border border-amber-700 flex items-center justify-between">
+                <div>
+                  <p className="font-extrabold text-sm text-amber-200">Virgilio Flor E. Guaño</p>
+                  <p className="text-xs font-medium text-amber-300 mt-0.5">Expires in 4 days (Phone: 09754100345)</p>
                 </div>
-                <div className="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 text-zinc-200 font-extrabold text-sm flex items-center justify-center gap-2">
-                  <Send className="w-4 h-4 text-amber-400" /> View SMS Retention Alerts
-                </div>
-                <div className="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 text-zinc-200 font-extrabold text-sm flex items-center justify-center gap-2">
-                  <Percent className="w-4 h-4 text-blue-400" /> Manage Badges & Plans
-                </div>
+                <button className="px-3 py-1.5 bg-red-600 text-white font-extrabold text-xs rounded-xl shadow-md flex items-center gap-1">
+                  View Pass <ArrowUpRight className="w-3.5 h-3.5" />
+                </button>
               </div>
             </div>
           </div>
@@ -529,93 +649,116 @@ export function AppTutorial() {
         {/* --- REPLICA VIEW 3: MEMBERS ROSTER --- */}
         {currentStep.viewType === "members" && (
           <div className="max-w-5xl mx-auto space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h2 className="text-2xl font-black text-white tracking-tight">Members Directory</h2>
-                <p className="text-xs text-zinc-400 font-semibold">Active gym members & subscription records</p>
+                <p className="text-xs text-zinc-400 font-semibold">Registered gym members & subscription records</p>
               </div>
 
-              <div className="px-4 py-2 rounded-xl bg-red-600 text-white font-extrabold text-xs flex items-center gap-1.5">
+              <div className="px-4 py-2.5 rounded-xl bg-red-600 text-white font-extrabold text-xs flex items-center gap-2 shadow-md shrink-0">
                 <Plus className="w-4 h-4" /> Add Member
+              </div>
+            </div>
+
+            {/* Search & Tabs */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  readOnly
+                  placeholder="Search by name or phone..."
+                  value="Virgilio"
+                  className="w-full px-4 py-2.5 pl-10 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-200 text-xs font-bold"
+                />
+                <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
+              </div>
+
+              <div className="flex items-center gap-1 bg-zinc-950 p-1 rounded-xl border border-zinc-800 text-xs font-bold">
+                <span className="px-3 py-1.5 rounded-lg bg-zinc-800 text-white font-black">All</span>
+                <span className="px-3 py-1.5 rounded-lg text-zinc-400">Active</span>
+                <span className="px-3 py-1.5 rounded-lg text-zinc-400">Expiring</span>
+                <span className="px-3 py-1.5 rounded-lg text-zinc-400">Banned</span>
               </div>
             </div>
 
             {/* Member Table */}
             <div
               id="tutorial-members-table"
-              className="bg-[#121214] border-2 border-zinc-800 rounded-3xl overflow-hidden shadow-xl"
+              className="bg-[#121214] border-2 border-zinc-800 rounded-2xl overflow-hidden shadow-xl"
             >
-              <table className="w-full text-left border-collapse text-xs">
-                <thead>
-                  <tr className="bg-zinc-950 border-b border-zinc-800 text-zinc-400 font-black uppercase tracking-wider">
-                    <th className="py-4 px-6">Member Details</th>
-                    <th className="py-4 px-6">Phone Number</th>
-                    <th className="py-4 px-6">Active Plan</th>
-                    <th className="py-4 px-6">Status & Badges</th>
-                    <th className="py-4 px-6 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-800/80 text-zinc-200 font-medium">
-                  {/* Row 1: Virgilio Flor E. Guaño */}
-                  <tr className="bg-zinc-900/40">
-                    <td className="py-4 px-6 font-extrabold text-white">
-                      <div className="text-sm font-black text-white">Virgilio Flor E. Guaño</div>
-                      <div className="text-[10px] text-zinc-400">ID: JLAB-2026-9901</div>
-                    </td>
-                    <td className="py-4 px-6 font-bold text-zinc-300">
-                      09754100345
-                    </td>
-                    <td className="py-4 px-6">
-                      <div className="font-extrabold text-white">1 Month Regular Plan</div>
-                      <div className="text-[10px] font-bold text-emerald-400">₱600 (50% Student Off)</div>
-                    </td>
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-1.5">
-                        <span className="px-2 py-0.5 rounded-md bg-emerald-950 border border-emerald-600 text-emerald-300 font-black text-[10px]">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-zinc-950 border-b-2 border-zinc-800 text-zinc-400 font-extrabold uppercase tracking-wider">
+                      <th className="py-3.5 px-5">Member Details</th>
+                      <th className="py-3.5 px-5">Phone Number</th>
+                      <th className="py-3.5 px-5">Active Plan</th>
+                      <th className="py-3.5 px-5">Status & Badges</th>
+                      <th className="py-3.5 px-5 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-800 text-zinc-200 font-medium">
+                    {/* Row 1: Virgilio Flor E. Guaño */}
+                    <tr className="bg-zinc-900/40">
+                      <td className="py-4 px-5 font-extrabold text-white">
+                        <div className="text-sm font-black text-white">Virgilio Flor E. Guaño</div>
+                        <div className="text-[10px] text-zinc-400">Joined: Oct 01, 2026</div>
+                      </td>
+                      <td className="py-4 px-5 font-bold text-zinc-300">
+                        09754100345
+                      </td>
+                      <td className="py-4 px-5">
+                        <div className="font-extrabold text-white">1 Month Regular Plan</div>
+                        <div className="text-[10px] font-bold text-emerald-400">₱600 (50% Student Off)</div>
+                      </td>
+                      <td className="py-4 px-5">
+                        <div className="flex flex-wrap gap-1.5">
+                          <span className="px-2.5 py-1 rounded-md bg-emerald-950 border border-emerald-600 text-emerald-300 font-black text-[10px]">
+                            Active
+                          </span>
+                          <span className="px-2.5 py-1 rounded-md bg-red-950 border border-red-600 text-red-300 font-black text-[10px]">
+                            Student (50% Off)
+                          </span>
+                        </div>
+                      </td>
+                      {/* Action buttons target */}
+                      <td id="tutorial-members-actions" className="py-4 px-5 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button className="px-2.5 py-1.5 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-200 font-bold text-[11px] flex items-center gap-1">
+                            <Edit3 className="w-3 h-3 text-blue-400" /> Edit
+                          </button>
+                          <button className="px-2.5 py-1.5 rounded-lg bg-amber-950 border border-amber-800 text-amber-300 font-bold text-[11px] flex items-center gap-1">
+                            <AlertTriangle className="w-3 h-3 text-amber-400" /> Strike
+                          </button>
+                          <button className="px-2.5 py-1.5 rounded-lg bg-red-950 border border-red-800 text-red-300 font-bold text-[11px] flex items-center gap-1">
+                            <Ban className="w-3 h-3 text-red-400" /> Ban
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+
+                    {/* Row 2: Secondary Mock Member */}
+                    <tr className="bg-zinc-950/20">
+                      <td className="py-4 px-5 font-extrabold text-white">
+                        <div className="text-sm font-black text-zinc-200">Maria Santos</div>
+                        <div className="text-[10px] text-zinc-500">Joined: Sep 15, 2026</div>
+                      </td>
+                      <td className="py-4 px-5 text-zinc-400 font-bold">09171234567</td>
+                      <td className="py-4 px-5 text-zinc-300 font-extrabold">1 Year VIP Pass</td>
+                      <td className="py-4 px-5">
+                        <span className="px-2.5 py-1 rounded-md bg-emerald-950 border border-emerald-600 text-emerald-300 font-black text-[10px]">
                           Active
                         </span>
-                        <span className="px-2 py-0.5 rounded-md bg-blue-950 border border-blue-600 text-blue-300 font-black text-[10px]">
-                          Student (50% Off)
-                        </span>
-                      </div>
-                    </td>
-                    {/* Action buttons target */}
-                    <td id="tutorial-members-actions" className="py-4 px-6 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <button className="px-2.5 py-1.5 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-200 font-bold text-[11px] flex items-center gap-1">
-                          <Edit3 className="w-3 h-3 text-blue-400" /> Edit
-                        </button>
-                        <button className="px-2.5 py-1.5 rounded-lg bg-amber-950 border border-amber-800 text-amber-300 font-bold text-[11px] flex items-center gap-1">
-                          <AlertTriangle className="w-3 h-3 text-amber-400" /> Strike
-                        </button>
-                        <button className="px-2.5 py-1.5 rounded-lg bg-red-950 border border-red-800 text-red-300 font-bold text-[11px] flex items-center gap-1">
-                          <Ban className="w-3 h-3 text-red-400" /> Ban
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-
-                  {/* Row 2: Secondary Mock Member */}
-                  <tr className="bg-zinc-950/20">
-                    <td className="py-4 px-6 font-extrabold text-white">
-                      <div className="text-sm font-black text-zinc-200">Maria Santos</div>
-                      <div className="text-[10px] text-zinc-500">ID: JLAB-2026-8812</div>
-                    </td>
-                    <td className="py-4 px-6 text-zinc-400 font-bold">09171234567</td>
-                    <td className="py-4 px-6 text-zinc-300 font-extrabold">1 Year VIP Pass</td>
-                    <td className="py-4 px-6">
-                      <span className="px-2 py-0.5 rounded-md bg-emerald-950 border border-emerald-600 text-emerald-300 font-black text-[10px]">
-                        Active
-                      </span>
-                    </td>
-                    <td className="py-4 px-6 text-right opacity-50">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <span className="text-[10px] font-bold text-zinc-500">Standard Actions</span>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                      </td>
+                      <td className="py-4 px-5 text-right opacity-50">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <span className="text-[10px] font-bold text-zinc-500">Standard Actions</span>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
@@ -630,7 +773,7 @@ export function AppTutorial() {
                 id="tutorial-plans-grid"
                 className="grid grid-cols-1 sm:grid-cols-2 gap-4"
               >
-                <div className="p-6 rounded-3xl bg-[#121214] border-2 border-zinc-800 space-y-3 shadow-xl">
+                <div className="p-6 rounded-2xl bg-[#121214] border-2 border-zinc-800 space-y-3 shadow-xl">
                   <div className="flex items-center justify-between">
                     <span className="px-2.5 py-1 rounded-lg bg-red-950 border border-red-800 text-red-400 text-xs font-black uppercase">
                       Regular Plan
@@ -638,12 +781,12 @@ export function AppTutorial() {
                     <span className="text-2xl font-black text-white">₱1,200</span>
                   </div>
                   <div>
-                    <h4 className="text-lg font-black text-white">1 Month Unlimited Pass</h4>
+                    <h4 className="text-lg font-black text-white">1 Month Regular Plan</h4>
                     <p className="text-xs text-zinc-400 font-semibold">Valid for 30 consecutive calendar days</p>
                   </div>
                 </div>
 
-                <div className="p-6 rounded-3xl bg-[#121214] border-2 border-zinc-800 space-y-3 shadow-xl">
+                <div className="p-6 rounded-2xl bg-[#121214] border-2 border-zinc-800 space-y-3 shadow-xl">
                   <div className="flex items-center justify-between">
                     <span className="px-2.5 py-1 rounded-lg bg-blue-950 border border-blue-800 text-blue-400 text-xs font-black uppercase">
                       Annual VIP
@@ -651,8 +794,8 @@ export function AppTutorial() {
                     <span className="text-2xl font-black text-white">₱10,000</span>
                   </div>
                   <div>
-                    <h4 className="text-lg font-black text-white">1 Year Full Membership</h4>
-                    <p className="text-xs text-zinc-400 font-semibold">Valid for 365 days with free locker access</p>
+                    <h4 className="text-lg font-black text-white">1 Year Full Pass</h4>
+                    <p className="text-xs text-zinc-400 font-semibold">Valid for 365 days with full access</p>
                   </div>
                 </div>
               </div>
@@ -665,7 +808,7 @@ export function AppTutorial() {
                 id="tutorial-badges-grid"
                 className="grid grid-cols-1 sm:grid-cols-2 gap-4"
               >
-                <div className="p-6 rounded-3xl bg-[#121214] border-2 border-emerald-500/80 space-y-2 shadow-xl">
+                <div className="p-6 rounded-2xl bg-[#121214] border-2 border-emerald-500/80 space-y-2 shadow-xl">
                   <div className="flex items-center justify-between">
                     <span className="px-3 py-1 rounded-xl bg-emerald-950 border border-emerald-500 text-emerald-300 text-xs font-black">
                       Student Badge (50% OFF)
@@ -673,11 +816,11 @@ export function AppTutorial() {
                     <span className="text-xs font-extrabold text-emerald-400">50% Price Reduction</span>
                   </div>
                   <p className="text-xs font-semibold text-zinc-300">
-                    Applied to students with valid school ID like Virgilio Flor E. Guaño.
+                    Applied to students with valid student ID like Virgilio Flor E. Guaño.
                   </p>
                 </div>
 
-                <div className="p-6 rounded-3xl bg-[#121214] border-2 border-zinc-800 space-y-2 shadow-xl">
+                <div className="p-6 rounded-2xl bg-[#121214] border-2 border-zinc-800 space-y-2 shadow-xl">
                   <div className="flex items-center justify-between">
                     <span className="px-3 py-1 rounded-xl bg-purple-950 border border-purple-800 text-purple-300 text-xs font-black">
                       Senior Discount (20% OFF)
@@ -693,61 +836,17 @@ export function AppTutorial() {
           </div>
         )}
 
-        {/* --- REPLICA VIEW 5: RETENTION HUB --- */}
-        {currentStep.viewType === "retention" && (
-          <div className="max-w-4xl mx-auto space-y-6">
-            <div
-              id="tutorial-retention-hub"
-              className="p-6 sm:p-8 rounded-3xl bg-[#121214] border-2 border-zinc-800 space-y-6 shadow-xl"
-            >
-              <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
-                <div>
-                  <h3 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
-                    <Send className="w-5 h-5 text-amber-400" /> Retention SMS Center
-                  </h3>
-                  <p className="text-xs font-semibold text-zinc-400">
-                    Find members expiring within 3 days and send text renewal notices
-                  </p>
-                </div>
-                <button className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs shadow-md">
-                  Send All Reminders (1)
-                </button>
-              </div>
-
-              {/* Expiring member item */}
-              <div className="p-5 rounded-2xl bg-zinc-900 border-2 border-amber-500/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-base font-black text-white">Virgilio Flor E. Guaño</span>
-                    <span className="px-2 py-0.5 rounded bg-amber-950 border border-amber-800 text-amber-300 text-[10px] font-extrabold">
-                      Expires in 2 Days
-                    </span>
-                  </div>
-                  <div className="text-xs font-bold text-zinc-400">Phone: 09754100345</div>
-                  <p className="text-xs italic text-zinc-300 pt-1">
-                    "Hi Virgilio! Your JLAB Gym pass expires on Oct 29. Visit the front desk to renew!"
-                  </p>
-                </div>
-
-                <button className="px-4 py-2.5 rounded-xl bg-amber-500 text-black font-extrabold text-xs flex items-center justify-center gap-1.5 shrink-0 shadow-md">
-                  <Send className="w-3.5 h-3.5" /> Send SMS Alert
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* --- REPLICA VIEW 6: SETTINGS --- */}
+        {/* --- REPLICA VIEW 5: CUSTOMIZATION / SETTINGS --- */}
         {currentStep.viewType === "settings" && (
           <div className="max-w-4xl mx-auto space-y-6">
             <div
               id="tutorial-settings-branding"
-              className="p-6 sm:p-8 rounded-3xl bg-[#121214] border-2 border-zinc-800 space-y-6 shadow-xl"
+              className="p-6 sm:p-8 rounded-2xl bg-[#121214] border-2 border-zinc-800 space-y-6 shadow-xl"
             >
               <div className="flex items-center gap-2 border-b border-zinc-800 pb-4">
                 <Building2 className="w-6 h-6 text-red-500" />
                 <div>
-                  <h3 className="text-xl font-black text-white">Gym Branding & Title</h3>
+                  <h3 className="text-xl font-black text-white">Gym Branding & Customization</h3>
                   <p className="text-xs font-semibold text-zinc-400">Customize official gym logo and business name</p>
                 </div>
               </div>
@@ -759,19 +858,19 @@ export function AppTutorial() {
                     type="text"
                     readOnly
                     value="JLAB Fitness Gym"
-                    className="w-full px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white font-extrabold text-sm"
+                    className="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-800 text-white font-extrabold text-sm"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-extrabold text-zinc-300">Gym Logo</label>
-                  <div className="p-3 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-red-600/20 border border-red-500/40 flex items-center justify-center font-black text-red-500 text-lg">
+                  <label className="text-xs font-extrabold text-zinc-300">Gym Logo Graphic</label>
+                  <div className="p-3 rounded-2xl bg-zinc-950 border border-zinc-800 flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-center font-black text-red-500 text-lg">
                       JLAB
                     </div>
                     <div>
                       <div className="text-xs font-black text-zinc-200">jlab-logo.svg</div>
-                      <div className="text-[10px] font-bold text-emerald-400">Active Official Logo</div>
+                      <div className="text-[10px] font-bold text-emerald-400">Active Official Graphic</div>
                     </div>
                   </div>
                 </div>
@@ -784,7 +883,7 @@ export function AppTutorial() {
       {/* Target Element Glowing Pulse Box */}
       {targetRect && (
         <div
-          className="fixed border-2 border-amber-400 sm:border-blue-400 rounded-2xl shadow-[0_0_40px_rgba(59,130,246,0.9)] pointer-events-none transition-all duration-300 ease-out bg-blue-500/10 animate-pulse z-[99998]"
+          className="fixed border-2 border-blue-400 rounded-2xl shadow-[0_0_35px_rgba(59,130,246,0.85)] pointer-events-none transition-all duration-300 ease-out bg-blue-500/10 animate-pulse z-[99998]"
           style={{
             top: `${Math.max(4, targetRect.top - 6)}px`,
             left: `${Math.max(4, targetRect.left - 6)}px`,
@@ -837,7 +936,7 @@ export function AppTutorial() {
 
           <button
             onClick={handleSkip}
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition"
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition cursor-pointer"
             title="Close Tutorial"
           >
             <X className="w-4 h-4" />
@@ -875,14 +974,14 @@ export function AppTutorial() {
             <button
               onClick={handlePrev}
               disabled={currentStepIdx === 0}
-              className="px-3 py-1.5 rounded-lg text-xs font-extrabold border border-zinc-700 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed text-zinc-200 transition flex items-center gap-1"
+              className="px-3 py-1.5 rounded-lg text-xs font-extrabold border border-zinc-700 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed text-zinc-200 transition flex items-center gap-1 cursor-pointer"
             >
               <ChevronLeft className="w-3.5 h-3.5" /> Back
             </button>
 
             <button
               onClick={handleNext}
-              className="px-4 py-1.5 rounded-lg text-xs font-extrabold bg-blue-600 hover:bg-blue-500 text-white transition flex items-center gap-1 shadow-md shadow-blue-600/30"
+              className="px-4 py-1.5 rounded-lg text-xs font-extrabold bg-blue-600 hover:bg-blue-500 text-white transition flex items-center gap-1 shadow-md shadow-blue-600/30 cursor-pointer"
             >
               {currentStepIdx === TUTORIAL_STEPS.length - 1 ? (
                 <>
