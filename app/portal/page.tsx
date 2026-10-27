@@ -24,6 +24,7 @@ import { getCustomBadges } from "@/app/actions/badges";
 import { BackButton } from "@/components/BackButton";
 import { Member, GymSchedule, ScheduleDay, CustomBadge } from "@/types/database";
 import { getBadgeColorStyle } from "@/app/subscriptions/page";
+import { DEFAULT_GYM_NAME, DEFAULT_LOGO_URL } from "@/lib/config";
 
 const defaultDays: ScheduleDay[] = [
   { day: "Monday", open: "06:00", close: "22:00", is_closed: false },
@@ -64,8 +65,30 @@ function calculateCountdown(expirationDateStr: string): string {
 
 export default function MemberPortalPage() {
   const [isMounted, setIsMounted] = useState(false);
-  const [gymName, setGymName] = useState("JLAB Fitness");
-  const [logoUrl, setLogoUrl] = useState<string | null>("/jlab-logo.svg");
+  const [gymName, setGymName] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const savedSettings = localStorage.getItem("gym_settings_data");
+        if (savedSettings) {
+          const parsed = JSON.parse(savedSettings);
+          if (parsed.name) return parsed.name;
+        }
+      } catch (e) {}
+    }
+    return DEFAULT_GYM_NAME;
+  });
+  const [logoUrl, setLogoUrl] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const savedSettings = localStorage.getItem("gym_settings_data");
+        if (savedSettings) {
+          const parsed = JSON.parse(savedSettings);
+          if (parsed.logo_url !== undefined) return parsed.logo_url;
+        }
+      } catch (e) {}
+    }
+    return DEFAULT_LOGO_URL;
+  });
   const [schedule, setSchedule] = useState<GymSchedule>(fallbackSchedule);
   const [customBadges, setCustomBadges] = useState<CustomBadge[]>([]);
 

@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { GymSettings } from '@/types/database';
 import { revalidatePath } from 'next/cache';
+import { DEFAULT_GYM_NAME, DEFAULT_LOGO_URL, DEFAULT_THEME_COLOR } from '@/lib/config';
 
 export async function getGymSettings(): Promise<{ data: GymSettings | null; error: string | null }> {
   try {
@@ -20,9 +21,9 @@ export async function getGymSettings(): Promise<{ data: GymSettings | null; erro
 
     if (!data) {
       const defaultSettings: GymSettings = {
-        name: 'JLAB Fitness',
-        theme_color: '#EF4444',
-        logo_url: '/jlab-logo.svg',
+        name: DEFAULT_GYM_NAME,
+        theme_color: DEFAULT_THEME_COLOR,
+        logo_url: DEFAULT_LOGO_URL,
       };
       return { data: defaultSettings, error: null };
     }

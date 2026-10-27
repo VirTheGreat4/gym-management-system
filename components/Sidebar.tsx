@@ -16,12 +16,35 @@ import {
 } from "lucide-react";
 import { getGymSettings } from "@/app/actions/settings";
 import { logoutAdmin } from "@/app/actions/auth";
+import { DEFAULT_GYM_NAME, DEFAULT_LOGO_URL } from "@/lib/config";
 
 export default function Sidebar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [gymName, setGymName] = useState("JLAB Fitness");
-  const [logoUrl, setLogoUrl] = useState<string | null>("/jlab-logo.svg");
+  const [gymName, setGymName] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("gym_settings_data");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.name) return parsed.name;
+        }
+      } catch (e) {}
+    }
+    return DEFAULT_GYM_NAME;
+  });
+  const [logoUrl, setLogoUrl] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("gym_settings_data");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.logo_url !== undefined) return parsed.logo_url;
+        }
+      } catch (e) {}
+    }
+    return DEFAULT_LOGO_URL;
+  });
 
   useEffect(() => {
     function loadLocalSettings() {
@@ -109,11 +132,11 @@ export default function Sidebar() {
       {/* Mobile Top App Bar */}
       <div className="lg:hidden flex items-center justify-between bg-zinc-900/95 border-b-2 border-zinc-700/80 px-4 py-3.5 shadow-soft sticky top-0 z-40 backdrop-blur-md">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold border-2 border-zinc-700 bg-zinc-950 shadow-soft overflow-hidden">
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold border-2 border-zinc-700 bg-zinc-950 shadow-soft overflow-hidden shrink-0">
             {logoUrl ? (
               <img src={logoUrl} alt={gymName} className="w-full h-full object-contain p-1" />
             ) : (
-              <Dumbbell className="w-5 h-5 text-red-500" />
+              <Dumbbell className="w-6 h-6 text-red-500" />
             )}
           </div>
           <div>
@@ -149,11 +172,11 @@ export default function Sidebar() {
         <div className="space-y-7">
           {/* Brand / Logo */}
           <div className="flex items-center gap-3 px-1">
-            <div className="w-11 h-11 rounded-lg flex items-center justify-center text-white border-2 border-zinc-700 bg-zinc-950 shadow-md overflow-hidden">
+            <div className="w-14 h-14 rounded-xl flex items-center justify-center text-white border-2 border-zinc-700 bg-zinc-950 shadow-md overflow-hidden shrink-0">
               {logoUrl ? (
                 <img src={logoUrl} alt={gymName} className="w-full h-full object-contain p-1" />
               ) : (
-                <Dumbbell className="w-6 h-6 text-red-500" />
+                <Dumbbell className="w-7 h-7 text-red-500" />
               )}
             </div>
             <div>

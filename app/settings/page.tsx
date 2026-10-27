@@ -21,6 +21,7 @@ import {
 import { getGymSettings, updateGymSettings } from "@/app/actions/settings";
 import { BackButton } from "@/components/BackButton";
 import { GymSchedule, ScheduleDay, SpecialClosedDate } from "@/types/database";
+import { DEFAULT_GYM_NAME, DEFAULT_LOGO_URL, DEFAULT_THEME_COLOR } from "@/lib/config";
 
 const defaultDays: ScheduleDay[] = [
   { day: "Monday", open: "06:00", close: "22:00", is_closed: false },
@@ -47,9 +48,9 @@ export default function SettingsPage() {
     setIsMounted(true);
   }, []);
 
-  const [gymName, setGymName] = useState("JLAB Fitness");
-  const [selectedColor, setSelectedColor] = useState("#EF4444");
-  const [logoPreview, setLogoPreview] = useState<string | null>("/jlab-logo.svg");
+  const [gymName, setGymName] = useState(DEFAULT_GYM_NAME);
+  const [selectedColor, setSelectedColor] = useState(DEFAULT_THEME_COLOR);
+  const [logoPreview, setLogoPreview] = useState<string | null>(DEFAULT_LOGO_URL);
   const [isSaved, setIsSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -353,13 +354,13 @@ export default function SettingsPage() {
                     className="hidden"
                   />
                 </label>
-                {logoPreview && logoPreview !== "/jlab-logo.svg" && (
+                {logoPreview && logoPreview !== DEFAULT_LOGO_URL && (
                   <button
                     type="button"
-                    onClick={() => setLogoPreview("/jlab-logo.svg")}
+                    onClick={() => setLogoPreview(DEFAULT_LOGO_URL)}
                     className="block text-xs text-red-400 font-extrabold hover:underline"
                   >
-                    Reset to default JLAB Fitness logo
+                    Reset to default gym logo
                   </button>
                 )}
               </div>

@@ -19,6 +19,7 @@ import {
   ShieldCheck,
   Filter,
   Tag,
+  Lock,
 } from "lucide-react";
 import {
   getMembers,
@@ -63,6 +64,8 @@ export default function MembersPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<UIMember | null>(null);
   const [deletingMember, setDeletingMember] = useState<UIMember | null>(null);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [warningMember, setWarningMember] = useState<UIMember | null>(null);
   const [banMemberTarget, setBanMemberTarget] = useState<UIMember | null>(null);
 
@@ -322,23 +325,32 @@ export default function MembersPage() {
     }
   };
 
-  const handleDeleteMember = async () => {
+  const handleDeleteMember = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!deletingMember) return;
+
+    if (!deletePassword) {
+      setDeleteError("Admin password is required to confirm deletion.");
+      return;
+    }
 
     setIsSubmitting(true);
     setFeedback(null);
+    setDeleteError(null);
     try {
-      const res = await deleteMember(deletingMember.id);
+      const res = await deleteMember(deletingMember.id, deletePassword);
       if (res.success) {
-        setFeedback({ type: "success", message: "Member deleted successfully!" });
+        setFeedback({ type: "success", message: `Member record for "${deletingMember.name}" deleted successfully!` });
         setDeletingMember(null);
+        setDeletePassword("");
+        setDeleteError(null);
         await loadData();
         router.refresh();
       } else {
-        setFeedback({ type: "error", message: res.error || "Failed to delete member" });
+        setDeleteError(res.error || "Failed to delete member. Incorrect admin password.");
       }
     } catch (err: any) {
-      setFeedback({ type: "error", message: err?.message || "An error occurred" });
+      setDeleteError(err?.message || "An error occurred");
     } finally {
       setIsSubmitting(false);
       setTimeout(() => setFeedback(null), 4000);
@@ -728,7 +740,11 @@ export default function MembersPage() {
                         </button>
 
                         <button
-                          onClick={() => setDeletingMember(member)}
+                          onClick={() => {
+                            setDeletingMember(member);
+                            setDeletePassword("");
+                            setDeleteError(null);
+                          }}
                           className="p-2 rounded-2xl bg-zinc-800 hover:bg-red-950 text-zinc-200 border border-zinc-700 transition min-h-[40px] min-w-[40px] flex items-center justify-center font-bold cursor-pointer"
                           title="Delete Member"
                         >
@@ -1115,25 +1131,60 @@ export default function MembersPage() {
               <strong className="text-zinc-100">{deletingMember.name}</strong>?
               This action cannot be undone.
             </p>
-            <div className="pt-2 flex items-center justify-end gap-3">
-              <button
-                disabled={isSubmitting}
-                onClick={() => setDeletingMember(null)}
-                className="px-5 py-3 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-extrabold text-sm border-2 border-zinc-700 min-h-[48px] cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                disabled={isSubmitting}
-                onClick={handleDeleteMember}
-                className="px-6 py-3 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-extrabold text-sm shadow-soft border-2 border-red-500 disabled:opacity-50 min-h-[48px] cursor-pointer"
-              >
-                {isSubmitting ? "Deleting..." : "Delete Member"}
-              </button>
-            </div>
+
+            <form onSubmit={handleDeleteMember} className="space-y-4 pt-2">
+              <div>
+                <label className="block text-xs font-extrabold text-zinc-300 uppercase mb-1.5 flex items-center gap-1.5">
+                  <Lock className="w-3.5 h-3.5 text-amber-500" /> Confirm Admin Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  autoFocus
+                  placeholder="Enter admin password (e.g. admin123)"
+                  value={deletePassword}
+                  onChange={(e) => {
+                    setDeletePassword(e.target.value);
+                    if (deleteError) setDeleteError(null);
+                  }}
+                  className="w-full px-4 py-3.5 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-sm font-extrabold focus:outline-none focus:border-red-500 min-h-[48px]"
+                />
+              </div>
+
+              {deleteError && (
+                <div className="p-3 rounded-xl bg-red-950/90 border border-red-700 text-red-200 font-extrabold text-xs flex items-center gap-2">
+                  <ShieldAlert className="w-4 h-4 text-red-400 shrink-0" />
+                  <span>{deleteError}</span>
+                </div>
+              )}
+
+              <div className="pt-2 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  disabled={isSubmitting}
+                  onClick={() => {
+                    setDeletingMember(null);
+                    setDeletePassword("");
+                    setDeleteError(null);
+                  }}
+                  className="px-5 py-3 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-extrabold text-sm border-2 border-zinc-700 min-h-[48px] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting || !deletePassword}
+                  className="px-6 py-3 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-extrabold text-sm shadow-soft border-2 border-red-500 disabled:opacity-50 min-h-[48px] cursor-pointer flex items-center gap-1.5"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  {isSubmitting ? "Deleting..." : "Confirm & Delete Member"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
     </div>
   );
 }
+

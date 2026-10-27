@@ -17,6 +17,7 @@ import {
 import { getDashboardMetrics } from "@/app/actions/dashboard";
 import { getGymSettings } from "@/app/actions/settings";
 import DashboardHeader from "@/components/DashboardHeader";
+import { DEFAULT_GYM_NAME, DEFAULT_LOGO_URL } from "@/lib/config";
 
 export const instant = false;
 
@@ -233,8 +234,8 @@ function DashboardSkeleton() {
 
 export default async function DashboardPage() {
   const { data: gymSettings } = await getGymSettings();
-  const gymName = gymSettings?.name || "JLAB Fitness";
-  const logoUrl = gymSettings?.logo_url || "/jlab-logo.svg";
+  const gymName = gymSettings?.name || DEFAULT_GYM_NAME;
+  const logoUrl = gymSettings?.logo_url || DEFAULT_LOGO_URL;
 
   return (
     <div className="space-y-6 sm:space-y-8" suppressHydrationWarning>

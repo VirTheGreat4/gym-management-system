@@ -53,7 +53,15 @@ export async function updateMember(
   return { success: true, error: null };
 }
 
-export async function deleteMember(id: string): Promise<{ success: boolean; error: string | null }> {
+export async function deleteMember(
+  id: string,
+  password?: string
+): Promise<{ success: boolean; error: string | null }> {
+  const validPassword = process.env.ADMIN_PASSWORD || 'admin123';
+  if (!password || password !== validPassword) {
+    return { success: false, error: 'Incorrect admin password. Action denied.' };
+  }
+
   const supabase = await createClient();
   const { error } = await supabase.from('members').delete().eq('id', id);
 

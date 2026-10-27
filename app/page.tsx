@@ -6,6 +6,7 @@ import { Dumbbell, Users, Lock, ChevronRight, Sparkles, KeyRound, ShieldAlert, S
 import { loginAdmin } from '@/app/actions/auth';
 import { getGymSettings } from '@/app/actions/settings';
 import GeometricBackground from '@/components/GeometricBackground';
+import { DEFAULT_GYM_NAME, DEFAULT_LOGO_URL } from '@/lib/config';
 
 export default function LandingGateway() {
   const router = useRouter();
@@ -13,8 +14,30 @@ export default function LandingGateway() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const [gymName, setGymName] = useState('JLAB Fitness');
-  const [logoUrl, setLogoUrl] = useState<string | null>('/jlab-logo.svg');
+  const [gymName, setGymName] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("gym_settings_data");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.name) return parsed.name;
+        }
+      } catch (e) {}
+    }
+    return DEFAULT_GYM_NAME;
+  });
+  const [logoUrl, setLogoUrl] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("gym_settings_data");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.logo_url !== undefined) return parsed.logo_url;
+        }
+      } catch (e) {}
+    }
+    return DEFAULT_LOGO_URL;
+  });
 
   useEffect(() => {
     setIsMounted(true);
@@ -82,12 +105,12 @@ export default function LandingGateway() {
       {/* Main Card - Soft Off-White Aesthetic Container */}
       <div className="relative w-full max-w-sm sm:max-w-md mx-auto z-10 !bg-[#f0f2f5] rounded-xl !border-2 !border-slate-300/90 shadow-2xl shadow-slate-950/30 p-5 sm:p-7 space-y-5">
         {/* Card Header Branding */}
-        <div className="text-center space-y-2.5">
-          <div className="w-14 h-14 sm:w-16 sm:h-16 bg-slate-900 rounded-lg border-2 border-slate-800 text-red-500 flex items-center justify-center mx-auto shadow-md overflow-hidden">
+        <div className="text-center space-y-3">
+          <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 bg-slate-900 rounded-2xl border-2 border-slate-800 text-red-500 flex items-center justify-center mx-auto shadow-xl overflow-hidden shrink-0">
             {logoUrl ? (
-              <img src={logoUrl} alt={gymName} className="w-full h-full object-contain p-1" />
+              <img src={logoUrl} alt={gymName} className="w-full h-full object-contain p-1.5" />
             ) : (
-              <Dumbbell className="w-7 h-7 sm:w-8 sm:h-8 text-red-500" />
+              <Dumbbell className="w-12 h-12 text-red-500" />
             )}
           </div>
 

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Activity, UserPlus, Palette, Dumbbell, Sparkles } from "lucide-react";
 import { getGymSettings } from "@/app/actions/settings";
+import { DEFAULT_GYM_NAME, DEFAULT_LOGO_URL } from "@/lib/config";
 
 interface DashboardHeaderProps {
   initialGymName?: string;
@@ -11,11 +12,33 @@ interface DashboardHeaderProps {
 }
 
 export default function DashboardHeader({
-  initialGymName = "JLAB Fitness",
-  initialLogoUrl = "/jlab-logo.svg",
+  initialGymName = DEFAULT_GYM_NAME,
+  initialLogoUrl = DEFAULT_LOGO_URL,
 }: DashboardHeaderProps) {
-  const [gymName, setGymName] = useState<string>(initialGymName);
-  const [logoUrl, setLogoUrl] = useState<string | null>(initialLogoUrl);
+  const [gymName, setGymName] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("gym_settings_data");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.name) return parsed.name;
+        }
+      } catch (e) {}
+    }
+    return initialGymName;
+  });
+  const [logoUrl, setLogoUrl] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("gym_settings_data");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.logo_url !== undefined) return parsed.logo_url;
+        }
+      } catch (e) {}
+    }
+    return initialLogoUrl;
+  });
 
   useEffect(() => {
     function loadLocalSettings() {
@@ -76,15 +99,15 @@ export default function DashboardHeader({
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
           {/* Prominent Logo Profile Frame */}
           <div className="relative shrink-0 group">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-2xl bg-zinc-950 border-3 border-zinc-700 shadow-2xl flex items-center justify-center overflow-hidden transition-all duration-300 group-hover:border-red-500/80 group-hover:shadow-red-950/40">
+            <div className="w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 rounded-2xl bg-zinc-950 border-3 border-zinc-700 shadow-2xl flex items-center justify-center overflow-hidden transition-all duration-300 group-hover:border-red-500/80 group-hover:shadow-red-950/40">
               {logoUrl ? (
                 <img
                   src={logoUrl}
                   alt={gymName}
-                  className="w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-105"
+                  className="w-full h-full object-contain p-1.5 transition-transform duration-300 group-hover:scale-105"
                 />
               ) : (
-                <Dumbbell className="w-10 h-10 text-red-500" />
+                <Dumbbell className="w-12 h-12 text-red-500" />
               )}
             </div>
 
