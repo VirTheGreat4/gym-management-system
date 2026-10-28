@@ -148,12 +148,93 @@ export function AppTutorial() {
   >("idle");
   const [currentStepIdx, setCurrentStepIdx] = useState(0);
   const [targetEl, setTargetEl] = useState<HTMLElement | null>(null);
+  const [popoverPos, setPopoverPos] = useState<{
+    rect: DOMRect;
+    placement: "top" | "bottom";
+    top?: number;
+    bottom?: number;
+    left: number;
+    width: number;
+    maxHeight: number;
+    pointerLeft: number;
+  } | null>(null);
 
   const router = useRouter();
   const pathname = usePathname();
 
   const activeSteps = tutorialPhase === "member_tour" ? MEMBER_STEPS : ADMIN_STEPS;
   const currentStep = activeSteps[currentStepIdx] || activeSteps[0];
+
+  // Dynamic collision detection and position calculation for the chat bubble
+  const updatePopoverPosition = useCallback(() => {
+    if (!targetEl) {
+      setPopoverPos(null);
+      return;
+    }
+
+    const rect = targetEl.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    // Estimate required height for bubble (approx 300px)
+    const spaceBelow = vh - rect.bottom;
+    const spaceAbove = rect.top;
+
+    let placement: "top" | "bottom" = "bottom";
+
+    if (spaceBelow < 280 && spaceAbove > spaceBelow) {
+      placement = "top";
+    }
+
+    const width = Math.min(420, vw - 32);
+    const centerX = rect.left + rect.width / 2;
+    const left = Math.max(16, Math.min(vw - width - 16, centerX - width / 2));
+    const pointerLeft = Math.max(20, Math.min(width - 20, centerX - left));
+
+    if (placement === "top") {
+      const bottom = vh - rect.top + 12;
+      const maxHeight = Math.min(380, Math.max(200, rect.top - 24));
+      setPopoverPos({
+        rect,
+        placement,
+        bottom,
+        left,
+        width,
+        maxHeight,
+        pointerLeft,
+      });
+    } else {
+      const top = rect.bottom + 12;
+      const maxHeight = Math.min(380, Math.max(200, vh - rect.bottom - 24));
+      setPopoverPos({
+        rect,
+        placement,
+        top,
+        left,
+        width,
+        maxHeight,
+        pointerLeft,
+      });
+    }
+  }, [targetEl]);
+
+  useEffect(() => {
+    updatePopoverPosition();
+
+    if (!targetEl) return;
+
+    const handleUpdate = () => {
+      updatePopoverPosition();
+    };
+
+    window.addEventListener("resize", handleUpdate);
+    window.addEventListener("scroll", handleUpdate, true);
+
+    return () => {
+      window.removeEventListener("resize", handleUpdate);
+      window.removeEventListener("scroll", handleUpdate, true);
+    };
+  }, [targetEl, updatePopoverPosition]);
 
   // Listen for trigger events
   useEffect(() => {
@@ -340,27 +421,62 @@ export function AppTutorial() {
         </div>
       )}
 
-      {/* SINGLE-LAYER ANCHORED TUTORIAL COMPONENTS (NATURAL DOM SCROLLING) */}
+      {/* VIEWPORT-CONTAINED ANCHORED TUTORIAL OVERLAY & CHAT BUBBLE */}
       {targetEl &&
+        popoverPos &&
         (tutorialPhase === "admin_tour" || tutorialPhase === "member_tour") &&
         createPortal(
-          <div className="tutorial-single-layer-anchor">
+          <>
             {/* Target Highlight Outline */}
-            <div className="absolute -inset-2.5 rounded-2xl border-2 border-blue-400 bg-blue-500/10 shadow-[0_0_30px_rgba(59,130,246,0.5)] pointer-events-none z-30 animate-pulse">
+            <div
+              style={{
+                position: "fixed",
+                top: popoverPos.rect.top - 8,
+                left: popoverPos.rect.left - 8,
+                width: popoverPos.rect.width + 16,
+                height: popoverPos.rect.height + 16,
+                zIndex: 99998,
+                pointerEvents: "none",
+              }}
+              className="rounded-2xl border-2 border-blue-400 bg-blue-500/10 shadow-[0_0_30px_rgba(59,130,246,0.5)] animate-pulse"
+            >
               <div className="absolute -top-3.5 left-4 px-2.5 py-0.5 rounded-full bg-blue-600 text-[10px] font-black tracking-wider text-white uppercase shadow-md flex items-center gap-1">
                 <Sparkles className="w-3 h-3 text-yellow-300 animate-spin" /> Target Feature
               </div>
             </div>
 
             {/* Instructional Chat Bubble & Directional Indicator */}
-            <div className="absolute z-40 top-full mt-4 left-0 right-0 sm:left-1/2 sm:-translate-x-1/2 sm:w-[420px] max-w-[calc(100vw-2rem)] mx-auto text-left pointer-events-auto">
+            <div
+              style={{
+                position: "fixed",
+                top: popoverPos.placement === "bottom" ? popoverPos.top : undefined,
+                bottom: popoverPos.placement === "top" ? popoverPos.bottom : undefined,
+                left: popoverPos.left,
+                width: popoverPos.width,
+                zIndex: 99999,
+              }}
+              className="text-left pointer-events-auto animate-in fade-in zoom-in-95 duration-150"
+            >
               {/* Directional Indicator (Pointer Caret) */}
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-0 h-0 border-l-8 border-l-transparent border-r-8 border-r-transparent border-b-8 border-b-blue-500 z-50" />
+              {popoverPos.placement === "bottom" ? (
+                <div
+                  style={{ left: popoverPos.pointerLeft }}
+                  className="absolute -top-3 -translate-x-1/2 w-0 h-0 border-l-8 border-l-transparent border-r-8 border-r-transparent border-b-8 border-b-blue-500 z-50"
+                />
+              ) : (
+                <div
+                  style={{ left: popoverPos.pointerLeft }}
+                  className="absolute -bottom-3 -translate-x-1/2 w-0 h-0 border-l-8 border-l-transparent border-r-8 border-r-transparent border-t-8 border-t-blue-500 z-50"
+                />
+              )}
 
               {/* Chat Bubble Card */}
-              <div className="bg-zinc-900/98 border-2 border-blue-500/80 rounded-2xl shadow-2xl p-4 sm:p-5 text-zinc-100 backdrop-blur-xl space-y-3.5 max-h-[80vh] overflow-y-auto">
+              <div
+                style={{ maxHeight: popoverPos.maxHeight }}
+                className="bg-zinc-900/98 border-2 border-blue-500/80 rounded-2xl shadow-2xl p-4 sm:p-5 text-zinc-100 backdrop-blur-xl flex flex-col justify-between space-y-3"
+              >
                 {/* Header */}
-                <div className="flex items-start justify-between border-b border-zinc-800 pb-3">
+                <div className="flex items-start justify-between border-b border-zinc-800 pb-2.5 shrink-0">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="px-2 py-0.5 rounded-md bg-blue-950 border border-blue-700/80 text-blue-300 text-[11px] font-black uppercase flex items-center gap-1">
@@ -371,7 +487,7 @@ export function AppTutorial() {
                         {currentStep.targetTag}
                       </span>
                     </div>
-                    <h2 className="text-lg font-black text-white tracking-tight flex items-center gap-1.5 pt-0.5">
+                    <h2 className="text-base sm:text-lg font-black text-white tracking-tight flex items-center gap-1.5 pt-0.5">
                       <MessageSquare className="w-4 h-4 text-amber-400 shrink-0" />
                       {currentStep.title}
                     </h2>
@@ -379,15 +495,15 @@ export function AppTutorial() {
 
                   <button
                     onClick={handleSkip}
-                    className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition cursor-pointer"
+                    className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition cursor-pointer shrink-0"
                     title="Close Tutorial"
                   >
                     <X className="w-4 h-4" />
                   </button>
                 </div>
 
-                {/* Explanations */}
-                <div className="space-y-2.5">
+                {/* Explanations (Scrollable) */}
+                <div className="space-y-2.5 overflow-y-auto pr-1 flex-1 min-h-0">
                   <div className="p-3 rounded-xl bg-zinc-950/90 border border-zinc-800 space-y-0.5">
                     <div className="text-[11px] font-black uppercase tracking-wider text-blue-400 flex items-center gap-1">
                       <Zap className="w-3.5 h-3.5 text-blue-400" /> What is this?
@@ -407,8 +523,8 @@ export function AppTutorial() {
                   </div>
                 </div>
 
-                {/* Footer Navigation */}
-                <div className="flex items-center justify-between pt-2 border-t border-zinc-800">
+                {/* Footer Navigation (Always Visible & Unclipped) */}
+                <div className="flex items-center justify-between pt-2.5 border-t border-zinc-800 shrink-0">
                   <div className="text-[11px] font-extrabold text-zinc-400">
                     {tutorialPhase === "admin_tour" ? "Admin" : "Member"} Step{" "}
                     <span className="text-blue-400">{currentStepIdx + 1}</span> / {activeSteps.length}
@@ -442,8 +558,8 @@ export function AppTutorial() {
                 </div>
               </div>
             </div>
-          </div>,
-          targetEl
+          </>,
+          document.body
         )}
     </>
   );

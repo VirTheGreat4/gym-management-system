@@ -102,9 +102,81 @@ export default function MemberPortalPage() {
   const [lookupError, setLookupError] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState(false);
 
+  // Member Search Autocomplete state
+  const [allMembers, setAllMembers] = useState<Member[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [isFetchingMembers, setIsFetchingMembers] = useState(false);
+  const suggestionContainerRef = React.useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // Handle click outside autocomplete suggestion dropdown
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        suggestionContainerRef.current &&
+        !suggestionContainerRef.current.contains(event.target as Node)
+      ) {
+        setShowSuggestions(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Fetch member directory list for recommendations
+  const fetchMembersDirectory = async () => {
+    if (allMembers.length > 0 || isFetchingMembers) return;
+    setIsFetchingMembers(true);
+    try {
+      const { data } = await getMembers();
+      if (data) {
+        setAllMembers(data);
+      }
+    } catch (err) {
+      console.error("Error fetching members directory", err);
+    } finally {
+      setIsFetchingMembers(false);
+    }
+  };
+
+  // Filtered members for recommendations dropdown
+  const filteredSuggestions = React.useMemo(() => {
+    const query = inputName.trim().toLowerCase();
+    if (!query) return allMembers.slice(0, 6);
+    return allMembers
+      .filter((m) => m.name.toLowerCase().includes(query))
+      .slice(0, 6);
+  }, [allMembers, inputName]);
+
+  const handleSelectSuggestion = (name: string) => {
+    setInputName(name);
+    setShowSuggestions(false);
+    setSelectedIndex(-1);
+  };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showSuggestions || filteredSuggestions.length === 0) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setSelectedIndex((prev) => (prev + 1) % filteredSuggestions.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSelectedIndex(
+        (prev) => (prev - 1 + filteredSuggestions.length) % filteredSuggestions.length
+      );
+    } else if (e.key === "Enter" && selectedIndex >= 0) {
+      e.preventDefault();
+      handleSelectSuggestion(filteredSuggestions[selectedIndex].name);
+    } else if (e.key === "Escape") {
+      setShowSuggestions(false);
+      setSelectedIndex(-1);
+    }
+  };
 
   // Load gym info, schedule, badges & restore session
   useEffect(() => {
@@ -361,7 +433,7 @@ export default function MemberPortalPage() {
 
           {/* Form */}
           <form onSubmit={handleLookup} className="space-y-4 max-w-md mx-auto pt-2">
-            <div>
+            <div className="relative" ref={suggestionContainerRef}>
               <label className="block text-xs font-extrabold text-zinc-400 uppercase tracking-wide mb-2">
                 Enter your Full Name
               </label>
@@ -370,12 +442,69 @@ export default function MemberPortalPage() {
                   type="text"
                   required
                   value={inputName}
-                  onChange={(e) => setInputName(e.target.value)}
+                  onFocus={() => {
+                    fetchMembersDirectory();
+                    setShowSuggestions(true);
+                  }}
+                  onChange={(e) => {
+                    setInputName(e.target.value);
+                    setShowSuggestions(true);
+                    setSelectedIndex(-1);
+                  }}
+                  onKeyDown={handleInputKeyDown}
                   placeholder="e.g. John Doe"
                   className="w-full px-5 py-3.5 pl-12 rounded-lg bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-base focus:outline-none focus:ring-2 focus:ring-red-500 font-extrabold min-h-[52px] shadow-xs"
                 />
                 <User className="w-5 h-5 text-zinc-500 absolute left-4 top-1/2 -translate-y-1/2" />
               </div>
+
+              {/* Autocomplete Dropdown Menu */}
+              {showSuggestions && (
+                <div className="absolute z-50 left-0 right-0 top-full mt-2 bg-zinc-900 border-2 border-zinc-700 rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto divide-y divide-zinc-800">
+                  {isFetchingMembers && allMembers.length === 0 ? (
+                    <div className="p-3 text-xs text-zinc-400 text-center font-medium">
+                      Loading member directory...
+                    </div>
+                  ) : filteredSuggestions.length > 0 ? (
+                    <div>
+                      <div className="px-3 py-1.5 bg-zinc-950/90 text-[10px] font-extrabold uppercase tracking-wider text-zinc-400 border-b border-zinc-800 flex items-center justify-between">
+                        <span>Select Your Registered Name</span>
+                        <span>{filteredSuggestions.length} recommendation{filteredSuggestions.length > 1 ? "s" : ""}</span>
+                      </div>
+                      {filteredSuggestions.map((member, idx) => {
+                        const isSelected = idx === selectedIndex;
+                        return (
+                          <button
+                            key={member.id}
+                            type="button"
+                            onClick={() => handleSelectSuggestion(member.name)}
+                            onMouseEnter={() => setSelectedIndex(idx)}
+                            className={`w-full text-left px-4 py-2.5 flex items-center justify-between transition-colors cursor-pointer ${
+                              isSelected
+                                ? "bg-red-600/20 text-white font-black"
+                                : "hover:bg-zinc-800/80 text-zinc-200 font-bold"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <User className={`w-4 h-4 ${isSelected ? "text-red-400" : "text-zinc-500"}`} />
+                              <span className="text-sm">{member.name}</span>
+                            </div>
+                            {member.plan_type && (
+                              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700 uppercase">
+                                {member.plan_type}
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="p-3 text-xs text-zinc-400 text-center font-medium">
+                      No registered members matching "{inputName}"
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {lookupError && (
