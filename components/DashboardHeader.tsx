@@ -15,6 +15,7 @@ export default function DashboardHeader({
   initialGymName = DEFAULT_GYM_NAME,
   initialLogoUrl = DEFAULT_LOGO_URL,
 }: DashboardHeaderProps) {
+  const [isMounted, setIsMounted] = useState(false);
   const [gymName, setGymName] = useState<string>(() => {
     if (typeof window !== "undefined") {
       try {
@@ -43,6 +44,7 @@ export default function DashboardHeader({
   });
 
   useEffect(() => {
+    setIsMounted(true);
     function loadLocalSettings() {
       try {
         const saved = localStorage.getItem("gym_settings_data");

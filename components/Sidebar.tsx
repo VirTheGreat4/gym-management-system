@@ -23,6 +23,7 @@ import { startAppTutorial } from "@/components/AppTutorial";
 export default function Sidebar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const [gymName, setGymName] = useState<string>(() => {
     if (typeof window !== "undefined") {
       try {
@@ -51,6 +52,7 @@ export default function Sidebar() {
   });
 
   useEffect(() => {
+    setIsMounted(true);
     function loadLocalSettings() {
       try {
         const saved = localStorage.getItem("gym_settings_data");

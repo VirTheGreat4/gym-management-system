@@ -71,7 +71,6 @@ export default function SubscriptionsPage() {
     name: "",
     duration_days: 30,
     price: 1500,
-    category: "Standard" as SubscriptionPlan["category"],
     description: "",
   });
 
@@ -118,7 +117,6 @@ export default function SubscriptionsPage() {
       name: "",
       duration_days: 30,
       price: 1500,
-      category: "Standard",
       description: "",
     });
     setIsAddModalOpen(true);
@@ -130,7 +128,6 @@ export default function SubscriptionsPage() {
       name: plan.name,
       duration_days: plan.duration_days,
       price: plan.price,
-      category: plan.category,
       description: plan.description || "",
     });
   };
@@ -168,7 +165,6 @@ export default function SubscriptionsPage() {
           name: formData.name,
           duration_days: Number(formData.duration_days),
           price: Number(formData.price),
-          category: formData.category,
           description: formData.description,
         });
         if (!res.success) throw new Error(res.error || "Failed to update plan");
@@ -179,7 +175,6 @@ export default function SubscriptionsPage() {
           name: formData.name,
           duration_days: Number(formData.duration_days),
           price: Number(formData.price),
-          category: formData.category,
           description: formData.description,
         });
         if (!res.success) throw new Error(res.error || "Failed to create plan");
@@ -321,7 +316,7 @@ export default function SubscriptionsPage() {
             Subscription Plans Management
           </h1>
           <p className="text-zinc-400 font-medium text-sm mt-1">
-            Configure live database gym plans, pricing tiers, durations, and category discount tags.
+            Configure live database gym plans, pricing tiers, durations, and member benefits.
           </p>
         </div>
 
@@ -342,8 +337,8 @@ export default function SubscriptionsPage() {
           >
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className={`px-3 py-1 rounded-xl text-xs font-extrabold border ${getCategoryBadgeStyle(plan.category)}`}>
-                  {plan.category}
+                <span className="px-3 py-1 rounded-xl text-xs font-extrabold border bg-zinc-800 text-zinc-300 border-zinc-700">
+                  {plan.duration_days} Days
                 </span>
                 <div className="w-10 h-10 rounded-2xl bg-zinc-800 text-zinc-200 border-2 border-zinc-700 flex items-center justify-center shadow-xs">
                   <CreditCard className="w-5 h-5 text-red-500" />
@@ -532,23 +527,6 @@ export default function SubscriptionsPage() {
                     className="w-full px-4 py-3.5 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-sm font-extrabold focus:outline-none min-h-[48px]"
                   />
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-extrabold text-zinc-400 uppercase mb-1">
-                  Category / Discount Tag
-                </label>
-                <select
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
-                  className="w-full px-4 py-3.5 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-sm font-extrabold focus:outline-none min-h-[48px]"
-                >
-                  <option value="Standard">Standard</option>
-                  <option value="Student">Student</option>
-                  <option value="VIP">VIP</option>
-                  <option value="Daily">Daily</option>
-                  <option value="Custom">Custom</option>
-                </select>
               </div>
 
               <div>

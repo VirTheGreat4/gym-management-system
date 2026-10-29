@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Dumbbell,
   User,
@@ -46,6 +47,104 @@ const fallbackSchedule: GymSchedule = {
   special_closed_dates: [],
 };
 
+export interface ComputedGymStatus {
+  isOpen: boolean;
+  reason: string;
+  todayHoursText: string;
+}
+
+export function calculateGymOpenStatus(
+  schedule: GymSchedule | null,
+  now: Date = new Date()
+): ComputedGymStatus {
+  if (!schedule) {
+    return { isOpen: true, reason: "Standard Operating Hours", todayHoursText: "06:00 - 22:00" };
+  }
+
+  // 1. Manual live override check
+  if (schedule.manual_override) {
+    const isOverrideOpen = !!schedule.is_open_now;
+    return {
+      isOpen: isOverrideOpen,
+      reason: isOverrideOpen
+        ? "Live Management Override (Currently Open)"
+        : "Live Management Override (Currently Closed)",
+      todayHoursText: isOverrideOpen ? "Open via Live Control" : "Closed via Live Control",
+    };
+  }
+
+  // 2. Special closed dates check (YYYY-MM-DD)
+  const currentYear = now.getFullYear();
+  const currentMonth = String(now.getMonth() + 1).padStart(2, "0");
+  const currentDate = String(now.getDate()).padStart(2, "0");
+  const dateStr = `${currentYear}-${currentMonth}-${currentDate}`;
+
+  if (schedule.special_closed_dates && schedule.special_closed_dates.length > 0) {
+    const specialClosed = schedule.special_closed_dates.find((d) => d.date === dateStr);
+    if (specialClosed) {
+      return {
+        isOpen: false,
+        reason: `Holiday / Special Event: ${specialClosed.reason || "Scheduled Closure"}`,
+        todayHoursText: "Closed Today",
+      };
+    }
+  }
+
+  // 3. Regular weekly hours check
+  const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const currentDayName = daysOfWeek[now.getDay()];
+
+  const daySchedule = schedule.regular_hours?.find(
+    (item) => item.day.toLowerCase() === currentDayName.toLowerCase()
+  );
+
+  if (!daySchedule || daySchedule.is_closed) {
+    return {
+      isOpen: false,
+      reason: `Regularly closed on ${currentDayName}s`,
+      todayHoursText: "Closed Today",
+    };
+  }
+
+  // 4. Time range check (HH:mm)
+  const openTimeParts = (daySchedule.open || "06:00").split(":");
+  const closeTimeParts = (daySchedule.close || "22:00").split(":");
+
+  const openH = parseInt(openTimeParts[0] || "6", 10);
+  const openM = parseInt(openTimeParts[1] || "0", 10);
+  const closeH = parseInt(closeTimeParts[0] || "22", 10);
+  const closeM = parseInt(closeTimeParts[1] || "0", 10);
+
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const openMinutes = openH * 60 + openM;
+  const closeMinutes = closeH * 60 + closeM;
+
+  let isOpen = false;
+  if (closeMinutes > openMinutes) {
+    // Standard same-day range (e.g. 06:00 - 22:00)
+    isOpen = nowMinutes >= openMinutes && nowMinutes < closeMinutes;
+  } else {
+    // Overnight range (e.g. 20:00 - 04:00)
+    isOpen = nowMinutes >= openMinutes || nowMinutes < closeMinutes;
+  }
+
+  const hoursText = `${daySchedule.open || "06:00"} - ${daySchedule.close || "22:00"}`;
+
+  if (isOpen) {
+    return {
+      isOpen: true,
+      reason: `Open Today (${currentDayName}: ${hoursText})`,
+      todayHoursText: hoursText,
+    };
+  } else {
+    return {
+      isOpen: false,
+      reason: `Outside Operating Hours (${currentDayName}: ${hoursText})`,
+      todayHoursText: hoursText,
+    };
+  }
+}
+
 function calculateCountdown(expirationDateStr: string): string {
   if (!expirationDateStr) return "N/A";
   const exp = new Date(expirationDateStr);
@@ -66,6 +165,7 @@ function calculateCountdown(expirationDateStr: string): string {
 }
 
 export default function MemberPortalPage() {
+  const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
   const [gymName, setGymName] = useState<string>(() => {
     if (typeof window !== "undefined") {
@@ -95,6 +195,20 @@ export default function MemberPortalPage() {
   });
   const [schedule, setSchedule] = useState<GymSchedule>(fallbackSchedule);
   const [customBadges, setCustomBadges] = useState<CustomBadge[]>([]);
+  const [currentTime, setCurrentTime] = useState<Date>(new Date());
+
+  // Dynamic real-time gym open status calculation
+  const currentGymStatus = React.useMemo(() => {
+    return calculateGymOpenStatus(schedule, currentTime);
+  }, [schedule, currentTime]);
+
+  useEffect(() => {
+    // Real-time tick every 10 seconds to update gym status live without page reloads
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Passwordless session state
   const [inputName, setInputName] = useState("");
@@ -112,6 +226,20 @@ export default function MemberPortalPage() {
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // Secure Portal Navigation: Prevent back button from returning to Admin Dashboard context
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.history.pushState(null, "", window.location.href);
+      const handlePopState = () => {
+        router.replace("/");
+      };
+      window.addEventListener("popstate", handlePopState);
+      return () => {
+        window.removeEventListener("popstate", handlePopState);
+      };
+    }
+  }, [router]);
 
   // Handle click outside autocomplete suggestion dropdown
   useEffect(() => {
@@ -348,7 +476,7 @@ export default function MemberPortalPage() {
   if (!isMounted) {
     return (
       <div className="space-y-6 sm:space-y-8" suppressHydrationWarning>
-        <BackButton />
+        <BackButton onClick={() => router.replace("/")} />
         <div className="bg-zinc-900 p-8 rounded-2xl border-3 border-zinc-700 text-zinc-300 font-bold text-center">
           Loading Member Portal...
         </div>
@@ -396,7 +524,7 @@ export default function MemberPortalPage() {
   return (
     <div className="space-y-6 sm:space-y-8 max-w-4xl mx-auto px-1 sm:px-0" suppressHydrationWarning>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <BackButton />
+        <BackButton onClick={() => router.replace("/")} />
         {activeMember && (
           <button
             type="button"
@@ -430,6 +558,39 @@ export default function MemberPortalPage() {
             <p className="text-xs sm:text-sm font-medium text-zinc-400 max-w-md mx-auto">
               Check your active plan status, expiry countdown, database badges, and live operating hours without needing a password.
             </p>
+
+            {/* Live Gym Status Badge */}
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-950 border border-zinc-700 text-xs font-extrabold shadow-sm mt-1">
+              <span
+                className={`w-2.5 h-2.5 rounded-full ${
+                  currentGymStatus.isOpen ? "bg-emerald-400 animate-pulse" : "bg-rose-500"
+                }`}
+              />
+              <span className={currentGymStatus.isOpen ? "text-emerald-400" : "text-rose-400"}>
+                Gym is {currentGymStatus.isOpen ? "OPEN NOW" : "CLOSED NOW"}
+              </span>
+              <span className="text-zinc-500">•</span>
+              <span className="text-zinc-300 font-medium">{currentGymStatus.reason}</span>
+            </div>
+          </div>
+
+          {/* Quick-Fill Test Member Helper for Tutorial & Seamless Navigation */}
+          <div className="max-w-md mx-auto p-4 rounded-xl bg-blue-950/40 border-2 border-blue-800/60 text-xs text-zinc-300 space-y-2">
+            <div className="font-extrabold text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-blue-400 shrink-0" /> Tutorial & Test Member Quick-Access
+            </div>
+            <p className="text-zinc-300 leading-relaxed font-medium">
+              To proceed seamlessly with the member portal tour or test the portal without being blocked, click below to quick-fill a valid test member:
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setInputName("Virgilio Flor E. Guaño");
+              }}
+              className="w-full px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs transition cursor-pointer shadow-md flex items-center justify-center gap-2 active:scale-95"
+            >
+              <span>Quick-Fill: Virgilio Flor E. Guaño</span>
+            </button>
           </div>
 
           {/* Form */}
@@ -453,7 +614,7 @@ export default function MemberPortalPage() {
                     setSelectedIndex(-1);
                   }}
                   onKeyDown={handleInputKeyDown}
-                  placeholder="e.g. John Doe"
+                  placeholder="e.g. Virgilio Flor E. Guaño"
                   className="w-full px-5 py-3.5 pl-12 rounded-lg bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-base focus:outline-none focus:ring-2 focus:ring-red-500 font-extrabold min-h-[52px] shadow-xs"
                 />
                 <User className="w-5 h-5 text-zinc-500 absolute left-4 top-1/2 -translate-y-1/2" />
@@ -536,7 +697,7 @@ export default function MemberPortalPage() {
           {/* Gym Status Header Banner */}
           <div
             className={`p-4 sm:p-6 rounded-xl border-2 shadow-soft flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${
-              schedule.is_open_now
+              currentGymStatus.isOpen
                 ? "bg-emerald-950/90 text-emerald-100 border-emerald-700/80"
                 : "bg-rose-950/90 text-rose-100 border-rose-700/80"
             }`}
@@ -544,12 +705,12 @@ export default function MemberPortalPage() {
             <div className="flex items-center gap-3.5">
               <div
                 className={`p-3 rounded-lg border flex items-center justify-center shrink-0 ${
-                  schedule.is_open_now
+                  currentGymStatus.isOpen
                     ? "bg-emerald-900/80 border-emerald-600 text-emerald-300"
                     : "bg-rose-900/80 border-rose-600 text-rose-300"
                 }`}
               >
-                {schedule.is_open_now ? (
+                {currentGymStatus.isOpen ? (
                   <CheckCircle2 className="w-6 h-6 text-emerald-400" />
                 ) : (
                   <AlertCircle className="w-6 h-6 text-rose-400" />
@@ -557,13 +718,16 @@ export default function MemberPortalPage() {
               </div>
               <div>
                 <h2 className="text-lg sm:text-xl font-black text-zinc-100 leading-tight flex items-center gap-2">
-                  <span>Gym is {schedule.is_open_now ? "OPEN NOW" : "CLOSED NOW"}</span>
+                  <span>Gym is {currentGymStatus.isOpen ? "OPEN NOW" : "CLOSED NOW"}</span>
                   <span
                     className={`inline-block w-2.5 h-2.5 rounded-full ${
-                      schedule.is_open_now ? "bg-emerald-400 animate-pulse" : "bg-rose-400"
+                      currentGymStatus.isOpen ? "bg-emerald-400 animate-pulse" : "bg-rose-400"
                     }`}
                   />
                 </h2>
+                <p className="text-xs font-semibold text-zinc-300 mt-0.5">
+                  {currentGymStatus.reason}
+                </p>
                 {schedule.announcement && (
                   <p className="text-xs font-extrabold text-zinc-200 mt-1 inline-flex items-center gap-1.5 bg-zinc-900/80 px-3 py-1 rounded-lg border border-zinc-700">
                     <Megaphone className="w-3.5 h-3.5 text-amber-400 shrink-0" />

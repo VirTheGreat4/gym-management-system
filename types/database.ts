@@ -33,7 +33,7 @@ export interface SubscriptionPlan {
   name: string;
   duration_days: number;
   price: number;
-  category: 'Standard' | 'Student' | 'VIP' | 'Daily' | 'Custom';
+  category?: 'Standard' | 'Student' | 'VIP' | 'Daily' | 'Custom';
   description?: string;
 }
 

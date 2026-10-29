@@ -82,6 +82,7 @@ CREATE POLICY "Allow public read/write on members" ON members FOR ALL USING (tru
 -- 2. Seed Custom Badges
 INSERT INTO custom_badges (id, name, color, discount_percent, description, created_at)
 VALUES
+  ('00000000-0000-0000-0000-0000000000b0', 'Standard', 'zinc', 0, 'Standard regular membership badge', NOW()),
   ('00000000-0000-0000-0000-0000000000b1', 'Student', 'blue', 50, 'Student discount promo (50% off)', NOW())
 ON CONFLICT (id) DO UPDATE
 SET name = EXCLUDED.name, discount_percent = EXCLUDED.discount_percent;

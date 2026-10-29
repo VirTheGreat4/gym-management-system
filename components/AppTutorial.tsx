@@ -175,15 +175,17 @@ export function AppTutorial() {
   const currentStep = activeSteps[currentStepIdx] || activeSteps[0];
 
   const lastScrolledStepRef = useRef<string | null>(null);
-  const prevTargetStyleRef = useRef<{ el: HTMLElement; position: string; overflow: string } | null>(null);
+  const prevTargetStyleRef = useRef<{ el: HTMLElement; position: string; overflow: string; zIndex: string; isolation: string } | null>(null);
 
   // Restore modified styles on previous target element to prevent layout side-effects
   const restorePrevTargetStyle = useCallback(() => {
     if (prevTargetStyleRef.current) {
-      const { el, position, overflow } = prevTargetStyleRef.current;
+      const { el, position, overflow, zIndex, isolation } = prevTargetStyleRef.current;
       if (typeof document !== "undefined" && document.body.contains(el)) {
         el.style.position = position;
         el.style.overflow = overflow;
+        el.style.zIndex = zIndex;
+        el.style.isolation = isolation;
       }
       prevTargetStyleRef.current = null;
     }
@@ -461,6 +463,8 @@ export function AppTutorial() {
           el,
           position: el.style.position,
           overflow: el.style.overflow,
+          zIndex: el.style.zIndex,
+          isolation: el.style.isolation,
         };
 
         if (computedStyle.position === "static") {
@@ -469,6 +473,8 @@ export function AppTutorial() {
         if (computedStyle.overflow === "hidden") {
           el.style.overflow = "visible";
         }
+        el.style.zIndex = "99995";
+        el.style.isolation = "isolate";
 
         setTargetEl(el);
 
@@ -632,7 +638,7 @@ export function AppTutorial() {
             {/* Backdrop click area for dismissing tutorial */}
             <div
               onClick={dismissTutorial}
-              className="fixed inset-0 z-[99990] bg-black/20 backdrop-blur-[1px] pointer-events-auto"
+              className="fixed inset-0 z-[99990] bg-black/50 pointer-events-auto"
             />
 
             {/* Target Highlight Outline */}

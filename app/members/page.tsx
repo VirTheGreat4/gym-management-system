@@ -167,12 +167,14 @@ export default function MembersPage() {
 
   const handleOpenAddModal = () => {
     const todayStr = new Date().toISOString().split("T")[0];
-    const defaultPlan = subscriptionPlans[0] || { name: "Standard Plan", duration_days: 30, price: 1500 };
+    const defaultPlan = subscriptionPlans[0] || { name: "1 Month Membership", duration_days: 30, price: 1200 };
     const expDateStr = new Date(Date.now() + defaultPlan.duration_days * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+    const standardBadge = customBadges.find((b) => b.name.toLowerCase() === "standard");
+    const initialBadges = standardBadge ? [standardBadge.name] : [];
     setFormData({
       name: "",
       phone: "",
-      badges: [],
+      badges: initialBadges,
       plan_type: defaultPlan.name,
       amount_paid: defaultPlan.price,
       payment_method: "Cash",
@@ -201,9 +203,14 @@ export default function MembersPage() {
   const handleBadgeToggle = (badgeName: string) => {
     const currentBadges = formData.badges || [];
     const isAlreadySelected = currentBadges.includes(badgeName);
-    const updatedBadges = isAlreadySelected
+    let updatedBadges = isAlreadySelected
       ? currentBadges.filter((b) => b !== badgeName)
       : [...currentBadges, badgeName];
+
+    const standardBadge = customBadges.find((b) => b.name.toLowerCase() === "standard");
+    if (updatedBadges.length === 0 && standardBadge) {
+      updatedBadges = [standardBadge.name];
+    }
 
     const currentPlan = subscriptionPlans.find((p) => p.name === formData.plan_type) || subscriptionPlans[0];
     let basePrice = currentPlan ? currentPlan.price : 1500;
@@ -997,7 +1004,7 @@ export default function MembersPage() {
                           <div className="flex items-center justify-between">
                             <span className="font-extrabold text-sm">{plan.name}</span>
                             <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-xl border ${isSelected ? "bg-white/20 text-white border-white/30" : "bg-zinc-900 text-zinc-400 border-zinc-700"}`}>
-                              {plan.category}
+                              {plan.duration_days} Days
                             </span>
                           </div>
                           <div className="flex items-center justify-between text-xs mt-2 opacity-90 font-bold">
