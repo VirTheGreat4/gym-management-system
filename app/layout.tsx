@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import AppLayout from "@/components/AppLayout";
 import RealtimeSync from "@/components/RealtimeSync";
 import { AppTutorial } from "@/components/AppTutorial";
+import AdminInactivityGuard from "@/components/AdminInactivityGuard";
 import "./globals.css";
 
 const inter = Inter({
@@ -39,6 +40,7 @@ export default function RootLayout({
         className={`${inter.variable} ${inter.className} min-h-screen text-zinc-100 bg-[#09090B] antialiased`}
       >
         <RealtimeSync />
+        <AdminInactivityGuard />
         <AppLayout>{children}</AppLayout>
         <AppTutorial />
       </body>

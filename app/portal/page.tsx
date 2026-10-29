@@ -143,13 +143,14 @@ export default function MemberPortalPage() {
     }
   };
 
-  // Filtered members for recommendations dropdown
+  // Filtered members for recommendations dropdown with strict privacy controls
   const filteredSuggestions = React.useMemo(() => {
     const query = inputName.trim().toLowerCase();
-    if (!query) return allMembers.slice(0, 6);
+    // STRICT PRIVACY: Require minimum 2 characters before showing recommendations. Never expose full directory when empty.
+    if (!query || query.length < 2) return [];
     return allMembers
       .filter((m) => m.name.toLowerCase().includes(query))
-      .slice(0, 6);
+      .slice(0, 5);
   }, [allMembers, inputName]);
 
   const handleSelectSuggestion = (name: string) => {
