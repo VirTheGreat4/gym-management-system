@@ -45,6 +45,10 @@ A modern, full-stack gym management application built with **Next.js 16**, **Rea
     * Disables browser auto-complete (`autoComplete="off"`, `autoCorrect="off"`, `spellCheck={false}`).
     * Enforces a minimum 2-character threshold for predictive search suggestions; suppresses initial dropdown recommendations when empty or focused without input.
     * Matches contextually on partial strings without exposing full member directory lists to public visitors.
+  * **Dynamic Onboarding Tutorial & Viewport-Clamped Callouts:**
+    * Integrated continuous positioning system (`components/AppTutorial.tsx`) combining `ResizeObserver`, `MutationObserver`, and high-frequency layout monitoring.
+    * Dynamically re-calculates target highlight frames and instructional chat bubbles when asynchronous database content loads or layout shifts occur.
+    * Features automatic auto-scroll to keep active step targets centered, and strict viewport clamping/collision detection so popovers and directional carets never overflow or render off-screen on mobile or desktop viewports.
 
 ---
 

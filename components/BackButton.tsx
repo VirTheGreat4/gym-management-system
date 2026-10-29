@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 
 export function BackButton() {
   const router = useRouter();
@@ -18,9 +19,10 @@ export function BackButton() {
     <button
       type="button"
       onClick={handleBack}
-      className="inline-flex items-center gap-2 border-4 border-slate-700/80 bg-slate-200 text-slate-800 rounded-2xl px-5 py-2 min-h-[48px] font-comic font-bold shadow-sm hover:bg-slate-300 active:translate-y-0.5 transition-all"
+      className="inline-flex items-center gap-2 border-2 border-zinc-700/80 bg-zinc-800/90 hover:bg-zinc-700 text-zinc-200 rounded-xl px-4 py-2.5 min-h-[44px] font-extrabold text-xs shadow-md transition-all active:scale-95 cursor-pointer shrink-0"
     >
-      ← Back
+      <ArrowLeft className="w-4 h-4 text-red-500" />
+      <span>Back</span>
     </button>
   );
 }

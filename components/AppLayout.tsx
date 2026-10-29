@@ -16,10 +16,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   if (isPublicRoute) {
+    const maxWidthClass = pathname === '/portal' ? 'max-w-4xl' : 'max-w-xl';
     return (
-      <main className="flex-1 flex flex-col items-center justify-center min-h-screen p-4 sm:p-6 w-full mx-auto bg-[#09090B] text-zinc-100 relative overflow-hidden">
+      <main className="flex-1 flex flex-col items-center justify-center min-h-screen p-3 sm:p-6 py-6 sm:py-10 w-full mx-auto bg-[#09090B] text-zinc-100 relative overflow-hidden">
         <GeometricBackground />
-        <div className="relative z-10 w-full max-w-xl mx-auto">
+        <div className={`relative z-10 w-full ${maxWidthClass} mx-auto`}>
           {children}
         </div>
       </main>

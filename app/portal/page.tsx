@@ -394,14 +394,14 @@ export default function MemberPortalPage() {
   };
 
   return (
-    <div className="space-y-6 sm:space-y-8 max-w-4xl mx-auto" suppressHydrationWarning>
-      <div className="flex items-center justify-between gap-4">
+    <div className="space-y-6 sm:space-y-8 max-w-4xl mx-auto px-1 sm:px-0" suppressHydrationWarning>
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <BackButton />
         {activeMember && (
           <button
             type="button"
             onClick={() => startAppTutorial('portal-card')}
-            className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs shadow-md shadow-blue-600/30 flex items-center gap-2 transition cursor-pointer"
+            className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs shadow-md shadow-blue-600/30 flex items-center gap-2 transition cursor-pointer active:scale-95 shrink-0"
           >
             <HelpCircle className="w-4 h-4 text-white" />
             <span>Interactive Tutorial</span>
@@ -411,7 +411,7 @@ export default function MemberPortalPage() {
 
       {/* VIEW A: PASSWORDLESS LOOKUP (When Not Logged In) */}
       {!activeMember ? (
-        <div className="bg-[#121318] p-6 sm:p-9 rounded-xl border-2 border-zinc-700/80 shadow-2xl space-y-6">
+        <div className="bg-[#121318] p-5 sm:p-9 rounded-xl border-2 border-zinc-700/80 shadow-2xl space-y-6">
           {/* Header Branding */}
           <div className="text-center space-y-3">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-lg bg-zinc-950 border-2 border-zinc-700 shadow-md overflow-hidden mx-auto">
@@ -535,7 +535,7 @@ export default function MemberPortalPage() {
         <div className="space-y-6">
           {/* Gym Status Header Banner */}
           <div
-            className={`p-5 sm:p-6 rounded-xl border-2 shadow-soft flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${
+            className={`p-4 sm:p-6 rounded-xl border-2 shadow-soft flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${
               schedule.is_open_now
                 ? "bg-emerald-950/90 text-emerald-100 border-emerald-700/80"
                 : "bg-rose-950/90 text-rose-100 border-rose-700/80"
@@ -573,7 +573,7 @@ export default function MemberPortalPage() {
               </div>
             </div>
 
-            <div className="text-xs font-extrabold text-zinc-300 bg-zinc-900/80 px-4 py-2 rounded-lg border border-zinc-700">
+            <div className="text-xs font-extrabold text-zinc-300 bg-zinc-900/80 px-4 py-2 rounded-lg border border-zinc-700 w-full sm:w-auto text-center sm:text-right">
               Welcome back, <span className="text-zinc-100 font-black">{activeMember.name}</span>!
             </div>
           </div>
@@ -582,7 +582,7 @@ export default function MemberPortalPage() {
           <div id="tutorial-portal-card" className="bg-[#121318] p-5 sm:p-7 rounded-xl border-2 border-zinc-700/80 shadow-soft space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-800">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-zinc-950 border-2 border-zinc-700 flex items-center justify-center font-black text-xl text-zinc-200 shadow-xs">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-zinc-950 border-2 border-zinc-700 flex items-center justify-center font-black text-xl text-zinc-200 shadow-xs shrink-0">
                   {activeMember.name.charAt(0).toUpperCase()}
                 </div>
                 <div>
@@ -590,8 +590,8 @@ export default function MemberPortalPage() {
                     {activeMember.name}
                   </h2>
                   <p className="text-xs font-extrabold text-zinc-400 flex items-center gap-1.5 mt-0.5">
-                    <Phone className="w-3.5 h-3.5 text-zinc-500" />
-                    {activeMember.phone || "No phone provided"}
+                    <Phone className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+                    <span>{activeMember.phone || "No phone provided"}</span>
                   </p>
                 </div>
               </div>
@@ -603,7 +603,7 @@ export default function MemberPortalPage() {
             {activeMember.is_banned && (
               <div className="p-4 rounded-lg bg-red-950/80 border-2 border-red-700 text-red-200 font-extrabold text-xs space-y-1">
                 <div className="flex items-center gap-2 text-sm font-black text-red-300">
-                  <ShieldAlert className="w-5 h-5 text-red-500" />
+                  <ShieldAlert className="w-5 h-5 text-red-500 shrink-0" />
                   <span>Account Banned / Restricted</span>
                 </div>
                 <p>Reason: {activeMember.ban_reason || "Violation of gym regulations."}</p>
@@ -612,42 +612,42 @@ export default function MemberPortalPage() {
             )}
 
             {/* Plan Details & Countdown */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-              <div className="bg-zinc-950 p-4 rounded-lg border-2 border-zinc-800 space-y-1">
-                <span className="text-[11px] font-extrabold uppercase text-zinc-500 block">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+              <div className="bg-zinc-950 p-3.5 sm:p-4 rounded-lg border-2 border-zinc-800 space-y-1">
+                <span className="text-[10px] sm:text-[11px] font-extrabold uppercase text-zinc-500 block">
                   Membership Plan
                 </span>
-                <p className="text-base font-black text-zinc-100">
+                <p className="text-sm sm:text-base font-black text-zinc-100 truncate">
                   {activeMember.plan_type || "Standard Access"}
                 </p>
               </div>
 
-              <div className="bg-zinc-950 p-4 rounded-lg border-2 border-zinc-800 space-y-1">
-                <span className="text-[11px] font-extrabold uppercase text-zinc-500 block">
+              <div className="bg-zinc-950 p-3.5 sm:p-4 rounded-lg border-2 border-zinc-800 space-y-1">
+                <span className="text-[10px] sm:text-[11px] font-extrabold uppercase text-zinc-500 block">
                   Start Date
                 </span>
-                <p className="text-sm font-extrabold text-zinc-300">
+                <p className="text-xs sm:text-sm font-extrabold text-zinc-300">
                   {activeMember.join_date || "N/A"}
                 </p>
               </div>
 
-              <div className="bg-zinc-950 p-4 rounded-lg border-2 border-zinc-800 space-y-1">
-                <span className="text-[11px] font-extrabold uppercase text-zinc-500 block">
+              <div className="bg-zinc-950 p-3.5 sm:p-4 rounded-lg border-2 border-zinc-800 space-y-1">
+                <span className="text-[10px] sm:text-[11px] font-extrabold uppercase text-zinc-500 block">
                   Expiration Date
                 </span>
-                <p className="text-sm font-extrabold text-zinc-300">
+                <p className="text-xs sm:text-sm font-extrabold text-zinc-300">
                   {activeMember.expiration_date || "N/A"}
                 </p>
               </div>
             </div>
 
             {/* Countdown Banner */}
-            <div className="p-4 rounded-lg border-2 border-red-500/60 flex items-center justify-between gap-3 text-white shadow-soft bg-red-600">
+            <div className="p-3.5 sm:p-4 rounded-lg border-2 border-red-500/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-white shadow-soft bg-red-600">
               <div className="flex items-center gap-2">
                 <Clock className="w-5 h-5 shrink-0" />
-                <span className="text-xs font-extrabold uppercase">Plan Countdown</span>
+                <span className="text-xs font-extrabold uppercase tracking-wide">Plan Countdown</span>
               </div>
-              <span className="text-sm sm:text-base font-black bg-black/40 px-3 py-1.5 rounded-lg border border-white/30">
+              <span className="text-sm sm:text-base font-black bg-black/40 px-3.5 py-1.5 rounded-lg border border-white/30 w-full sm:w-auto text-center whitespace-nowrap">
                 {calculateCountdown(activeMember.expiration_date)}
               </span>
             </div>
@@ -655,7 +655,7 @@ export default function MemberPortalPage() {
             {/* Assigned Badges */}
             <div id="tutorial-portal-badges" className="space-y-3 pt-2 p-2 rounded-xl transition">
               <span className="text-xs font-extrabold text-zinc-300 uppercase tracking-wide flex items-center gap-1.5">
-                <Award className="w-4 h-4 text-red-500" /> Assigned Member Badges
+                <Award className="w-4 h-4 text-red-500 shrink-0" /> Assigned Member Badges
               </span>
 
               {activeMember.badges && activeMember.badges.length > 0 ? (
@@ -668,7 +668,7 @@ export default function MemberPortalPage() {
                         key={idx}
                         className={`px-3 py-1.5 rounded-lg font-extrabold text-xs border shadow-2xs flex items-center gap-1.5 ${colorStyle}`}
                       >
-                        <Tag className="w-3.5 h-3.5 text-red-500" />
+                        <Tag className="w-3.5 h-3.5 text-red-500 shrink-0" />
                         <span>{foundBadge ? foundBadge.name : badgeName}</span>
                         {foundBadge?.discount_percent ? (
                           <span className="text-[10px] bg-red-950 text-red-300 px-1.5 py-0.5 rounded-md border border-red-700">
@@ -689,7 +689,7 @@ export default function MemberPortalPage() {
             {/* Disciplinary Standing */}
             <div className="space-y-3 pt-2">
               <span className="text-xs font-extrabold text-zinc-300 uppercase tracking-wide flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-emerald-500" /> Disciplinary Standing
+                <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" /> Disciplinary Standing
               </span>
 
               {(!activeMember.warning_count || activeMember.warning_count === 0) &&
@@ -708,7 +708,7 @@ export default function MemberPortalPage() {
               ) : (
                 <div className="p-3.5 bg-amber-950/80 rounded-lg border-2 border-amber-700/80 space-y-1">
                   <div className="flex items-center gap-2 font-extrabold text-xs text-amber-200">
-                    <ShieldAlert className="w-4 h-4 text-amber-400" />
+                    <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0" />
                     <span>Warning Count: {activeMember.warning_count || 0}</span>
                   </div>
                   {activeMember.violation_notes && (
@@ -724,25 +724,25 @@ export default function MemberPortalPage() {
           {/* Gym Schedule & Calendar Card */}
           <div id="tutorial-portal-schedule" className="bg-[#121318] p-5 sm:p-7 rounded-xl border-2 border-zinc-700/80 shadow-soft space-y-6">
             <h2 className="text-lg sm:text-xl font-black text-zinc-100 flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-red-500" /> Operating Schedule & Holiday Closures
+              <Calendar className="w-5 h-5 text-red-500 shrink-0" /> Operating Schedule & Holiday Closures
             </h2>
 
-            {/* Weekly Hours */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2">
+            {/* Weekly Hours Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-2.5">
               {schedule.regular_hours.map((day) => (
                 <div
                   key={day.day}
-                  className={`p-3 rounded-lg border-2 text-center space-y-1 ${
+                  className={`p-2.5 sm:p-3 rounded-lg border-2 text-center flex flex-col justify-between items-center gap-1 min-w-0 ${
                     day.is_closed ? "bg-zinc-950 text-zinc-500 border-zinc-800" : "bg-zinc-950 text-zinc-200 border-zinc-700"
                   }`}
                 >
-                  <span className="block text-xs font-black">{day.day.substring(0, 3)}</span>
+                  <span className="block text-xs font-black uppercase tracking-wider">{day.day.substring(0, 3)}</span>
                   {day.is_closed ? (
-                    <span className="block text-[10px] font-extrabold text-red-400 bg-red-950/80 rounded-md p-0.5 border border-red-700">
+                    <span className="block text-[10px] sm:text-xs font-extrabold text-red-400 bg-red-950/80 rounded-md py-0.5 px-2 border border-red-700 w-full whitespace-nowrap">
                       Closed
                     </span>
                   ) : (
-                    <span className="block text-[10px] font-extrabold text-emerald-400">
+                    <span className="block text-[10px] sm:text-xs font-extrabold text-emerald-400 whitespace-nowrap">
                       {day.open} - {day.close}
                     </span>
                   )}
@@ -754,13 +754,13 @@ export default function MemberPortalPage() {
             {schedule.special_closed_dates.length > 0 && (
               <div className="space-y-3 pt-2">
                 <span className="text-xs font-extrabold text-zinc-300 uppercase tracking-wide flex items-center gap-1.5">
-                  <AlertCircle className="w-4 h-4 text-red-500" /> Scheduled Holiday Closures
+                  <AlertCircle className="w-4 h-4 text-red-500 shrink-0" /> Scheduled Holiday Closures
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                   {schedule.special_closed_dates.map((item) => (
                     <div
                       key={item.id}
-                      className="p-3 bg-red-950/80 rounded-lg border-2 border-red-700 text-xs"
+                      className="p-3 bg-red-950/80 rounded-lg border-2 border-red-700 text-xs space-y-0.5"
                     >
                       <span className="block font-black text-red-200">{item.date}</span>
                       <span className="block font-semibold text-zinc-300">{item.reason}</span>
@@ -776,9 +776,9 @@ export default function MemberPortalPage() {
             <button
               type="button"
               onClick={handleLogout}
-              className="px-5 py-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-extrabold text-xs shadow-soft border-2 border-zinc-700 flex items-center gap-2 transition cursor-pointer"
+              className="w-full sm:w-auto px-5 py-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-extrabold text-xs shadow-soft border-2 border-zinc-700 flex items-center justify-center gap-2 transition cursor-pointer active:scale-98 min-h-[48px]"
             >
-              <LogOut className="w-4 h-4 text-red-500" /> Log Out / Switch Member
+              <LogOut className="w-4 h-4 text-red-500 shrink-0" /> Log Out / Switch Member
             </button>
           </div>
         </div>
