@@ -141,6 +141,8 @@ const VIEW_ROUTES: Record<string, string> = {
   portal: "/portal",
 };
 
+export const TUTORIAL_STORAGE_KEY = "gym_tutorial_active_state";
+
 interface PopoverPos {
   highlightRect: {
     top: number;
@@ -173,6 +175,41 @@ export function AppTutorial() {
   const currentStep = activeSteps[currentStepIdx] || activeSteps[0];
 
   const lastScrolledStepRef = useRef<string | null>(null);
+  const prevTargetStyleRef = useRef<{ el: HTMLElement; position: string; overflow: string } | null>(null);
+
+  // Restore modified styles on previous target element to prevent layout side-effects
+  const restorePrevTargetStyle = useCallback(() => {
+    if (prevTargetStyleRef.current) {
+      const { el, position, overflow } = prevTargetStyleRef.current;
+      if (typeof document !== "undefined" && document.body.contains(el)) {
+        el.style.position = position;
+        el.style.overflow = overflow;
+      }
+      prevTargetStyleRef.current = null;
+    }
+  }, []);
+
+  // Complete cleanup and dismissal function to unlock state and reset overlays
+  const dismissTutorial = useCallback(() => {
+    restorePrevTargetStyle();
+    setIsOpen(false);
+    setTutorialPhase("idle");
+    setCurrentStepIdx(0);
+    setTargetEl(null);
+    setPopoverPos(null);
+    lastScrolledStepRef.current = null;
+
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem(TUTORIAL_STORAGE_KEY);
+        sessionStorage.removeItem(TUTORIAL_STORAGE_KEY);
+      } catch (e) {
+        // Ignore storage errors
+      }
+      document.body.style.pointerEvents = "";
+      document.body.style.overflow = "";
+    }
+  }, [restorePrevTargetStyle]);
 
   // Dynamic collision detection and position calculation for target highlight & chat bubble
   const updatePopoverPosition = useCallback(() => {
@@ -324,7 +361,7 @@ export function AppTutorial() {
     };
   }, [isOpen, tutorialPhase, targetEl, currentStep, updatePopoverPosition]);
 
-  // Listen for trigger events
+  // Listen for trigger and dismissal/logout/storage events
   useEffect(() => {
     const handleStartEvent = (e: CustomEvent) => {
       const stepId = e.detail?.stepId;
@@ -350,15 +387,55 @@ export function AppTutorial() {
       setIsOpen(true);
     };
 
+    const handleDismissEvent = () => {
+      dismissTutorial();
+    };
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === TUTORIAL_STORAGE_KEY && !e.newValue) {
+        dismissTutorial();
+      }
+    };
+
     window.addEventListener("start-app-tutorial" as any, handleStartEvent);
+    window.addEventListener("dismiss-app-tutorial" as any, handleDismissEvent);
+    window.addEventListener("app-logout" as any, handleDismissEvent);
+    window.addEventListener("storage", handleStorageChange);
+
     return () => {
       window.removeEventListener("start-app-tutorial" as any, handleStartEvent);
+      window.removeEventListener("dismiss-app-tutorial" as any, handleDismissEvent);
+      window.removeEventListener("app-logout" as any, handleDismissEvent);
+      window.removeEventListener("storage", handleStorageChange);
     };
-  }, []);
+  }, [dismissTutorial]);
+
+  // Lifecycle listeners for pagehide and beforeunload to guarantee tab closure/reloads clear locked state
+  useEffect(() => {
+    const handleUnload = () => {
+      dismissTutorial();
+    };
+
+    window.addEventListener("pagehide", handleUnload);
+    window.addEventListener("beforeunload", handleUnload);
+
+    return () => {
+      window.removeEventListener("pagehide", handleUnload);
+      window.removeEventListener("beforeunload", handleUnload);
+    };
+  }, [dismissTutorial]);
+
+  // Route changes audit: automatically dismiss overlay when landing on root/gateway or during session transitions
+  useEffect(() => {
+    if (pathname === "/") {
+      dismissTutorial();
+    }
+  }, [pathname, dismissTutorial]);
 
   // Dynamically attach tutorial elements directly to target DOM feature and auto-scroll
   useEffect(() => {
     if (!isOpen || (tutorialPhase !== "admin_tour" && tutorialPhase !== "member_tour")) {
+      restorePrevTargetStyle();
       setTargetEl(null);
       lastScrolledStepRef.current = null;
       return;
@@ -373,17 +450,23 @@ export function AppTutorial() {
     }
 
     let attempts = 0;
-    let prevOverflow = "";
 
     const checkAndAttach = () => {
       const el = document.querySelector(currentStep.targetSelector) as HTMLElement | null;
       if (el) {
+        restorePrevTargetStyle();
+
         const computedStyle = window.getComputedStyle(el);
+        prevTargetStyleRef.current = {
+          el,
+          position: el.style.position,
+          overflow: el.style.overflow,
+        };
+
         if (computedStyle.position === "static") {
           el.style.position = "relative";
         }
         if (computedStyle.overflow === "hidden") {
-          prevOverflow = el.style.overflow;
           el.style.overflow = "visible";
         }
 
@@ -410,12 +493,19 @@ export function AppTutorial() {
 
       return () => {
         clearInterval(interval);
-        if (targetEl && prevOverflow) {
-          targetEl.style.overflow = prevOverflow;
-        }
+        restorePrevTargetStyle();
       };
     }
-  }, [isOpen, tutorialPhase, currentStepIdx, currentStep, pathname, router]);
+  }, [isOpen, tutorialPhase, currentStepIdx, currentStep, pathname, router, restorePrevTargetStyle]);
+
+  // Final unmount cleanup safety guarantee
+  useEffect(() => {
+    return () => {
+      restorePrevTargetStyle();
+      document.body.style.pointerEvents = "";
+      document.body.style.overflow = "";
+    };
+  }, [restorePrevTargetStyle]);
 
   if (!isOpen) return null;
 
@@ -425,14 +515,14 @@ export function AppTutorial() {
         setCurrentStepIdx((prev) => prev + 1);
       } else {
         setTutorialPhase("member_prompt");
+        restorePrevTargetStyle();
         setTargetEl(null);
       }
     } else if (tutorialPhase === "member_tour") {
       if (currentStepIdx < MEMBER_STEPS.length - 1) {
         setCurrentStepIdx((prev) => prev + 1);
       } else {
-        setTutorialPhase("idle");
-        setIsOpen(false);
+        dismissTutorial();
       }
     }
   };
@@ -444,16 +534,21 @@ export function AppTutorial() {
   };
 
   const handleSkip = () => {
-    setTutorialPhase("idle");
-    setIsOpen(false);
+    dismissTutorial();
   };
 
   return (
     <>
       {/* ADMIN PROMPT MODAL */}
       {tutorialPhase === "admin_prompt" && (
-        <div className="fixed inset-0 z-[100000] bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#121214] border-2 border-zinc-800 rounded-2xl max-w-md w-full p-6 sm:p-8 text-zinc-100 shadow-2xl space-y-6 text-center animate-in fade-in zoom-in-95 duration-200">
+        <div
+          onClick={dismissTutorial}
+          className="fixed inset-0 z-[100000] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#121214] border-2 border-zinc-800 rounded-2xl max-w-md w-full p-6 sm:p-8 text-zinc-100 shadow-2xl space-y-6 text-center animate-in fade-in zoom-in-95 duration-200 cursor-default"
+          >
             <div className="w-16 h-16 rounded-2xl bg-red-950/80 border-2 border-red-700/80 text-red-500 flex items-center justify-center mx-auto shadow-md">
               <Compass className="w-8 h-8 animate-spin" />
             </div>
@@ -488,8 +583,14 @@ export function AppTutorial() {
 
       {/* MEMBER PROMPT MODAL */}
       {tutorialPhase === "member_prompt" && (
-        <div className="fixed inset-0 z-[100000] bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#121214] border-2 border-zinc-800 rounded-2xl max-w-md w-full p-6 sm:p-8 text-zinc-100 shadow-2xl space-y-6 text-center animate-in fade-in zoom-in-95 duration-200">
+        <div
+          onClick={dismissTutorial}
+          className="fixed inset-0 z-[100000] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#121214] border-2 border-zinc-800 rounded-2xl max-w-md w-full p-6 sm:p-8 text-zinc-100 shadow-2xl space-y-6 text-center animate-in fade-in zoom-in-95 duration-200 cursor-default"
+          >
             <div className="w-16 h-16 rounded-2xl bg-blue-950/80 border-2 border-blue-700/80 text-blue-400 flex items-center justify-center mx-auto shadow-md">
               <Users className="w-8 h-8" />
             </div>
@@ -528,6 +629,12 @@ export function AppTutorial() {
         (tutorialPhase === "admin_tour" || tutorialPhase === "member_tour") &&
         createPortal(
           <>
+            {/* Backdrop click area for dismissing tutorial */}
+            <div
+              onClick={dismissTutorial}
+              className="fixed inset-0 z-[99990] bg-black/20 backdrop-blur-[1px] pointer-events-auto"
+            />
+
             {/* Target Highlight Outline */}
             <div
               style={{
@@ -666,9 +773,28 @@ export function AppTutorial() {
   );
 }
 
+/** Helper function to dismiss tutorial from anywhere */
+export function dismissAppTutorial() {
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.removeItem(TUTORIAL_STORAGE_KEY);
+      sessionStorage.removeItem(TUTORIAL_STORAGE_KEY);
+    } catch (e) {
+      // Ignore
+    }
+    window.dispatchEvent(new CustomEvent("dismiss-app-tutorial"));
+    window.dispatchEvent(new CustomEvent("app-logout"));
+  }
+}
+
 /** Helper function to open tutorial from anywhere */
 export function startAppTutorial(stepId?: string) {
   if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem(TUTORIAL_STORAGE_KEY, JSON.stringify({ active: true, stepId, timestamp: Date.now() }));
+    } catch (e) {
+      // Ignore
+    }
     window.dispatchEvent(new CustomEvent("start-app-tutorial", { detail: { stepId } }));
   }
 }
