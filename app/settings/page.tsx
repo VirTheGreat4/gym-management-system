@@ -22,6 +22,7 @@ import { getGymSettings, updateGymSettings } from "@/app/actions/settings";
 import { BackButton } from "@/components/BackButton";
 import { GymSchedule, ScheduleDay, SpecialClosedDate } from "@/types/database";
 import { DEFAULT_GYM_NAME, DEFAULT_LOGO_URL, DEFAULT_THEME_COLOR } from "@/lib/config";
+import { isSpecialClosedDateExpired } from "@/lib/dateUtils";
 
 const defaultDays: ScheduleDay[] = [
   { day: "Monday", open: "06:00", close: "22:00", is_closed: false },
@@ -57,7 +58,12 @@ function sanitizeSchedule(rawSchedule: any): GymSchedule {
       : defaultDays,
     special_closed_dates: Array.isArray(rawSchedule.special_closed_dates)
       ? rawSchedule.special_closed_dates.filter(
-          (item: any) => item && typeof item === "object" && item.id && item.date
+          (item: any) =>
+            item &&
+            typeof item === "object" &&
+            item.id &&
+            item.date &&
+            !isSpecialClosedDateExpired(item.date)
         )
       : [],
   };
@@ -104,7 +110,7 @@ export default function SettingsPage() {
         console.error("Error reading gym_settings_data from localStorage", e);
       }
 
-      // 2. Fetch remote DB settings
+      // 2. Fetch remote DB settings (server-filtered)
       const { data, error } = await getGymSettings();
       if (error) {
         console.warn("Supabase loadSettings warning:", error);
@@ -113,7 +119,13 @@ export default function SettingsPage() {
         if (data.theme_color) setSelectedColor(data.theme_color);
         if (data.logo_url !== undefined) setLogoPreview(data.logo_url);
         if (data.schedule) {
-          setSchedule(sanitizeSchedule(data.schedule));
+          const sanitized = sanitizeSchedule(data.schedule);
+          setSchedule(sanitized);
+          try {
+            localStorage.setItem("gym_schedule_data", JSON.stringify(sanitized));
+          } catch (e) {
+            // ignore
+          }
         }
       }
 

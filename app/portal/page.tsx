@@ -28,6 +28,7 @@ import { BackButton } from "@/components/BackButton";
 import { Member, GymSchedule, ScheduleDay, CustomBadge } from "@/types/database";
 import { getBadgeColorStyle } from "@/app/subscriptions/page";
 import { DEFAULT_GYM_NAME, DEFAULT_LOGO_URL } from "@/lib/config";
+import { isSpecialClosedDateExpired } from "@/lib/dateUtils";
 
 const defaultDays: ScheduleDay[] = [
   { day: "Monday", open: "06:00", close: "22:00", is_closed: false },
@@ -61,11 +62,13 @@ function sanitizeSchedule(rawSchedule: any): GymSchedule {
     : defaultDays;
 
   const special_closed_dates = Array.isArray(rawSchedule.special_closed_dates)
-    ? rawSchedule.special_closed_dates.map((item: any) => ({
-        id: item?.id || String(Math.random()),
-        date: item?.date || "",
-        reason: item?.reason || "Holiday Closure",
-      }))
+    ? rawSchedule.special_closed_dates
+        .filter((item: any) => item && item.date && !isSpecialClosedDateExpired(item.date))
+        .map((item: any) => ({
+          id: item?.id || String(Math.random()),
+          date: item?.date || "",
+          reason: item?.reason || "Holiday Closure",
+        }))
     : [];
 
   return {
@@ -398,24 +401,33 @@ export default function MemberPortalPage() {
     loadLocalSettings();
 
     async function initPortal() {
-      // 1. Fetch gym settings & badges
+      // 1. Fetch gym settings & badges (server-filtered)
       const [settingsRes, badgesRes] = await Promise.all([
         getGymSettings(),
         getCustomBadges(),
       ]);
 
       if (settingsRes.data) {
-        const savedSettings = localStorage.getItem("gym_settings_data");
-        if (!savedSettings) {
-          if (settingsRes.data.name && settingsRes.data.name !== "JLAB Fitness" && settingsRes.data.name !== "JLAB Fitness Gym") setGymName(settingsRes.data.name);
-          else setGymName(DEFAULT_GYM_NAME);
+        if (settingsRes.data.name && settingsRes.data.name !== "JLAB Fitness" && settingsRes.data.name !== "JLAB Fitness Gym") {
+          setGymName(settingsRes.data.name);
+        } else {
+          setGymName(DEFAULT_GYM_NAME);
+        }
 
-          if (settingsRes.data.logo_url) {
-            setLogoUrl(settingsRes.data.logo_url);
-          } else {
-            setLogoUrl(DEFAULT_LOGO_URL);
+        if (settingsRes.data.logo_url) {
+          setLogoUrl(settingsRes.data.logo_url);
+        } else {
+          setLogoUrl(DEFAULT_LOGO_URL);
+        }
+
+        if (settingsRes.data.schedule) {
+          const sanitized = sanitizeSchedule(settingsRes.data.schedule);
+          setSchedule(sanitized);
+          try {
+            localStorage.setItem("gym_schedule_data", JSON.stringify(sanitized));
+          } catch (e) {
+            // ignore
           }
-          if (settingsRes.data.schedule) setSchedule(sanitizeSchedule(settingsRes.data.schedule));
         }
       }
       if (badgesRes.data) {
@@ -447,7 +459,13 @@ export default function MemberPortalPage() {
     initPortal();
 
     const handleRealtime = async () => {
-      const badgesRes = await getCustomBadges();
+      const [settingsRes, badgesRes] = await Promise.all([
+        getGymSettings(),
+        getCustomBadges(),
+      ]);
+      if (settingsRes.data && settingsRes.data.schedule) {
+        setSchedule(sanitizeSchedule(settingsRes.data.schedule));
+      }
       if (badgesRes.data) setCustomBadges(badgesRes.data);
 
       if (activeMember) {

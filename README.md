@@ -21,14 +21,15 @@ A modern, full-stack gym management application built with **Next.js 16**, **Rea
   * Flexible plan creator supporting Standard, Student, VIP, Daily, and Custom tiers.
   * Custom member badges with optional percentage discounts.
 
-* **Retention & Renewal Hub**
+* **Retention & Renewal Hub** (Not Implemented)
   * Automated tracking for members nearing expiration (0 to 3 days) or overdue (-1 to -3 days).
   * Integrated SMS/outreach actions for renewal reminders and win-back offers.
 
 * **⚙️ Gym Settings & Custom Branding**
   * Custom gym branding including gym name, primary theme color, and custom logo.
   * Configurable weekly schedule (regular operating hours per day & manual open/close overrides).
-  * Special closed dates calendar management.
+  * Special closed dates calendar management with server-side timezone-safe expiration checking (`YYYY-MM-DD` comparison against local & UTC start-of-day).
+  * Automated background purging of expired closed dates from Supabase database records and instant cache revalidation (`revalidatePath`).
 
 * **🛡️ Security, Resilience & Anti-Abuse System**
   * **Resilient Click Handling & Failure Recovery:**
@@ -76,9 +77,10 @@ gym-management-system/
 │   └── subscriptions/    # Subscription plans & badge management
 ├── components/           # Reusable UI components (ResilientButton, AdminInactivityGuard, BotProtection, etc.)
 ├── hooks/                # React custom hooks (useResilientAction)
-├── lib/                  # Utilities, rate-limiting, bot detection, async helpers, Supabase clients
+├── lib/                  # Utilities, rate-limiting, bot detection, date helpers, Supabase clients
 │   ├── async-utils.ts    # Debounce, throttle, and exponential backoff retry helpers
 │   ├── bot-detection.ts  # Bot UA checks, honeypot traps, and Turnstile validation
+│   ├── dateUtils.ts      # Date manipulation and timezone-safe special closed date expiration checks
 │   ├── rate-limit.ts     # Upstash Redis sliding window rate limiter with in-memory fallback
 │   └── request-validation.ts # Public API request validator
 ├── proxy.ts              # Security headers, rate limiting, and bot filter middleware
@@ -165,6 +167,16 @@ Client actions execute through `useResilientAction` hook wrapped around `execute
 * Portal member lookup (`app/portal/page.tsx`) explicitly obscures full directory contents.
 * Requires at least 2 characters before rendering matches.
 * Search matches against trimmed name queries without displaying unselected member details or exposing all directory records at once.
+
+### Server-Side Filtering & Automated Purging of Special Closed Dates
+* **Timezone-Safe Date Boundary Validation (`lib/dateUtils.ts`):** `isSpecialClosedDateExpired()` compares target `YYYY-MM-DD` strings against both local system date and UTC date boundaries to prevent premature expiration or lingering entries past midnight.
+* **Database Purging & Server Actions (`app/actions/settings.ts`):**
+  * `getGymSettings()` filters out expired closed dates at the server layer before sending data to the client. When expired entries are detected in database JSONB arrays, an automated background transaction permanently purges them from Supabase.
+  * `updateGymSettings()` sanitizes incoming payloads to remove expired entries prior to saving and invokes `revalidatePath` across `/settings`, `/portal`, `/dashboard`, and `/`.
+* **Zero-Flash Client Synchronization (`app/portal/page.tsx` & `app/settings/page.tsx`):**
+  * Admin Settings and Member Portal views directly consume server-filtered data and update local storage caches (`localStorage.gym_schedule`).
+  * Eliminates client-side post-fetch array filtering effects (`useEffect`, `.filter()`), preventing layout shifts or temporary displays of stale content during initial render.
+  * Live updates via `RealtimeSync` refetch `getGymSettings()` upon database payload changes, ensuring instant, synchronized UI state across all active Admin and Member views.
 
 ---
 
