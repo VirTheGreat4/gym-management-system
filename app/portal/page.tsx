@@ -573,23 +573,34 @@ export default function MemberPortalPage() {
       {!activeMember ? (
         <div className="bg-[#121318] p-5 sm:p-9 rounded-xl border-2 border-zinc-700/80 shadow-2xl space-y-6">
           {/* Header Branding */}
-          <div className="text-center space-y-3">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-lg bg-zinc-950 border-2 border-zinc-700 shadow-md overflow-hidden mx-auto">
+          <div className="flex flex-col items-center justify-center text-center space-y-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-zinc-950 border-2 border-zinc-700 shadow-lg overflow-hidden shrink-0">
               {logoUrl ? (
-                <img src={logoUrl} alt={gymName} className="w-full h-full object-contain p-1" />
+                <img src={logoUrl} alt={gymName} className="w-full h-full object-contain p-1.5" />
               ) : (
-                <Dumbbell className="w-8 h-8 text-red-500" />
+                <Dumbbell className="w-8 h-8 sm:w-10 sm:h-10 text-red-500" />
               )}
             </div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-zinc-800 text-zinc-300 text-xs font-extrabold border border-zinc-700">
-              <Sparkles className="w-3.5 h-3.5 text-red-500" /> Passwordless Member Portal
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-zinc-900/90 text-zinc-300 text-xs font-extrabold border border-zinc-700/80 shadow-xs">
+              <Sparkles className="w-3.5 h-3.5 text-red-500 shrink-0" />
+              <span>Passwordless Member Portal</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-zinc-100">
-              Welcome to {gymName} Member Portal
-            </h1>
-            <p className="text-xs sm:text-sm font-medium text-zinc-400 max-w-md mx-auto">
-              Check your active plan status, expiry countdown, database badges, and live operating hours without needing a password.
-            </p>
+            <div className="space-y-1.5 max-w-lg">
+              <h1 className="text-2xl sm:text-3xl font-black text-zinc-100 tracking-tight leading-tight">
+                Welcome to {gymName} Member Portal
+              </h1>
+              <p className="text-xs sm:text-sm font-medium text-zinc-400 leading-relaxed">
+                Check your active plan status, expiry countdown, database badges, and live operating hours without needing a password.
+              </p>
+            </div>
+
+            {/* Session Duration Notice */}
+            <div className="p-3.5 rounded-xl bg-zinc-950/80 border border-zinc-800 text-xs font-medium text-zinc-300 max-w-md mx-auto leading-relaxed flex items-start gap-2.5 text-left">
+              <Clock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+              <span>
+                <strong className="text-zinc-200">Session & Access Duration:</strong> Your account is accessible in this portal throughout your registered membership plan period. Account features remain active only before your allotted subscription span of time expires.
+              </span>
+            </div>
 
             {/* Live Gym Status Badge */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-950 border border-zinc-700 text-xs font-extrabold shadow-sm mt-1">
@@ -630,9 +641,12 @@ export default function MemberPortalPage() {
           {/* Form */}
           <form onSubmit={handleLookup} className="space-y-4 max-w-md mx-auto pt-2">
             <div className="relative" ref={suggestionContainerRef}>
-              <label className="block text-xs font-extrabold text-zinc-400 uppercase tracking-wide mb-2">
+              <label className="block text-xs font-extrabold text-zinc-400 uppercase tracking-wide mb-1">
                 Enter your Full Name
               </label>
+              <p className="text-xs font-medium text-zinc-400 mb-2.5 leading-relaxed">
+                Please enter the exact name you provided when you last registered for a plan or checked in at the front desk.
+              </p>
               <div className="relative">
                 <input
                   type="text"
