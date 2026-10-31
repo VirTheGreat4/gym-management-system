@@ -51,7 +51,7 @@ export const ADMIN_STEPS: TutorialStep[] = [
   {
     id: "members-list",
     viewType: "members",
-    targetSelector: "#tutorial-members-table",
+    targetSelector: "#tutorial-members-table, #tutorial-members-list",
     title: "Member Directory",
     targetTag: "All Members List",
     category: "Admin Core",
@@ -61,7 +61,7 @@ export const ADMIN_STEPS: TutorialStep[] = [
   {
     id: "members-actions",
     viewType: "members",
-    targetSelector: "#tutorial-members-actions",
+    targetSelector: "#tutorial-members-actions, #tutorial-members-actions-mobile",
     title: "Member Control Actions",
     targetTag: "Edit, Strike & Ban",
     category: "Admin Core",
@@ -143,6 +143,32 @@ const VIEW_ROUTES: Record<string, string> = {
 
 export const TUTORIAL_STORAGE_KEY = "gym_tutorial_active_state";
 
+/**
+ * Safely search for a mounted, visible target element supporting comma-separated fallback selectors.
+ */
+function findVisibleTarget(selectorString: string): HTMLElement | null {
+  if (typeof document === "undefined") return null;
+  const selectors = selectorString.split(",").map((s) => s.trim());
+  for (const selector of selectors) {
+    if (!selector) continue;
+    const elements = Array.from(document.querySelectorAll<HTMLElement>(selector));
+    for (const el of elements) {
+      if (!document.body.contains(el)) continue;
+      const rect = el.getBoundingClientRect();
+      const style = window.getComputedStyle(el);
+      if (
+        style.display !== "none" &&
+        style.visibility !== "hidden" &&
+        style.opacity !== "0" &&
+        (rect.width > 0 || rect.height > 0 || el.offsetWidth > 0 || el.offsetHeight > 0)
+      ) {
+        return el;
+      }
+    }
+  }
+  return null;
+}
+
 interface PopoverPos {
   highlightRect: {
     top: number;
@@ -150,7 +176,7 @@ interface PopoverPos {
     width: number;
     height: number;
   };
-  placement: "top" | "bottom" | "center";
+  placement: "top" | "bottom";
   top?: number;
   bottom?: number;
   left: number;
@@ -175,16 +201,9 @@ export function AppTutorial() {
   const currentStep = activeSteps[currentStepIdx] || activeSteps[0];
 
   const lastScrolledStepRef = useRef<string | null>(null);
-  const prevTargetStyleRef = useRef<{ el: HTMLElement; position: string; overflow: string; zIndex: string; isolation: string } | null>(null);
-
-  // Restore modified styles on previous target element to prevent layout side-effects
-  const restorePrevTargetStyle = useCallback(() => {
-    prevTargetStyleRef.current = null;
-  }, []);
 
   // Complete cleanup and dismissal function to unlock state and reset overlays
   const dismissTutorial = useCallback(() => {
-    restorePrevTargetStyle();
     setIsOpen(false);
     setTutorialPhase("idle");
     setCurrentStepIdx(0);
@@ -202,9 +221,9 @@ export function AppTutorial() {
       document.body.style.pointerEvents = "";
       document.body.style.overflow = "";
     }
-  }, [restorePrevTargetStyle]);
+  }, []);
 
-  // Dynamic collision detection and position calculation for target highlight & chat bubble
+  // Calculate exact bounding box and popover anchor position relative to target element
   const updatePopoverPosition = useCallback(() => {
     if (!targetEl || !document.body.contains(targetEl)) {
       setPopoverPos(null);
@@ -215,17 +234,25 @@ export function AppTutorial() {
     const vw = typeof window !== "undefined" ? window.innerWidth : 1200;
     const vh = typeof window !== "undefined" ? window.innerHeight : 800;
 
-    // Highlight frame clamped inside viewport bounds
-    const hTop = Math.max(4, rect.top - 8);
-    const hLeft = Math.max(4, rect.left - 8);
-    const hWidth = Math.min(vw - hLeft - 4, Math.max(10, rect.width + 16));
-    const hHeight = Math.min(vh - hTop - 4, Math.max(10, rect.height + 16));
+    // Highlight frame relative to exact target bounds (padded)
+    const hTop = rect.top - 8;
+    const hLeft = rect.left - 8;
+    const hWidth = Math.max(10, rect.width + 16);
+    const hHeight = Math.max(10, rect.height + 16);
 
-    // Popover bubble responsive width & position
+    // Check if target element is visible inside viewport
+    const isTargetInViewport =
+      rect.bottom > 0 && rect.top < vh && rect.left < vw && rect.right > 0;
+
+    // Popover bubble responsive width
     const width = Math.min(420, vw - 24);
     const centerX = rect.left + rect.width / 2;
+
     let left = centerX - width / 2;
-    left = Math.max(12, Math.min(vw - width - 12, left));
+    if (isTargetInViewport) {
+      // Keep horizontal alignment within viewport edges only while target is visible in viewport
+      left = Math.max(12, Math.min(vw - width - 12, left));
+    }
 
     let pointerLeft = centerX - left;
     pointerLeft = Math.max(20, Math.min(width - 20, pointerLeft));
@@ -233,11 +260,10 @@ export function AppTutorial() {
     const spaceBelow = vh - rect.bottom - 16;
     const spaceAbove = rect.top - 16;
 
-    let placement: "top" | "bottom" | "center" = "bottom";
-
-    if (spaceBelow >= 240) {
+    let placement: "top" | "bottom" = "bottom";
+    if (spaceBelow >= 220) {
       placement = "bottom";
-    } else if (spaceAbove >= 240) {
+    } else if (spaceAbove >= 220) {
       placement = "top";
     } else if (spaceBelow >= spaceAbove) {
       placement = "bottom";
@@ -245,32 +271,15 @@ export function AppTutorial() {
       placement = "top";
     }
 
-    // Fallback centered placement if screen space is severely constrained
-    if (spaceBelow < 160 && spaceAbove < 160) {
-      placement = "center";
-    }
-
-    if (placement === "center") {
-      const maxHeight = Math.min(380, vh - 48);
-      const top = Math.max(24, (vh - maxHeight) / 2);
-      setPopoverPos({
-        highlightRect: { top: hTop, left: hLeft, width: hWidth, height: hHeight },
-        placement: "bottom",
-        top,
-        left,
-        width,
-        maxHeight,
-        pointerLeft: width / 2,
-      });
-      return;
-    }
-
     if (placement === "top") {
-      const bottom = Math.max(12, vh - rect.top + 12);
-      const maxHeight = Math.min(380, Math.max(180, rect.top - 24));
+      const bottom = vh - rect.top + 12;
+      const maxHeight = isTargetInViewport
+        ? Math.min(380, Math.max(160, rect.top - 24))
+        : 380;
+
       setPopoverPos({
         highlightRect: { top: hTop, left: hLeft, width: hWidth, height: hHeight },
-        placement,
+        placement: "top",
         bottom,
         left,
         width,
@@ -278,11 +287,14 @@ export function AppTutorial() {
         pointerLeft,
       });
     } else {
-      const top = Math.max(12, Math.min(vh - 180, rect.bottom + 12));
-      const maxHeight = Math.min(380, Math.max(180, vh - top - 16));
+      const top = rect.bottom + 12;
+      const maxHeight = isTargetInViewport
+        ? Math.min(380, Math.max(160, vh - top - 16))
+        : 380;
+
       setPopoverPos({
         highlightRect: { top: hTop, left: hLeft, width: hWidth, height: hHeight },
-        placement,
+        placement: "bottom",
         top,
         left,
         width,
@@ -292,69 +304,37 @@ export function AppTutorial() {
     }
   }, [targetEl]);
 
-  // Continuous Position Observer (ResizeObserver, MutationObserver, RAF & Scroll)
+  // Clean event listeners for position updates on scroll/resize without heavy polling loops
   useEffect(() => {
-    if (!isOpen || (tutorialPhase !== "admin_tour" && tutorialPhase !== "member_tour")) {
+    if (!isOpen || !targetEl || (tutorialPhase !== "admin_tour" && tutorialPhase !== "member_tour")) {
       return;
     }
 
     updatePopoverPosition();
 
-    // 1. ResizeObserver for target element and root document
-    let resizeObserver: ResizeObserver | null = null;
-    if (typeof ResizeObserver !== "undefined") {
-      resizeObserver = new ResizeObserver(() => {
-        updatePopoverPosition();
-      });
-      if (targetEl) {
-        resizeObserver.observe(targetEl);
-      }
-      resizeObserver.observe(document.documentElement);
-    }
-
-    // 2. MutationObserver on document body to detect async database loading or DOM shifts
-    let mutationObserver: MutationObserver | null = null;
-    if (typeof MutationObserver !== "undefined") {
-      mutationObserver = new MutationObserver(() => {
-        if (!targetEl || !document.body.contains(targetEl)) {
-          if (currentStep) {
-            const el = document.querySelector(currentStep.targetSelector) as HTMLElement | null;
-            if (el) setTargetEl(el);
-          }
-        }
-        updatePopoverPosition();
-      });
-      mutationObserver.observe(document.body, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        characterData: true,
-      });
-    }
-
-    // 3. Scroll & Resize event listeners
     const handleUpdate = () => {
       updatePopoverPosition();
     };
 
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      resizeObserver = new ResizeObserver(() => {
+        handleUpdate();
+      });
+      resizeObserver.observe(targetEl);
+    }
+
     window.addEventListener("resize", handleUpdate);
     window.addEventListener("scroll", handleUpdate, true);
 
-    // 4. Interval polling fallback for dynamic layout shifts during async data loading
-    const interval = setInterval(() => {
-      updatePopoverPosition();
-    }, 150);
-
     return () => {
       if (resizeObserver) resizeObserver.disconnect();
-      if (mutationObserver) mutationObserver.disconnect();
       window.removeEventListener("resize", handleUpdate);
       window.removeEventListener("scroll", handleUpdate, true);
-      clearInterval(interval);
     };
-  }, [isOpen, tutorialPhase, targetEl, currentStep, updatePopoverPosition]);
+  }, [isOpen, tutorialPhase, targetEl, updatePopoverPosition]);
 
-  // Listen for trigger and dismissal/logout/storage events
+  // Listen for trigger, logout, and storage sync events
   useEffect(() => {
     const handleStartEvent = (e: CustomEvent) => {
       const stepId = e.detail?.stepId;
@@ -403,7 +383,7 @@ export function AppTutorial() {
     };
   }, [dismissTutorial]);
 
-  // Lifecycle listeners for pagehide and beforeunload to guarantee tab closure/reloads clear locked state
+  // Handle unload events
   useEffect(() => {
     const handleUnload = () => {
       dismissTutorial();
@@ -418,39 +398,43 @@ export function AppTutorial() {
     };
   }, [dismissTutorial]);
 
-  // Route changes audit: automatically dismiss overlay when landing on root/gateway or during session transitions
+  // Automatically dismiss overlay when landing on root landing page
   useEffect(() => {
     if (pathname === "/") {
       dismissTutorial();
     }
   }, [pathname, dismissTutorial]);
 
-  // Dynamically attach tutorial elements directly to target DOM feature and auto-scroll
+  // Safe async target resolution loop when switching steps
   useEffect(() => {
     if (!isOpen || (tutorialPhase !== "admin_tour" && tutorialPhase !== "member_tour")) {
-      restorePrevTargetStyle();
       setTargetEl(null);
+      setPopoverPos(null);
       lastScrolledStepRef.current = null;
       return;
     }
 
     if (!currentStep) return;
 
-    // Navigate to correct page route if needed
+    // Instantly reset target state on step change to prevent sticky overlay artifacts
+    setTargetEl(null);
+    setPopoverPos(null);
+
+    // Ensure route navigation if required
     const targetPath = VIEW_ROUTES[currentStep.viewType];
     if (targetPath && pathname !== targetPath) {
       router.push(targetPath);
     }
 
     let attempts = 0;
+    let timer: NodeJS.Timeout | null = null;
 
-    const checkAndAttach = () => {
-      const el = document.querySelector(currentStep.targetSelector) as HTMLElement | null;
+    const resolveTarget = () => {
+      const el = findVisibleTarget(currentStep.targetSelector);
       if (el) {
-        restorePrevTargetStyle();
         setTargetEl(el);
 
-        // Auto-scroll target into view if entering new step or when element is off-screen
+        // Smooth scroll to target
         const stepKey = `${tutorialPhase}-${currentStep.id}`;
         if (lastScrolledStepRef.current !== stepKey) {
           lastScrolledStepRef.current = stepKey;
@@ -461,40 +445,30 @@ export function AppTutorial() {
       return false;
     };
 
-    if (!checkAndAttach()) {
-      const interval = setInterval(() => {
+    if (!resolveTarget()) {
+      timer = setInterval(() => {
         attempts++;
-        if (checkAndAttach() || attempts > 40) {
-          clearInterval(interval);
+        if (resolveTarget() || attempts >= 50) {
+          if (timer) clearInterval(timer);
         }
       }, 100);
-
-      return () => {
-        clearInterval(interval);
-        restorePrevTargetStyle();
-      };
     }
-  }, [isOpen, tutorialPhase, currentStepIdx, currentStep, pathname, router, restorePrevTargetStyle]);
 
-  // Final unmount cleanup safety guarantee
-  useEffect(() => {
     return () => {
-      restorePrevTargetStyle();
-      document.body.style.pointerEvents = "";
-      document.body.style.overflow = "";
+      if (timer) clearInterval(timer);
     };
-  }, [restorePrevTargetStyle]);
+  }, [isOpen, tutorialPhase, currentStepIdx, currentStep, pathname, router]);
 
   if (!isOpen) return null;
 
   const handleNext = () => {
+    setTargetEl(null);
+    setPopoverPos(null);
     if (tutorialPhase === "admin_tour") {
       if (currentStepIdx < ADMIN_STEPS.length - 1) {
         setCurrentStepIdx((prev) => prev + 1);
       } else {
         setTutorialPhase("member_prompt");
-        restorePrevTargetStyle();
-        setTargetEl(null);
       }
     } else if (tutorialPhase === "member_tour") {
       if (currentStepIdx < MEMBER_STEPS.length - 1) {
@@ -507,6 +481,8 @@ export function AppTutorial() {
 
   const handlePrev = () => {
     if (currentStepIdx > 0) {
+      setTargetEl(null);
+      setPopoverPos(null);
       setCurrentStepIdx((prev) => prev - 1);
     }
   };
@@ -547,6 +523,8 @@ export function AppTutorial() {
               </button>
               <button
                 onClick={() => {
+                  setTargetEl(null);
+                  setPopoverPos(null);
                   setTutorialPhase("admin_tour");
                   setCurrentStepIdx(0);
                 }}
@@ -589,6 +567,8 @@ export function AppTutorial() {
               </button>
               <button
                 onClick={() => {
+                  setTargetEl(null);
+                  setPopoverPos(null);
                   setTutorialPhase("member_tour");
                   setCurrentStepIdx(0);
                 }}
@@ -601,7 +581,7 @@ export function AppTutorial() {
         </div>
       )}
 
-      {/* VIEWPORT-CONTAINED ANCHORED TUTORIAL OVERLAY & CHAT BUBBLE */}
+      {/* ANCHORED TUTORIAL OVERLAY & CHAT BUBBLE */}
       {targetEl &&
         popoverPos &&
         (tutorialPhase === "admin_tour" || tutorialPhase === "member_tour") &&
@@ -709,7 +689,7 @@ export function AppTutorial() {
                   </div>
                 </div>
 
-                {/* Footer Navigation (Always Visible & Unclipped) */}
+                {/* Footer Navigation */}
                 <div className="flex items-center justify-between pt-2.5 border-t border-zinc-800 shrink-0">
                   <div className="text-[11px] font-extrabold text-zinc-400">
                     {tutorialPhase === "admin_tour" ? "Admin" : "Member"} Step{" "}

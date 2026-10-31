@@ -598,7 +598,7 @@ export default function MembersPage() {
       </div>
 
       {/* Mobile Stacked Member Cards (Visible on screens < md) */}
-      <div className="block md:hidden space-y-3">
+      <div id="tutorial-members-list" className="block md:hidden space-y-3">
         {isLoading ? (
           <div className="bg-zinc-900 rounded-2xl border-3 border-zinc-700 p-8 text-center text-zinc-400 font-medium">
             Loading members from live database...
@@ -702,7 +702,7 @@ export default function MembersPage() {
               </div>
 
               {/* Mobile Actions Grid */}
-              <div className="grid grid-cols-4 gap-2 pt-1 border-t border-zinc-800/80">
+              <div id="tutorial-members-actions-mobile" className="grid grid-cols-4 gap-2 pt-1 border-t border-zinc-800/80">
                 <button
                   onClick={() => {
                     setWarningMember(member);
