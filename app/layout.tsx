@@ -15,6 +15,9 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "JLAB Fitness Gym",
   description: "Modern Local Gym Management SaaS with AI Retention and White-Labeling",
+  verification: {
+    google: "DH-cARQFpxf36_oYXPPE_0zENJ8H4hSbcIEJnlp01bg",
+  },
   icons: {
     icon: "/jlab-logo.svg",
     shortcut: "/jlab-logo.svg",

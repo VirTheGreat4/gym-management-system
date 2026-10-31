@@ -179,16 +179,7 @@ export function AppTutorial() {
 
   // Restore modified styles on previous target element to prevent layout side-effects
   const restorePrevTargetStyle = useCallback(() => {
-    if (prevTargetStyleRef.current) {
-      const { el, position, overflow, zIndex, isolation } = prevTargetStyleRef.current;
-      if (typeof document !== "undefined" && document.body.contains(el)) {
-        el.style.position = position;
-        el.style.overflow = overflow;
-        el.style.zIndex = zIndex;
-        el.style.isolation = isolation;
-      }
-      prevTargetStyleRef.current = null;
-    }
+    prevTargetStyleRef.current = null;
   }, []);
 
   // Complete cleanup and dismissal function to unlock state and reset overlays
@@ -457,25 +448,6 @@ export function AppTutorial() {
       const el = document.querySelector(currentStep.targetSelector) as HTMLElement | null;
       if (el) {
         restorePrevTargetStyle();
-
-        const computedStyle = window.getComputedStyle(el);
-        prevTargetStyleRef.current = {
-          el,
-          position: el.style.position,
-          overflow: el.style.overflow,
-          zIndex: el.style.zIndex,
-          isolation: el.style.isolation,
-        };
-
-        if (computedStyle.position === "static") {
-          el.style.position = "relative";
-        }
-        if (computedStyle.overflow === "hidden") {
-          el.style.overflow = "visible";
-        }
-        el.style.zIndex = "99995";
-        el.style.isolation = "isolate";
-
         setTargetEl(el);
 
         // Auto-scroll target into view if entering new step or when element is off-screen
