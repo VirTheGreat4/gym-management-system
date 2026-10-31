@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Dumbbell, Users, Lock, ChevronRight, Sparkles, KeyRound, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { loginAdmin } from '@/app/actions/auth';
 import { getGymSettings } from '@/app/actions/settings';
-import GeometricBackground from '@/components/GeometricBackground';
+import GeometricBackground, { GlowTarget } from '@/components/GeometricBackground';
 import { DEFAULT_GYM_NAME, DEFAULT_LOGO_URL } from '@/lib/config';
 
 export default function LandingGateway() {
@@ -14,6 +14,7 @@ export default function LandingGateway() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [activeGlow, setActiveGlow] = useState<GlowTarget>('card');
   const [gymName, setGymName] = useState<string>(() => {
     if (typeof window !== "undefined") {
       try {
@@ -120,10 +121,16 @@ export default function LandingGateway() {
   return (
     <div className="relative w-full min-h-screen flex items-center justify-center py-6 px-3 sm:px-6 overflow-hidden select-none" suppressHydrationWarning>
       {/* Minimalist Geometric Background Layer */}
-      <GeometricBackground />
+      <GeometricBackground activeGlow={activeGlow} onGlowChange={setActiveGlow} />
 
       {/* Main Card - Soft Off-White Aesthetic Container */}
-      <div className="relative w-full max-w-sm sm:max-w-md mx-auto z-10 !bg-[#f0f2f5] rounded-xl !border-2 !border-slate-300/90 shadow-2xl shadow-slate-950/30 p-5 sm:p-7 space-y-5">
+      <div
+        className={`relative w-full max-w-sm sm:max-w-md mx-auto z-10 !bg-[#f0f2f5] rounded-xl !border-2 transition-all duration-700 ${
+          activeGlow === 'card'
+            ? 'card-glow-4edge !border-red-500/80 shadow-2xl shadow-red-950/40 scale-[1.01]'
+            : '!border-slate-300/90 shadow-2xl shadow-slate-950/30'
+        } p-5 sm:p-7 space-y-5`}
+      >
         {/* Card Header Branding */}
         <div className="text-center space-y-3 p-2 rounded-xl transition">
           <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 bg-slate-900 rounded-2xl border-2 border-slate-800 text-red-500 flex items-center justify-center mx-auto shadow-xl overflow-hidden shrink-0">
