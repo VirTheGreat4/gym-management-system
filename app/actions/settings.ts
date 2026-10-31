@@ -31,7 +31,7 @@ export async function getGymSettings(): Promise<{ data: GymSettings | null; erro
     if (!data.logo_url) {
       data.logo_url = DEFAULT_LOGO_URL;
     }
-    if (!data.name || data.name === 'JLAB Fitness') {
+    if (!data.name || data.name === 'JLAB Fitness' || data.name === 'JLAB Fitness Gym') {
       data.name = DEFAULT_GYM_NAME;
     }
 

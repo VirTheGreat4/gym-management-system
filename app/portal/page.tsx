@@ -173,7 +173,7 @@ export default function MemberPortalPage() {
         const savedSettings = localStorage.getItem("gym_settings_data");
         if (savedSettings) {
           const parsed = JSON.parse(savedSettings);
-          if (parsed.name && parsed.name !== "JLAB Fitness") return parsed.name;
+          if (parsed.name && parsed.name !== "JLAB Fitness" && parsed.name !== "JLAB Fitness Gym") return parsed.name;
         }
       } catch (e) {}
     }
@@ -314,7 +314,7 @@ export default function MemberPortalPage() {
         const savedSettings = localStorage.getItem("gym_settings_data");
         if (savedSettings) {
           const parsed = JSON.parse(savedSettings);
-          if (parsed.name && parsed.name !== "JLAB Fitness") setGymName(parsed.name);
+          if (parsed.name && parsed.name !== "JLAB Fitness" && parsed.name !== "JLAB Fitness Gym") setGymName(parsed.name);
           else setGymName(DEFAULT_GYM_NAME);
 
           if (parsed.logo_url) {
@@ -347,7 +347,7 @@ export default function MemberPortalPage() {
       if (settingsRes.data) {
         const savedSettings = localStorage.getItem("gym_settings_data");
         if (!savedSettings) {
-          if (settingsRes.data.name && settingsRes.data.name !== "JLAB Fitness") setGymName(settingsRes.data.name);
+          if (settingsRes.data.name && settingsRes.data.name !== "JLAB Fitness" && settingsRes.data.name !== "JLAB Fitness Gym") setGymName(settingsRes.data.name);
           else setGymName(DEFAULT_GYM_NAME);
 
           if (settingsRes.data.logo_url) {
@@ -403,7 +403,7 @@ export default function MemberPortalPage() {
 
     const handleSettingsUpdate = (e: any) => {
       if (e.detail) {
-        if (e.detail.name && e.detail.name !== "JLAB Fitness") setGymName(e.detail.name);
+        if (e.detail.name && e.detail.name !== "JLAB Fitness" && e.detail.name !== "JLAB Fitness Gym") setGymName(e.detail.name);
         else if (e.detail.name) setGymName(DEFAULT_GYM_NAME);
 
         if (e.detail.logo_url) {

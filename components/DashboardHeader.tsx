@@ -22,7 +22,7 @@ export default function DashboardHeader({
         const saved = localStorage.getItem("gym_settings_data");
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (parsed.name && parsed.name !== "JLAB Fitness") return parsed.name;
+          if (parsed.name && parsed.name !== "JLAB Fitness" && parsed.name !== "JLAB Fitness Gym") return parsed.name;
         }
       } catch (e) {}
     }
@@ -50,7 +50,7 @@ export default function DashboardHeader({
         const saved = localStorage.getItem("gym_settings_data");
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (parsed.name && parsed.name !== "JLAB Fitness") setGymName(parsed.name);
+          if (parsed.name && parsed.name !== "JLAB Fitness" && parsed.name !== "JLAB Fitness Gym") setGymName(parsed.name);
           else setGymName(DEFAULT_GYM_NAME);
 
           if (parsed.logo_url) {
@@ -73,7 +73,7 @@ export default function DashboardHeader({
       if (data) {
         const saved = localStorage.getItem("gym_settings_data");
         if (!saved) {
-          if (data.name && data.name !== "JLAB Fitness") setGymName(data.name);
+          if (data.name && data.name !== "JLAB Fitness" && data.name !== "JLAB Fitness Gym") setGymName(data.name);
           else setGymName(DEFAULT_GYM_NAME);
 
           if (data.logo_url) {
@@ -89,7 +89,7 @@ export default function DashboardHeader({
     // 3. Listen for live customization updates from Settings page
     const handleSettingsUpdate = (e: any) => {
       if (e.detail) {
-        if (e.detail.name && e.detail.name !== "JLAB Fitness") setGymName(e.detail.name);
+        if (e.detail.name && e.detail.name !== "JLAB Fitness" && e.detail.name !== "JLAB Fitness Gym") setGymName(e.detail.name);
         else if (e.detail.name) setGymName(DEFAULT_GYM_NAME);
 
         if (e.detail.logo_url) {
