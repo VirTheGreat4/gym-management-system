@@ -67,8 +67,8 @@ export function calculateGymOpenStatus(
     return {
       isOpen: isOverrideOpen,
       reason: isOverrideOpen
-        ? "Live Management Override (Currently Open)"
-        : "Live Management Override (Currently Closed)",
+        ? "Live Management Override"
+        : "Live Management Override (Closed)",
       todayHoursText: isOverrideOpen ? "Open via Live Control" : "Closed via Live Control",
     };
   }
@@ -223,8 +223,40 @@ export default function MemberPortalPage() {
   const [isFetchingMembers, setIsFetchingMembers] = useState(false);
   const suggestionContainerRef = React.useRef<HTMLDivElement>(null);
 
+  const [isTutorialActive, setIsTutorialActive] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        return localStorage.getItem("gym_tutorial_active_state") === "true";
+      } catch (e) {}
+    }
+    return false;
+  });
+
   useEffect(() => {
     setIsMounted(true);
+
+    const checkTutorialState = () => {
+      try {
+        setIsTutorialActive(localStorage.getItem("gym_tutorial_active_state") === "true");
+      } catch (e) {
+        setIsTutorialActive(false);
+      }
+    };
+
+    const handleStart = () => setIsTutorialActive(true);
+    const handleDismiss = () => setIsTutorialActive(false);
+
+    window.addEventListener("start-app-tutorial", handleStart as EventListener);
+    window.addEventListener("dismiss-app-tutorial", handleDismiss as EventListener);
+    window.addEventListener("storage", checkTutorialState);
+
+    checkTutorialState();
+
+    return () => {
+      window.removeEventListener("start-app-tutorial", handleStart as EventListener);
+      window.removeEventListener("dismiss-app-tutorial", handleDismiss as EventListener);
+      window.removeEventListener("storage", checkTutorialState);
+    };
   }, []);
 
   // Secure Portal Navigation: Prevent back button from returning to Admin Dashboard context
@@ -574,24 +606,26 @@ export default function MemberPortalPage() {
             </div>
           </div>
 
-          {/* Quick-Fill Test Member Helper for Tutorial & Seamless Navigation */}
-          <div className="max-w-md mx-auto p-4 rounded-xl bg-blue-950/40 border-2 border-blue-800/60 text-xs text-zinc-300 space-y-2">
-            <div className="font-extrabold text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-blue-400 shrink-0" /> Tutorial & Test Member Quick-Access
+          {/* Quick-Fill Test Member Helper for Tutorial & Seamless Navigation - Visible strictly during tutorial mode */}
+          {isTutorialActive && (
+            <div className="max-w-md mx-auto p-4 rounded-xl bg-blue-950/40 border-2 border-blue-800/60 text-xs text-zinc-300 space-y-2">
+              <div className="font-extrabold text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-blue-400 shrink-0" /> Tutorial & Test Member Quick-Access
+              </div>
+              <p className="text-zinc-300 leading-relaxed font-medium">
+                To proceed seamlessly with the member portal tour or test the portal without being blocked, click below to quick-fill a valid test member:
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setInputName("Virgilio Flor E. Guaño");
+                }}
+                className="w-full px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs transition cursor-pointer shadow-md flex items-center justify-center gap-2 active:scale-95"
+              >
+                <span>Quick-Fill: Virgilio Flor E. Guaño</span>
+              </button>
             </div>
-            <p className="text-zinc-300 leading-relaxed font-medium">
-              To proceed seamlessly with the member portal tour or test the portal without being blocked, click below to quick-fill a valid test member:
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                setInputName("Virgilio Flor E. Guaño");
-              }}
-              className="w-full px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs transition cursor-pointer shadow-md flex items-center justify-center gap-2 active:scale-95"
-            >
-              <span>Quick-Fill: Virgilio Flor E. Guaño</span>
-            </button>
-          </div>
+          )}
 
           {/* Form */}
           <form onSubmit={handleLookup} className="space-y-4 max-w-md mx-auto pt-2">

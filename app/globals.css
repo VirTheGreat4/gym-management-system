@@ -82,33 +82,40 @@ body, * {
   animation: middleCardPulse 4s ease-in-out infinite;
 }
 
-/* Middle card 4-edge intense glow for mobile & desktop viewports */
+/* Middle card 4-edge glow for mobile & desktop viewports */
 .card-glow-4edge {
   box-shadow: 
-    0 0 0 3px rgba(239, 68, 68, 0.95),       /* Solid 4-edge red outline stroke */
-    0 0 25px 8px rgba(220, 38, 38, 0.8),      /* Vibrant 4-edge shadow wrap */
-    0 0 55px 18px rgba(220, 38, 38, 0.55),    /* Medium spread atmospheric glow */
-    0 0 95px 30px rgba(220, 38, 38, 0.35);    /* Wide outer ambient shadow */
+    0 0 0 2px rgba(239, 68, 68, 0.6),       /* Clean 4-edge red outline stroke */
+    0 0 16px 4px rgba(220, 38, 38, 0.4),      /* Softened shadow wrap */
+    0 0 32px 8px rgba(220, 38, 38, 0.2);      /* Subtle outer ambient shadow */
   border-color: #EF4444 !important;
-  animation: card4EdgePulse 2.8s ease-in-out infinite;
+  animation: card4EdgePulse 3.5s ease-in-out infinite;
   transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (min-width: 768px) {
+  .card-glow-4edge {
+    box-shadow: 
+      0 0 0 1.5px rgba(239, 68, 68, 0.4),
+      0 0 14px 2px rgba(220, 38, 38, 0.25),
+      0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    border-color: rgba(239, 68, 68, 0.6) !important;
+  }
 }
 
 @keyframes card4EdgePulse {
   0%, 100% {
     box-shadow: 
-      0 0 0 3px rgba(239, 68, 68, 0.9),
-      0 0 22px 6px rgba(220, 38, 38, 0.75),
-      0 0 50px 15px rgba(220, 38, 38, 0.5),
-      0 0 85px 25px rgba(220, 38, 38, 0.3);
+      0 0 0 2px rgba(239, 68, 68, 0.5),
+      0 0 14px 4px rgba(220, 38, 38, 0.35),
+      0 0 28px 6px rgba(220, 38, 38, 0.15);
     border-color: #EF4444 !important;
   }
   50% {
     box-shadow: 
-      0 0 0 4px rgba(255, 70, 70, 1),
-      0 0 35px 12px rgba(239, 68, 68, 0.95),
-      0 0 75px 22px rgba(220, 38, 38, 0.75),
-      0 0 115px 35px rgba(220, 38, 38, 0.45);
+      0 0 0 2.5px rgba(255, 70, 70, 0.8),
+      0 0 20px 6px rgba(239, 68, 68, 0.5),
+      0 0 40px 10px rgba(220, 38, 38, 0.25);
     border-color: #F87171 !important;
   }
 }

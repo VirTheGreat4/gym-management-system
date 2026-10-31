@@ -46,22 +46,22 @@ export default function GeometricBackground({
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
       {/* Soft Ambient Radial Red Glow - Single traveling backlight synchronized with active node */}
       <div
-        className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] sm:w-[650px] md:w-[950px] h-[380px] sm:h-[650px] md:h-[950px] rounded-full blur-[100px] sm:blur-[150px] transition-all duration-1000 ease-in-out pointer-events-none ${
+        className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[500px] md:w-[750px] h-[300px] sm:h-[500px] md:h-[750px] rounded-full blur-[80px] sm:blur-[120px] transition-all duration-1000 ease-in-out pointer-events-none ${
           currentGlow === 'top-left'
-            ? 'bg-red-600/35 scale-125 -translate-x-3/4 -translate-y-3/4'
+            ? 'bg-red-600/18 scale-110 -translate-x-3/4 -translate-y-3/4'
             : currentGlow === 'top-right'
-            ? 'bg-red-600/35 scale-125 translate-x-0 -translate-y-3/4'
+            ? 'bg-red-600/18 scale-110 translate-x-0 -translate-y-3/4'
             : currentGlow === 'bottom-left'
-            ? 'bg-red-600/35 scale-125 -translate-x-3/4 translate-y-0'
+            ? 'bg-red-600/18 scale-110 -translate-x-3/4 translate-y-0'
             : currentGlow === 'bottom-right'
-            ? 'bg-red-600/35 scale-125 translate-x-0 translate-y-0'
-            : 'bg-red-600/30 scale-110 -translate-x-1/2 -translate-y-1/2'
+            ? 'bg-red-600/18 scale-110 translate-x-0 translate-y-0'
+            : 'bg-red-600/15 scale-100 -translate-x-1/2 -translate-y-1/2'
         }`}
       />
 
       {/* Grid Pattern SVG */}
       <svg
-        className="absolute inset-0 w-full h-full opacity-[0.16] sm:opacity-[0.12] text-slate-400 pointer-events-none"
+        className="absolute inset-0 w-full h-full opacity-[0.12] sm:opacity-[0.08] text-slate-400 pointer-events-none"
         xmlns="http://www.w3.org/2000/svg"
         width="100%"
         height="100%"
@@ -79,17 +79,17 @@ export default function GeometricBackground({
       <div className="absolute top-2 left-2 sm:top-6 sm:left-6 z-0">
         <div className="relative p-1 sm:p-2">
           <div
-            className={`absolute inset-0 rounded-full blur-2xl transition-all duration-700 ${
+            className={`absolute inset-0 rounded-full blur-xl transition-all duration-700 ${
               currentGlow === 'top-left'
-                ? 'bg-red-600/35 scale-150 opacity-100'
+                ? 'bg-red-600/20 scale-125 opacity-80'
                 : 'bg-red-600/0 scale-100 opacity-0'
             }`}
           />
           <svg
             className={`w-24 sm:w-44 h-24 sm:h-44 transition-all duration-700 ease-out ${
               currentGlow === 'top-left'
-                ? 'text-red-500 opacity-100 scale-110 drop-shadow-[0_0_25px_rgba(220,38,38,0.95)]'
-                : 'text-slate-500/40 opacity-30 scale-100 drop-shadow-none'
+                ? 'text-red-500/90 opacity-90 scale-105 drop-shadow-[0_0_12px_rgba(220,38,38,0.5)]'
+                : 'text-slate-500/30 opacity-25 scale-100 drop-shadow-none'
             }`}
             viewBox="0 0 200 200"
             fill="none"
@@ -131,17 +131,17 @@ export default function GeometricBackground({
       <div className="absolute top-2 right-2 sm:top-6 sm:right-6 z-0">
         <div className="relative p-1 sm:p-2">
           <div
-            className={`absolute inset-0 rounded-full blur-2xl transition-all duration-700 ${
+            className={`absolute inset-0 rounded-full blur-xl transition-all duration-700 ${
               currentGlow === 'top-right'
-                ? 'bg-red-600/35 scale-150 opacity-100'
+                ? 'bg-red-600/20 scale-125 opacity-80'
                 : 'bg-red-600/0 scale-100 opacity-0'
             }`}
           />
           <svg
             className={`w-24 sm:w-44 h-24 sm:h-44 transition-all duration-700 ease-out ${
               currentGlow === 'top-right'
-                ? 'text-red-500 opacity-100 scale-110 drop-shadow-[0_0_25px_rgba(220,38,38,0.95)]'
-                : 'text-slate-500/40 opacity-30 scale-100 drop-shadow-none'
+                ? 'text-red-500/90 opacity-90 scale-105 drop-shadow-[0_0_12px_rgba(220,38,38,0.5)]'
+                : 'text-slate-500/30 opacity-25 scale-100 drop-shadow-none'
             }`}
             viewBox="0 0 200 200"
             fill="none"
@@ -171,17 +171,17 @@ export default function GeometricBackground({
       <div className="absolute bottom-16 sm:bottom-6 left-2 sm:left-6 z-0">
         <div className="relative p-1 sm:p-2">
           <div
-            className={`absolute inset-0 rounded-full blur-2xl transition-all duration-700 ${
+            className={`absolute inset-0 rounded-full blur-xl transition-all duration-700 ${
               currentGlow === 'bottom-left'
-                ? 'bg-red-600/35 scale-150 opacity-100'
+                ? 'bg-red-600/20 scale-125 opacity-80'
                 : 'bg-red-600/0 scale-100 opacity-0'
             }`}
           />
           <svg
             className={`w-24 sm:w-44 h-24 sm:h-44 transition-all duration-700 ease-out ${
               currentGlow === 'bottom-left'
-                ? 'text-red-500 opacity-100 scale-110 drop-shadow-[0_0_25px_rgba(220,38,38,0.95)]'
-                : 'text-slate-500/40 opacity-30 scale-100 drop-shadow-none'
+                ? 'text-red-500/90 opacity-90 scale-105 drop-shadow-[0_0_12px_rgba(220,38,38,0.5)]'
+                : 'text-slate-500/30 opacity-25 scale-100 drop-shadow-none'
             }`}
             viewBox="0 0 200 200"
             fill="none"
@@ -209,17 +209,17 @@ export default function GeometricBackground({
       <div className="absolute bottom-16 sm:bottom-6 right-2 sm:right-6 z-0">
         <div className="relative p-1 sm:p-2">
           <div
-            className={`absolute inset-0 rounded-full blur-2xl transition-all duration-700 ${
+            className={`absolute inset-0 rounded-full blur-xl transition-all duration-700 ${
               currentGlow === 'bottom-right'
-                ? 'bg-red-600/35 scale-150 opacity-100'
+                ? 'bg-red-600/20 scale-125 opacity-80'
                 : 'bg-red-600/0 scale-100 opacity-0'
             }`}
           />
           <svg
             className={`w-24 sm:w-52 h-24 sm:h-52 transition-all duration-700 ease-out ${
               currentGlow === 'bottom-right'
-                ? 'text-red-500 opacity-100 scale-110 drop-shadow-[0_0_25px_rgba(220,38,38,0.95)]'
-                : 'text-slate-500/40 opacity-30 scale-100 drop-shadow-none'
+                ? 'text-red-500/90 opacity-90 scale-105 drop-shadow-[0_0_12px_rgba(220,38,38,0.5)]'
+                : 'text-slate-500/30 opacity-25 scale-100 drop-shadow-none'
             }`}
             viewBox="0 0 200 200"
             fill="none"
