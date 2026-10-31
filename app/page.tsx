@@ -143,7 +143,7 @@ export default function LandingGateway() {
 
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-white text-slate-800 text-xs font-bold border border-slate-300 shadow-2xs">
             <Sparkles className="w-3.5 h-3.5 text-red-600" />
-            <span>System Portal</span>
+            <span>Facility Portal</span>
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
@@ -151,7 +151,7 @@ export default function LandingGateway() {
           </h1>
 
           <p className="text-xs sm:text-sm font-semibold text-slate-600 max-w-xs mx-auto">
-            Select your access level below to continue.
+            Select your portal access level below to proceed.
           </p>
         </div>
 
@@ -169,10 +169,10 @@ export default function LandingGateway() {
               </div>
               <div>
                 <h2 className="text-sm sm:text-base font-extrabold !text-slate-900 group-hover:!text-red-600 transition-colors">
-                  Member Access
+                  Member Portal
                 </h2>
                 <p className="text-xs font-semibold !text-slate-600">
-                  Check gym status, hours & membership
+                  View operating hours, status, and member profiles
                 </p>
               </div>
             </div>
@@ -192,10 +192,10 @@ export default function LandingGateway() {
                 </div>
                 <div>
                   <h2 className="text-sm sm:text-base font-extrabold !text-slate-900 group-hover:!text-amber-600 transition-colors">
-                    Staff / Admin Login
+                    Staff & Administration
                   </h2>
                   <p className="text-xs font-semibold !text-slate-600">
-                    Manage members, access, & settings
+                    Manage member records, subscriptions, and facility settings
                   </p>
                 </div>
               </div>

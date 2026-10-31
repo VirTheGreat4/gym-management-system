@@ -17,16 +17,16 @@ export const metadata: Metadata = {
     default: "JLAB Fitness Gym Portal",
     template: "%s | JLAB Fitness Gym Portal",
   },
-  description: "Modern Local Gym Management SaaS with AI Retention and White-Labeling",
+  description: "Comprehensive gym management platform for member access, subscription tracking, and facility operations.",
   openGraph: {
     title: "JLAB Fitness Gym Portal",
-    description: "Modern Local Gym Management SaaS with AI Retention and White-Labeling",
+    description: "Comprehensive gym management platform for member access, subscription tracking, and facility operations.",
     siteName: "JLAB Fitness Gym Portal",
   },
   twitter: {
     card: "summary_large_image",
     title: "JLAB Fitness Gym Portal",
-    description: "Modern Local Gym Management SaaS with AI Retention and White-Labeling",
+    description: "Comprehensive gym management platform for member access, subscription tracking, and facility operations.",
   },
   verification: {
     google: "DH-cARQFpxf36_oYXPPE_0zENJ8H4hSbcIEJnlp01bg",
