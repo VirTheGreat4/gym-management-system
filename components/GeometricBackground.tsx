@@ -1,24 +1,36 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function GeometricBackground() {
-  const [activeNode, setActiveNode] = useState<string | null>(null);
+  const [activeNode, setActiveNode] = useState<string | null>('top-left');
+  const [isHovered, setIsHovered] = useState(false);
+
+  useEffect(() => {
+    if (isHovered) return;
+    const nodes = ['top-left', 'top-right', 'bottom-right', 'bottom-left'];
+    let index = 0;
+    const interval = setInterval(() => {
+      index = (index + 1) % nodes.length;
+      setActiveNode(nodes[index]);
+    }, 2800);
+    return () => clearInterval(interval);
+  }, [isHovered]);
 
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-      {/* Soft Ambient Radial Red Glow - Reacts smoothly on shape hover */}
+      {/* Soft Ambient Radial Red Glow - Automated sequential mobile/desktop loop & hover reactive */}
       <div
-        className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[600px] md:w-[900px] h-[340px] sm:h-[600px] md:h-[900px] rounded-full blur-[90px] sm:blur-[140px] transition-all duration-700 ease-out ${
+        className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] sm:w-[650px] md:w-[950px] h-[380px] sm:h-[650px] md:h-[950px] rounded-full blur-[100px] sm:blur-[150px] transition-all duration-1000 ease-out ${
           activeNode === 'top-left'
-            ? 'bg-red-600/35 scale-125 -translate-x-3/4 -translate-y-3/4'
+            ? 'bg-red-600/40 scale-125 -translate-x-3/4 -translate-y-3/4'
             : activeNode === 'top-right'
-            ? 'bg-red-600/35 scale-125 translate-x-0 -translate-y-3/4'
+            ? 'bg-red-600/40 scale-125 translate-x-0 -translate-y-3/4'
             : activeNode === 'bottom-left'
-            ? 'bg-red-600/35 scale-125 -translate-x-3/4 translate-y-0'
+            ? 'bg-red-600/40 scale-125 -translate-x-3/4 translate-y-0'
             : activeNode === 'bottom-right'
-            ? 'bg-red-600/35 scale-125 translate-x-0 translate-y-0'
-            : 'bg-red-600/20 sm:bg-red-600/15 scale-100'
+            ? 'bg-red-600/40 scale-125 translate-x-0 translate-y-0'
+            : 'bg-red-600/25 sm:bg-red-600/20 scale-105'
         }`}
       />
 
@@ -40,10 +52,10 @@ export default function GeometricBackground() {
 
       {/* Top Left Geometry Wireframe */}
       <div
-        onMouseEnter={() => setActiveNode('top-left')}
-        onMouseLeave={() => setActiveNode(null)}
-        onTouchStart={() => setActiveNode('top-left')}
-        onTouchEnd={() => setActiveNode(null)}
+        onMouseEnter={() => { setIsHovered(true); setActiveNode('top-left'); }}
+        onMouseLeave={() => setIsHovered(false)}
+        onTouchStart={() => { setIsHovered(true); setActiveNode('top-left'); }}
+        onTouchEnd={() => setIsHovered(false)}
         className="absolute top-2 left-2 sm:top-6 sm:left-6 pointer-events-auto group cursor-pointer z-0"
       >
         <div className="relative p-1 sm:p-2">
@@ -88,10 +100,10 @@ export default function GeometricBackground() {
 
       {/* Top Right Geometry Wireframe */}
       <div
-        onMouseEnter={() => setActiveNode('top-right')}
-        onMouseLeave={() => setActiveNode(null)}
-        onTouchStart={() => setActiveNode('top-right')}
-        onTouchEnd={() => setActiveNode(null)}
+        onMouseEnter={() => { setIsHovered(true); setActiveNode('top-right'); }}
+        onMouseLeave={() => setIsHovered(false)}
+        onTouchStart={() => { setIsHovered(true); setActiveNode('top-right'); }}
+        onTouchEnd={() => setIsHovered(false)}
         className="absolute top-2 right-2 sm:top-6 sm:right-6 pointer-events-auto group cursor-pointer z-0"
       >
         <div className="relative p-1 sm:p-2">
