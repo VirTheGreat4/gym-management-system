@@ -23,7 +23,7 @@ export function proxy(request: NextRequest) {
   const session = request.cookies.get('gym_admin_session');
   const path = request.nextUrl.pathname;
   
-  const isPublicRoute = path === '/' || path === '/portal';
+  const isPublicRoute = path === '/' || path === '/portal' || path === '/robots.txt' || path === '/sitemap.xml';
 
   let response: NextResponse;
 
@@ -48,5 +48,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|robots\\.txt|sitemap\\.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
 };
