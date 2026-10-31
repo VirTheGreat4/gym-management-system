@@ -41,13 +41,29 @@ const initialSchedule: GymSchedule = {
   special_closed_dates: [],
 };
 
+function sanitizeSchedule(rawSchedule: any): GymSchedule {
+  if (!rawSchedule || typeof rawSchedule !== "object") return initialSchedule;
+  return {
+    is_open_now: typeof rawSchedule.is_open_now === "boolean" ? rawSchedule.is_open_now : true,
+    manual_override: Boolean(rawSchedule.manual_override),
+    announcement: typeof rawSchedule.announcement === "string" ? rawSchedule.announcement : "",
+    regular_hours: Array.isArray(rawSchedule.regular_hours) && rawSchedule.regular_hours.length > 0
+      ? rawSchedule.regular_hours.map((item: any, i: number) => ({
+          day: item?.day || defaultDays[i]?.day || `Day ${i + 1}`,
+          open: item?.open || defaultDays[i]?.open || "06:00",
+          close: item?.close || defaultDays[i]?.close || "22:00",
+          is_closed: Boolean(item?.is_closed),
+        }))
+      : defaultDays,
+    special_closed_dates: Array.isArray(rawSchedule.special_closed_dates)
+      ? rawSchedule.special_closed_dates.filter(
+          (item: any) => item && typeof item === "object" && item.id && item.date
+        )
+      : [],
+  };
+}
+
 export default function SettingsPage() {
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
   const [gymName, setGymName] = useState(DEFAULT_GYM_NAME);
   const [selectedColor, setSelectedColor] = useState(DEFAULT_THEME_COLOR);
   const [logoPreview, setLogoPreview] = useState<string | null>(DEFAULT_LOGO_URL);
@@ -74,14 +90,14 @@ export default function SettingsPage() {
           if (parsed.name) setGymName(parsed.name);
           if (parsed.theme_color) setSelectedColor(parsed.theme_color);
           if (parsed.logo_url !== undefined) setLogoPreview(parsed.logo_url);
-          if (parsed.schedule?.regular_hours?.length > 0) {
-            setSchedule(parsed.schedule);
+          if (parsed.schedule) {
+            setSchedule(sanitizeSchedule(parsed.schedule));
           }
         } else {
           const savedSchedule = localStorage.getItem("gym_schedule_data");
           if (savedSchedule) {
             const parsed = JSON.parse(savedSchedule);
-            if (parsed?.regular_hours?.length > 0) setSchedule(parsed);
+            setSchedule(sanitizeSchedule(parsed));
           }
         }
       } catch (e) {
@@ -93,14 +109,11 @@ export default function SettingsPage() {
       if (error) {
         console.warn("Supabase loadSettings warning:", error);
       } else if (data) {
-        const localSettingsRaw = localStorage.getItem("gym_settings_data");
-        if (!localSettingsRaw) {
-          if (data.name) setGymName(data.name);
-          if (data.theme_color) setSelectedColor(data.theme_color);
-          if (data.logo_url !== undefined) setLogoPreview(data.logo_url);
-          if (data.schedule && data.schedule.regular_hours && data.schedule.regular_hours.length > 0) {
-            setSchedule(data.schedule);
-          }
+        if (data.name) setGymName(data.name);
+        if (data.theme_color) setSelectedColor(data.theme_color);
+        if (data.logo_url !== undefined) setLogoPreview(data.logo_url);
+        if (data.schedule) {
+          setSchedule(sanitizeSchedule(data.schedule));
         }
       }
 
@@ -110,9 +123,10 @@ export default function SettingsPage() {
   }, []);
 
   const saveScheduleToStorage = (updatedSchedule: GymSchedule) => {
-    setSchedule(updatedSchedule);
+    const sanitized = sanitizeSchedule(updatedSchedule);
+    setSchedule(sanitized);
     try {
-      localStorage.setItem("gym_schedule_data", JSON.stringify(updatedSchedule));
+      localStorage.setItem("gym_schedule_data", JSON.stringify(sanitized));
     } catch (e) {
       console.error("Failed to save schedule to localStorage", e);
     }
@@ -136,7 +150,8 @@ export default function SettingsPage() {
   };
 
   const handleDayHourChange = (index: number, field: keyof ScheduleDay, value: any) => {
-    const updatedHours = [...schedule.regular_hours];
+    const currentHours = schedule.regular_hours || defaultDays;
+    const updatedHours = [...currentHours];
     updatedHours[index] = {
       ...updatedHours[index],
       [field]: value,
@@ -156,9 +171,10 @@ export default function SettingsPage() {
       date: newClosedDate,
       reason: newClosedReason || "Closed All Day",
     };
+    const currentClosed = schedule.special_closed_dates || [];
     const updated: GymSchedule = {
       ...schedule,
-      special_closed_dates: [...schedule.special_closed_dates, newItem],
+      special_closed_dates: [...currentClosed, newItem],
     };
     saveScheduleToStorage(updated);
     setNewClosedDate("");
@@ -167,9 +183,10 @@ export default function SettingsPage() {
   };
 
   const handleRemoveClosedDate = (id: string) => {
+    const currentClosed = schedule.special_closed_dates || [];
     const updated: GymSchedule = {
       ...schedule,
-      special_closed_dates: schedule.special_closed_dates.filter((item) => item.id !== id),
+      special_closed_dates: currentClosed.filter((item) => item.id !== id),
     };
     saveScheduleToStorage(updated);
   };
@@ -180,7 +197,6 @@ export default function SettingsPage() {
       const reader = new FileReader();
       reader.onloadend = () => {
         const rawUrl = reader.result as string;
-        // Resize image if necessary to keep memory light and clear
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement("canvas");
@@ -218,17 +234,18 @@ export default function SettingsPage() {
     setIsSubmitting(true);
     setErrorMsg(null);
 
+    const sanitizedSched = sanitizeSchedule(schedule);
     const payload = {
       name: gymName,
       theme_color: selectedColor,
       logo_url: logoPreview,
-      schedule: schedule,
+      schedule: sanitizedSched,
     };
 
-    // 1. Immediately save full customization payload to localStorage
+    // 1. Save full customization payload to localStorage
     try {
       localStorage.setItem("gym_settings_data", JSON.stringify(payload));
-      localStorage.setItem("gym_schedule_data", JSON.stringify(schedule));
+      localStorage.setItem("gym_schedule_data", JSON.stringify(sanitizedSched));
     } catch (err) {
       console.error("Failed to store settings in localStorage:", err);
     }
@@ -253,19 +270,11 @@ export default function SettingsPage() {
     setTimeout(() => setIsSaved(false), 3500);
   };
 
-  if (!isMounted) {
-    return (
-      <div className="space-y-8" suppressHydrationWarning>
-        <BackButton />
-        <div className="bg-[#121214] p-6 sm:p-8 rounded-2xl border-2 border-zinc-800 text-zinc-300 font-bold text-center">
-          Loading gym settings...
-        </div>
-      </div>
-    );
-  }
+  const regularHoursList = schedule.regular_hours || defaultDays;
+  const specialClosedList = schedule.special_closed_dates || [];
 
   return (
-    <div className="space-y-6 sm:space-y-8 max-w-5xl touch-manipulation" suppressHydrationWarning>
+    <div className="space-y-6 sm:space-y-8 max-w-5xl touch-manipulation w-full overflow-x-hidden" suppressHydrationWarning>
       <BackButton />
 
       {/* Toast Alert */}
@@ -300,7 +309,7 @@ export default function SettingsPage() {
       )}
 
       {/* Main Settings Form Container */}
-      <form onSubmit={handleSaveSettings} className="space-y-6 sm:space-y-8">
+      <form onSubmit={handleSaveSettings} className="space-y-6 sm:space-y-8 w-full">
         {/* SECTION 1: BRAND NAME & LOGO ASSET */}
         <div id="tutorial-settings-branding" className="bg-[#121214] p-5 sm:p-8 rounded-2xl shadow-md border border-zinc-800 space-y-6 sm:space-y-8">
           {/* Gym Name Input Section */}
@@ -371,7 +380,7 @@ export default function SettingsPage() {
         </div>
 
         {/* SECTION 2: LIVE GYM STATUS & OPERATING SCHEDULE */}
-        <div className="bg-[#121214] p-5 sm:p-8 rounded-2xl shadow-md border border-zinc-800 space-y-6">
+        <div className="bg-[#121214] p-5 sm:p-8 rounded-2xl shadow-md border border-zinc-800 space-y-6 w-full">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-zinc-800">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-zinc-800 text-zinc-300 text-xs font-extrabold mb-2 border border-zinc-700">
@@ -424,8 +433,8 @@ export default function SettingsPage() {
               <Calendar className="w-5 h-5 text-red-500 shrink-0" /> Weekly Operating Hours Matrix
             </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {schedule.regular_hours.map((dayItem, idx) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 w-full">
+              {regularHoursList.map((dayItem, idx) => (
                 <div
                   key={dayItem.day}
                   className={`p-4 sm:p-5 rounded-2xl border-2 flex flex-col justify-between ${
@@ -453,7 +462,7 @@ export default function SettingsPage() {
                           type="time"
                           value={dayItem.open}
                           onChange={(e) => handleDayHourChange(idx, "open", e.target.value)}
-                          className="w-full h-12 px-3 rounded-xl border-2 border-zinc-700 bg-zinc-900 font-bold text-base sm:text-sm text-zinc-100 focus:border-red-500 focus:outline-none min-h-[44px]"
+                          className="w-full h-12 px-3 rounded-xl border-2 border-zinc-700 bg-zinc-900 font-bold text-base sm:text-sm text-zinc-100 focus:border-red-500 focus:outline-none min-h-[44px] scheme-dark [color-scheme:dark]"
                         />
                       </div>
                       <div>
@@ -462,7 +471,7 @@ export default function SettingsPage() {
                           type="time"
                           value={dayItem.close}
                           onChange={(e) => handleDayHourChange(idx, "close", e.target.value)}
-                          className="w-full h-12 px-3 rounded-xl border-2 border-zinc-700 bg-zinc-900 font-bold text-base sm:text-sm text-zinc-100 focus:border-red-500 focus:outline-none min-h-[44px]"
+                          className="w-full h-12 px-3 rounded-xl border-2 border-zinc-700 bg-zinc-900 font-bold text-base sm:text-sm text-zinc-100 focus:border-red-500 focus:outline-none min-h-[44px] scheme-dark [color-scheme:dark]"
                         />
                       </div>
                     </div>
@@ -496,13 +505,13 @@ export default function SettingsPage() {
               </button>
             </div>
 
-            {schedule.special_closed_dates.length === 0 ? (
+            {specialClosedList.length === 0 ? (
               <p className="text-xs font-bold text-zinc-500 italic bg-zinc-950 p-4 rounded-2xl border border-zinc-800 text-center">
                 No special closed dates configured. Click "Add Closed Date" to schedule holiday closures.
               </p>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                {schedule.special_closed_dates.map((item) => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 w-full">
+                {specialClosedList.map((item) => (
                   <div
                     key={item.id}
                     className="p-3.5 bg-red-950/30 rounded-2xl border border-red-800/60 flex items-center justify-between gap-2"
@@ -565,7 +574,7 @@ export default function SettingsPage() {
                   required
                   value={newClosedDate}
                   onChange={(e) => setNewClosedDate(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl bg-zinc-900 border-2 border-zinc-700 text-zinc-100 font-bold text-base sm:text-sm focus:outline-none focus:border-red-500 min-h-[48px]"
+                  className="w-full px-4 py-3 rounded-2xl bg-zinc-900 border-2 border-zinc-700 text-zinc-100 font-bold text-base sm:text-sm focus:outline-none focus:border-red-500 min-h-[48px] scheme-dark [color-scheme:dark]"
                 />
               </div>
 

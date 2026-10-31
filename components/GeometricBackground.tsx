@@ -61,7 +61,7 @@ export default function GeometricBackground({
 
       {/* Grid Pattern SVG */}
       <svg
-        className="absolute inset-0 w-full h-full opacity-[0.12] sm:opacity-[0.08] text-slate-400 pointer-events-none"
+        className="absolute inset-0 w-full h-full opacity-[0.22] sm:opacity-[0.14] text-slate-400 pointer-events-none"
         xmlns="http://www.w3.org/2000/svg"
         width="100%"
         height="100%"
@@ -89,7 +89,7 @@ export default function GeometricBackground({
             className={`w-24 sm:w-44 h-24 sm:h-44 transition-all duration-700 ease-out ${
               currentGlow === 'top-left'
                 ? 'text-red-500/90 opacity-90 scale-105 drop-shadow-[0_0_12px_rgba(220,38,38,0.5)]'
-                : 'text-slate-500/30 opacity-25 scale-100 drop-shadow-none'
+                : 'text-slate-400/50 opacity-50 sm:opacity-40 scale-100 drop-shadow-none'
             }`}
             viewBox="0 0 200 200"
             fill="none"
@@ -141,7 +141,7 @@ export default function GeometricBackground({
             className={`w-24 sm:w-44 h-24 sm:h-44 transition-all duration-700 ease-out ${
               currentGlow === 'top-right'
                 ? 'text-red-500/90 opacity-90 scale-105 drop-shadow-[0_0_12px_rgba(220,38,38,0.5)]'
-                : 'text-slate-500/30 opacity-25 scale-100 drop-shadow-none'
+                : 'text-slate-400/50 opacity-50 sm:opacity-40 scale-100 drop-shadow-none'
             }`}
             viewBox="0 0 200 200"
             fill="none"
@@ -181,7 +181,7 @@ export default function GeometricBackground({
             className={`w-24 sm:w-44 h-24 sm:h-44 transition-all duration-700 ease-out ${
               currentGlow === 'bottom-left'
                 ? 'text-red-500/90 opacity-90 scale-105 drop-shadow-[0_0_12px_rgba(220,38,38,0.5)]'
-                : 'text-slate-500/30 opacity-25 scale-100 drop-shadow-none'
+                : 'text-slate-400/50 opacity-50 sm:opacity-40 scale-100 drop-shadow-none'
             }`}
             viewBox="0 0 200 200"
             fill="none"
@@ -219,7 +219,7 @@ export default function GeometricBackground({
             className={`w-24 sm:w-52 h-24 sm:h-52 transition-all duration-700 ease-out ${
               currentGlow === 'bottom-right'
                 ? 'text-red-500/90 opacity-90 scale-105 drop-shadow-[0_0_12px_rgba(220,38,38,0.5)]'
-                : 'text-slate-500/30 opacity-25 scale-100 drop-shadow-none'
+                : 'text-slate-400/50 opacity-50 sm:opacity-40 scale-100 drop-shadow-none'
             }`}
             viewBox="0 0 200 200"
             fill="none"
@@ -243,7 +243,7 @@ export default function GeometricBackground({
       </div>
 
       {/* Floating Ambient Crosses */}
-      <div className="absolute top-1/4 left-1/3 text-slate-500/20 pointer-events-none">
+      <div className="absolute top-1/4 left-1/3 text-slate-400/40 pointer-events-none">
         <svg className="w-8 sm:w-10 h-8 sm:h-10 animate-geo-spin" viewBox="0 0 40 40">
           <circle cx="20" cy="20" r="16" stroke="currentColor" strokeWidth="0.75" strokeDasharray="3 3" fill="none" />
           <line x1="20" y1="4" x2="20" y2="36" stroke="currentColor" strokeWidth="0.5" />
@@ -251,7 +251,7 @@ export default function GeometricBackground({
         </svg>
       </div>
 
-      <div className="absolute bottom-1/4 right-1/3 text-slate-500/20 pointer-events-none">
+      <div className="absolute bottom-1/4 right-1/3 text-slate-400/40 pointer-events-none">
         <svg className="w-9 sm:w-12 h-9 sm:h-12 animate-geo-spin-reverse" viewBox="0 0 40 40">
           <polygon points="20,2 38,20 20,38 2,20" stroke="currentColor" strokeWidth="0.75" fill="none" />
           <circle cx="20" cy="20" r="6" stroke="currentColor" strokeWidth="0.5" fill="none" />
