@@ -506,8 +506,8 @@ export default function MembersPage() {
 
       {/* Categorized Filter Tabs with Count Badges */}
       <div className="bg-zinc-900 p-4 sm:p-6 rounded-2xl shadow-soft border-3 border-zinc-700 space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-2 touch-action-manipulation">
             {(
               [
                 { key: "All", label: "All", badgeBg: "bg-zinc-800 text-zinc-300" },
@@ -524,7 +524,7 @@ export default function MembersPage() {
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
-                  className={`flex items-center gap-2.5 px-4 py-3 rounded-2xl text-xs font-extrabold transition-all border-2 min-h-[48px] cursor-pointer ${
+                  className={`flex items-center gap-2 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-2xl text-xs font-extrabold transition-all border-2 min-h-[44px] cursor-pointer touch-action-manipulation active:scale-[0.98] ${
                     isSelected
                       ? "bg-red-600 text-white border-red-500 shadow-soft"
                       : "bg-zinc-800 text-zinc-300 border-zinc-700 hover:bg-zinc-700"
@@ -545,12 +545,12 @@ export default function MembersPage() {
 
           {/* Subscription Plan & Badge Filter Dropdowns */}
           <div className="flex items-center gap-3 flex-wrap">
-            <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-zinc-400" />
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <Filter className="w-4 h-4 text-zinc-400 shrink-0" />
               <select
                 value={selectedPlanFilter}
                 onChange={(e) => setSelectedPlanFilter(e.target.value)}
-                className="px-4 py-3 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-200 text-xs font-extrabold focus:outline-none min-h-[48px] shadow-xs"
+                className="w-full sm:w-auto px-4 py-3 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-200 text-xs font-extrabold focus:outline-none min-h-[48px] shadow-xs cursor-pointer touch-action-manipulation"
               >
                 <option value="All Plans">All Subscription Plans</option>
                 {subscriptionPlans.map((p) => (
@@ -561,12 +561,12 @@ export default function MembersPage() {
               </select>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Tag className="w-4 h-4 text-zinc-400" />
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <Tag className="w-4 h-4 text-zinc-400 shrink-0" />
               <select
                 value={selectedBadgeFilter}
                 onChange={(e) => setSelectedBadgeFilter(e.target.value)}
-                className="px-4 py-3 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-200 text-xs font-extrabold focus:outline-none min-h-[48px] shadow-xs"
+                className="w-full sm:w-auto px-4 py-3 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-200 text-xs font-extrabold focus:outline-none min-h-[48px] shadow-xs cursor-pointer touch-action-manipulation"
               >
                 <option value="All Badges">All Badges</option>
                 {customBadges.map((b) => (
@@ -582,20 +582,184 @@ export default function MembersPage() {
         {/* Search bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-zinc-800">
           <div className="relative w-full sm:w-80">
-            <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
+            <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
             <input
               type="text"
+              inputMode="search"
+              autoComplete="off"
+              enterKeyHint="search"
               placeholder={`Search in ${activeTab}...`}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 font-bold min-h-[48px]"
+              className="w-full pl-12 pr-4 py-3 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-red-500 font-bold min-h-[48px] touch-action-manipulation"
             />
           </div>
         </div>
       </div>
 
-      {/* Members Data Table */}
-      <div id="tutorial-members-table" className="bg-zinc-900 rounded-2xl shadow-soft border-3 border-zinc-700 overflow-hidden">
+      {/* Mobile Stacked Member Cards (Visible on screens < md) */}
+      <div className="block md:hidden space-y-3">
+        {isLoading ? (
+          <div className="bg-zinc-900 rounded-2xl border-3 border-zinc-700 p-8 text-center text-zinc-400 font-medium">
+            Loading members from live database...
+          </div>
+        ) : filteredMembers.length === 0 ? (
+          <div className="bg-zinc-900 rounded-2xl border-3 border-zinc-700 p-8 text-center text-zinc-400 font-medium space-y-3">
+            <div className="w-14 h-14 mx-auto rounded-2xl bg-zinc-800 text-red-500 border-2 border-zinc-700 flex items-center justify-center">
+              <Users className="w-7 h-7" />
+            </div>
+            <p className="text-base font-extrabold text-zinc-100">No members found in {activeTab}</p>
+            <p className="text-xs text-zinc-400 font-medium">Try switching categories, plan filter, or adjusting your search query.</p>
+          </div>
+        ) : (
+          filteredMembers.map((member) => (
+            <div
+              key={member.id}
+              className={`bg-zinc-900 rounded-2xl p-4 border-3 border-zinc-700 shadow-soft space-y-3 ${
+                member.is_banned ? "bg-red-950/20 border-red-900/60" : ""
+              }`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`w-11 h-11 rounded-2xl font-extrabold flex items-center justify-center text-sm border-2 border-zinc-700 shadow-xs shrink-0 ${
+                      member.is_banned ? "bg-red-950 text-red-300" : "bg-zinc-800 text-zinc-200"
+                    }`}
+                  >
+                    {member.name.slice(0, 2).toUpperCase()}
+                  </div>
+                  <div>
+                    <h3 className="font-extrabold text-zinc-100 text-base leading-tight flex items-center gap-2 flex-wrap">
+                      <span>{member.name}</span>
+                      {member.is_banned && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-xl bg-red-600 text-white text-[10px] font-extrabold border border-red-500 shadow-xs animate-pulse">
+                          BANNED
+                        </span>
+                      )}
+                      {(member.warning_count || 0) > 0 && !member.is_banned && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-xl bg-amber-950 text-amber-300 text-[10px] font-extrabold border border-amber-700 shadow-xs">
+                          Warnings: {member.warning_count}
+                        </span>
+                      )}
+                    </h3>
+                    <a
+                      href={`tel:${member.phone}`}
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-zinc-200 mt-1"
+                    >
+                      <Phone className="w-3.5 h-3.5 text-zinc-500" />
+                      {member.phone}
+                    </a>
+                  </div>
+                </div>
+
+                <span
+                  className={`inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-extrabold border shrink-0 ${
+                    member.is_banned
+                      ? "bg-red-950/80 text-red-300 border-red-700/60"
+                      : member.status === "Active"
+                      ? "bg-emerald-950/80 text-emerald-300 border-emerald-700/60"
+                      : member.status === "Near Expiry"
+                      ? "bg-amber-950/80 text-amber-300 border-amber-700/60"
+                      : "bg-rose-950/80 text-rose-300 border-rose-700/60"
+                  }`}
+                >
+                  {member.status}
+                </span>
+              </div>
+
+              {/* Badges */}
+              {member.badges && member.badges.length > 0 && (
+                <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                  {member.badges.map((bName) => {
+                    const foundBadge = customBadges.find((b) => b.name === bName || b.id === bName);
+                    const colorClass = foundBadge ? getBadgeColorStyle(foundBadge.color) : "bg-zinc-800 text-zinc-300 border-zinc-700";
+                    return (
+                      <span
+                        key={bName}
+                        className={`rounded-xl border font-bold text-xs px-2.5 py-0.5 ${colorClass}`}
+                      >
+                        {foundBadge ? foundBadge.name : bName}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Plan info */}
+              <div className="flex items-center justify-between text-xs font-bold text-zinc-400 bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-800">
+                <div>
+                  <span className="text-zinc-200 block font-extrabold">{member.planDisplay}</span>
+                  <span className="text-[11px] font-medium text-zinc-400">Joined: {member.join_date}</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-zinc-300 block font-bold">Exp: {member.expiration_date}</span>
+                  <span className="text-[11px] font-medium text-zinc-400">
+                    {member.diffDays < 0
+                      ? `Expired ${Math.abs(member.diffDays)}d ago`
+                      : `${member.diffDays} days left`}
+                  </span>
+                </div>
+              </div>
+
+              {/* Mobile Actions Grid */}
+              <div className="grid grid-cols-4 gap-2 pt-1 border-t border-zinc-800/80">
+                <button
+                  onClick={() => {
+                    setWarningMember(member);
+                    setWarningNote("");
+                  }}
+                  className="px-2 py-2.5 rounded-xl bg-amber-950/80 hover:bg-amber-900 text-amber-300 border border-amber-700 transition font-extrabold text-xs flex items-center justify-center gap-1 min-h-[44px] cursor-pointer touch-action-manipulation active:scale-[0.98]"
+                  title="Issue Warning"
+                >
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  <span className="hidden xs:inline">Warn</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setBanMemberTarget(member);
+                    setBanReasonInput(member.ban_reason || "");
+                  }}
+                  className={`px-2 py-2.5 rounded-xl border transition font-extrabold text-xs flex items-center justify-center gap-1 min-h-[44px] cursor-pointer touch-action-manipulation active:scale-[0.98] ${
+                    member.is_banned
+                      ? "bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border-emerald-700"
+                      : "bg-red-950/80 hover:bg-red-900 text-red-300 border-red-700"
+                  }`}
+                  title={member.is_banned ? "Lift Ban" : "Ban Member"}
+                >
+                  {member.is_banned ? <ShieldCheck className="w-4 h-4 shrink-0" /> : <ShieldAlert className="w-4 h-4 shrink-0" />}
+                  <span className="hidden xs:inline">{member.is_banned ? "Unban" : "Ban"}</span>
+                </button>
+
+                <button
+                  onClick={() => handleOpenEditModal(member)}
+                  className="px-2 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 transition min-h-[44px] flex items-center justify-center font-bold cursor-pointer touch-action-manipulation active:scale-[0.98]"
+                  title="Edit Member"
+                >
+                  <Pencil className="w-4 h-4 text-zinc-300 shrink-0" />
+                  <span className="hidden xs:inline">Edit</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setDeletingMember(member);
+                    setDeletePassword("");
+                    setDeleteError(null);
+                  }}
+                  className="px-2 py-2.5 rounded-xl bg-zinc-800 hover:bg-red-950 text-zinc-200 border border-zinc-700 transition min-h-[44px] flex items-center justify-center font-bold cursor-pointer touch-action-manipulation active:scale-[0.98]"
+                  title="Delete Member"
+                >
+                  <Trash2 className="w-4 h-4 text-red-400 shrink-0" />
+                  <span className="hidden xs:inline text-red-400">Del</span>
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Desktop Members Data Table (Visible on screens >= md) */}
+      <div id="tutorial-members-table" className="hidden md:block bg-zinc-900 rounded-2xl shadow-soft border-3 border-zinc-700 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-sm">
             <thead>
@@ -716,7 +880,7 @@ export default function MembersPage() {
                             setWarningMember(member);
                             setWarningNote("");
                           }}
-                          className="px-3 py-2 rounded-lg bg-amber-950/80 hover:bg-amber-900 text-amber-300 border border-amber-700 transition font-extrabold text-xs flex items-center gap-1 min-h-[40px] cursor-pointer"
+                          className="px-3 py-2 rounded-lg bg-amber-950/80 hover:bg-amber-900 text-amber-300 border border-amber-700 transition font-extrabold text-xs flex items-center gap-1 min-h-[44px] cursor-pointer touch-action-manipulation active:scale-[0.98]"
                           title="Issue Warning"
                         >
                           <AlertTriangle className="w-3.5 h-3.5" /> Warn
@@ -727,7 +891,7 @@ export default function MembersPage() {
                             setBanMemberTarget(member);
                             setBanReasonInput(member.ban_reason || "");
                           }}
-                          className={`px-3 py-2 rounded-lg border transition font-extrabold text-xs flex items-center gap-1 min-h-[40px] cursor-pointer ${
+                          className={`px-3 py-2 rounded-lg border transition font-extrabold text-xs flex items-center gap-1 min-h-[44px] cursor-pointer touch-action-manipulation active:scale-[0.98] ${
                             member.is_banned
                               ? "bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border-emerald-700"
                               : "bg-red-950/80 hover:bg-red-900 text-red-300 border-red-700"
@@ -740,7 +904,7 @@ export default function MembersPage() {
 
                         <button
                           onClick={() => handleOpenEditModal(member)}
-                          className="p-2 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 transition min-h-[40px] min-w-[40px] flex items-center justify-center font-bold cursor-pointer"
+                          className="p-2 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 transition min-h-[44px] min-w-[44px] flex items-center justify-center font-bold cursor-pointer touch-action-manipulation active:scale-[0.98]"
                           title="Edit Member"
                         >
                           <Pencil className="w-3.5 h-3.5" />
@@ -752,7 +916,7 @@ export default function MembersPage() {
                             setDeletePassword("");
                             setDeleteError(null);
                           }}
-                          className="p-2 rounded-2xl bg-zinc-800 hover:bg-red-950 text-zinc-200 border border-zinc-700 transition min-h-[40px] min-w-[40px] flex items-center justify-center font-bold cursor-pointer"
+                          className="p-2 rounded-2xl bg-zinc-800 hover:bg-red-950 text-zinc-200 border border-zinc-700 transition min-h-[44px] min-w-[44px] flex items-center justify-center font-bold cursor-pointer touch-action-manipulation active:scale-[0.98]"
                           title="Delete Member"
                         >
                           <Trash2 className="w-3.5 h-3.5 text-red-400" />
@@ -769,10 +933,10 @@ export default function MembersPage() {
 
       {/* Disciplinary Warning Modal */}
       {warningMember && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-zinc-900 rounded-3xl p-6 max-w-md w-full shadow-soft-lg border-3 border-zinc-700 space-y-4">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-xs flex items-center justify-center z-50 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-[calc(1rem+env(safe-area-inset-top))]">
+          <div className="bg-zinc-900 rounded-3xl p-5 sm:p-6 max-w-md w-full shadow-soft-lg border-3 border-zinc-700 space-y-4 max-h-[90dvh] overflow-y-auto">
             <div className="flex items-center gap-3 text-amber-400">
-              <div className="p-3 bg-amber-950/80 rounded-2xl border-2 border-amber-700">
+              <div className="p-3 bg-amber-950/80 rounded-2xl border-2 border-amber-700 shrink-0">
                 <AlertTriangle className="w-6 h-6" />
               </div>
               <h2 className="text-lg font-extrabold text-zinc-100">
@@ -787,10 +951,12 @@ export default function MembersPage() {
                 <textarea
                   required
                   rows={3}
+                  inputMode="text"
+                  enterKeyHint="done"
                   placeholder="e.g. Failure to rack weights / Gym rule infraction..."
                   value={warningNote}
                   onChange={(e) => setWarningNote(e.target.value)}
-                  className="w-full p-3 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-sm font-bold focus:outline-none"
+                  className="w-full p-3 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-base sm:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500 touch-action-manipulation"
                 />
               </div>
               <div className="pt-2 flex items-center justify-end gap-3">
@@ -798,14 +964,14 @@ export default function MembersPage() {
                   type="button"
                   disabled={isSubmitting}
                   onClick={() => setWarningMember(null)}
-                  className="px-5 py-3 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-extrabold text-sm border-2 border-zinc-700 min-h-[48px] cursor-pointer"
+                  className="px-5 py-3 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-extrabold text-sm border-2 border-zinc-700 min-h-[48px] cursor-pointer touch-action-manipulation active:scale-[0.98]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-6 py-3 rounded-2xl bg-amber-600 hover:bg-amber-700 text-white font-extrabold text-sm shadow-soft border-2 border-amber-500 disabled:opacity-50 min-h-[48px] cursor-pointer"
+                  className="px-6 py-3 rounded-2xl bg-amber-600 hover:bg-amber-700 text-white font-extrabold text-sm shadow-soft border-2 border-amber-500 disabled:opacity-50 min-h-[48px] cursor-pointer touch-action-manipulation active:scale-[0.98]"
                 >
                   {isSubmitting ? "Issuing..." : "Confirm Warning"}
                 </button>
@@ -817,10 +983,10 @@ export default function MembersPage() {
 
       {/* Disciplinary Ban / Unban Modal */}
       {banMemberTarget && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-zinc-900 rounded-3xl p-6 max-w-md w-full shadow-soft-lg border-3 border-zinc-700 space-y-4">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-xs flex items-center justify-center z-50 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-[calc(1rem+env(safe-area-inset-top))]">
+          <div className="bg-zinc-900 rounded-3xl p-5 sm:p-6 max-w-md w-full shadow-soft-lg border-3 border-zinc-700 space-y-4 max-h-[90dvh] overflow-y-auto">
             <div className={`flex items-center gap-3 ${banMemberTarget.is_banned ? "text-emerald-400" : "text-red-400"}`}>
-              <div className={`p-3 rounded-2xl border-2 ${banMemberTarget.is_banned ? "bg-emerald-950/80 border-emerald-700" : "bg-red-950/80 border-red-700"}`}>
+              <div className={`p-3 rounded-2xl border-2 shrink-0 ${banMemberTarget.is_banned ? "bg-emerald-950/80 border-emerald-700" : "bg-red-950/80 border-red-700"}`}>
                 {banMemberTarget.is_banned ? <ShieldCheck className="w-6 h-6" /> : <ShieldAlert className="w-6 h-6" />}
               </div>
               <h2 className="text-lg font-extrabold text-zinc-100">
@@ -836,10 +1002,12 @@ export default function MembersPage() {
                   <input
                     type="text"
                     required
+                    inputMode="text"
+                    enterKeyHint="done"
                     placeholder="e.g. Repeated policy violations / misconduct"
                     value={banReasonInput}
                     onChange={(e) => setBanReasonInput(e.target.value)}
-                    className="w-full p-3 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-sm font-bold focus:outline-none"
+                    className="w-full p-3.5 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-base sm:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-red-500 min-h-[48px] touch-action-manipulation"
                   />
                 </div>
               )}
@@ -853,14 +1021,14 @@ export default function MembersPage() {
                   type="button"
                   disabled={isSubmitting}
                   onClick={() => setBanMemberTarget(null)}
-                  className="px-5 py-3 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-extrabold text-sm border-2 border-zinc-700 min-h-[48px] cursor-pointer"
+                  className="px-5 py-3 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-extrabold text-sm border-2 border-zinc-700 min-h-[48px] cursor-pointer touch-action-manipulation active:scale-[0.98]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className={`px-6 py-3 rounded-2xl text-white font-extrabold text-sm shadow-soft border-2 disabled:opacity-50 min-h-[48px] cursor-pointer ${
+                  className={`px-6 py-3 rounded-2xl text-white font-extrabold text-sm shadow-soft border-2 disabled:opacity-50 min-h-[48px] cursor-pointer touch-action-manipulation active:scale-[0.98] ${
                     banMemberTarget.is_banned ? "bg-emerald-600 hover:bg-emerald-700 border-emerald-500" : "bg-red-600 hover:bg-red-700 border-red-500"
                   }`}
                 >
@@ -874,19 +1042,19 @@ export default function MembersPage() {
 
       {/* Walk-in Registration / Edit Modal */}
       {(isAddModalOpen || editingMember) && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-xs flex items-center justify-center z-50 p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-zinc-900 rounded-3xl p-5 sm:p-8 w-[95vw] sm:w-full sm:max-w-xl shadow-soft-lg border-3 border-zinc-700 space-y-6 my-8">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-xs flex items-center justify-center z-50 p-3 sm:p-4 overflow-y-auto pb-[calc(1rem+env(safe-area-inset-bottom))] pt-[calc(1rem+env(safe-area-inset-top))]">
+          <div className="bg-zinc-900 rounded-3xl p-5 sm:p-8 w-[95vw] sm:w-full sm:max-w-xl shadow-soft-lg border-3 border-zinc-700 space-y-6 my-auto max-h-[90dvh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
               <h2 className="text-xl font-extrabold text-zinc-100 flex items-center gap-2">
-                <UserCheck className="w-6 h-6 text-red-500" />
-                {editingMember ? "Edit Member Record" : "New Walk-in Registration & Payment"}
+                <UserCheck className="w-6 h-6 text-red-500 shrink-0" />
+                <span>{editingMember ? "Edit Member Record" : "New Walk-in Registration"}</span>
               </h2>
               <button
                 onClick={() => {
                   setIsAddModalOpen(false);
                   setEditingMember(null);
                 }}
-                className="p-3 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-2 border-zinc-700 min-h-[44px] min-w-[44px] flex items-center justify-center font-bold cursor-pointer"
+                className="p-3 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-2 border-zinc-700 min-h-[44px] min-w-[44px] flex items-center justify-center font-bold cursor-pointer touch-action-manipulation active:scale-[0.98]"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -909,12 +1077,15 @@ export default function MembersPage() {
                     <input
                       type="text"
                       required
+                      inputMode="text"
+                      autoComplete="name"
+                      enterKeyHint="next"
                       placeholder="e.g. John Doe"
                       value={formData.name}
                       onChange={(e) =>
                         setFormData({ ...formData, name: e.target.value })
                       }
-                      className="w-full px-4 py-3.5 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-base focus:outline-none focus:ring-2 focus:ring-red-500 font-bold min-h-[52px]"
+                      className="w-full px-4 py-3.5 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-red-500 font-bold min-h-[52px] touch-action-manipulation"
                     />
                   </div>
 
@@ -925,12 +1096,15 @@ export default function MembersPage() {
                     <input
                       type="text"
                       required
+                      inputMode="tel"
+                      autoComplete="tel"
+                      enterKeyHint="next"
                       placeholder="e.g. +639170000000"
                       value={formData.phone}
                       onChange={(e) =>
                         setFormData({ ...formData, phone: e.target.value })
                       }
-                      className="w-full px-4 py-3.5 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-base focus:outline-none focus:ring-2 focus:ring-red-500 font-bold min-h-[52px]"
+                      className="w-full px-4 py-3.5 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-red-500 font-bold min-h-[52px] touch-action-manipulation"
                     />
                   </div>
                 </div>
@@ -950,7 +1124,7 @@ export default function MembersPage() {
                         key={badge.id}
                         type="button"
                         onClick={() => handleBadgeToggle(badge.name)}
-                        className={`p-3 rounded-2xl border-2 text-left transition-all flex flex-col justify-between cursor-pointer ${
+                        className={`p-3 rounded-2xl border-2 text-left transition-all flex flex-col justify-between cursor-pointer min-h-[56px] touch-action-manipulation active:scale-[0.98] ${
                           isChecked
                             ? "bg-red-600 text-white border-red-500 shadow-soft"
                             : "bg-zinc-950 text-zinc-300 border-zinc-700 hover:bg-zinc-800"
@@ -971,7 +1145,7 @@ export default function MembersPage() {
                 </div>
                 {discountIndicator && (
                   <div className="p-3 bg-emerald-950/80 text-emerald-300 font-extrabold text-xs rounded-2xl border border-emerald-700 flex items-center gap-2 animate-bounce">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                     <span>{discountIndicator}</span>
                   </div>
                 )}
@@ -995,7 +1169,7 @@ export default function MembersPage() {
                           key={plan.id}
                           type="button"
                           onClick={() => handlePlanSelection(plan)}
-                          className={`p-3.5 rounded-2xl text-left transition-all border-2 flex flex-col justify-between cursor-pointer ${
+                          className={`p-3.5 rounded-2xl text-left transition-all border-2 flex flex-col justify-between cursor-pointer min-h-[56px] touch-action-manipulation active:scale-[0.98] ${
                             isSelected
                               ? "bg-red-600 text-white border-red-500 shadow-soft"
                               : "bg-zinc-950 text-zinc-300 border-zinc-700 hover:bg-zinc-800"
@@ -1029,7 +1203,7 @@ export default function MembersPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, join_date: e.target.value })
                       }
-                      className="w-full px-4 py-3.5 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-base focus:outline-none focus:ring-2 focus:ring-red-500 font-bold min-h-[52px]"
+                      className="w-full px-4 py-3.5 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-red-500 font-bold min-h-[52px] touch-action-manipulation"
                     />
                   </div>
 
@@ -1047,7 +1221,7 @@ export default function MembersPage() {
                           expiration_date: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3.5 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-base focus:outline-none focus:ring-2 focus:ring-red-500 font-bold min-h-[52px]"
+                      className="w-full px-4 py-3.5 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-red-500 font-bold min-h-[52px] touch-action-manipulation"
                     />
                   </div>
                 </div>
@@ -1067,11 +1241,13 @@ export default function MembersPage() {
                     <input
                       type="number"
                       required
+                      inputMode="numeric"
+                      enterKeyHint="done"
                       value={formData.amount_paid}
                       onChange={(e) =>
                         setFormData({ ...formData, amount_paid: Number(e.target.value) })
                       }
-                      className="w-full px-4 py-3.5 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-base focus:outline-none focus:ring-2 focus:ring-red-500 font-extrabold min-h-[52px]"
+                      className="w-full px-4 py-3.5 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-red-500 font-extrabold min-h-[52px] touch-action-manipulation"
                     />
                   </div>
 
@@ -1084,7 +1260,7 @@ export default function MembersPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, payment_method: e.target.value as any })
                       }
-                      className="w-full px-4 py-3.5 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-base focus:outline-none focus:ring-2 focus:ring-red-500 font-extrabold min-h-[52px]"
+                      className="w-full px-4 py-3.5 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-red-500 font-extrabold min-h-[52px] cursor-pointer touch-action-manipulation"
                     >
                       <option value="Cash">Cash</option>
                       <option value="GCash">GCash</option>
@@ -1103,17 +1279,17 @@ export default function MembersPage() {
                     setIsAddModalOpen(false);
                     setEditingMember(null);
                   }}
-                  className="px-6 py-3.5 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-extrabold text-sm border-2 border-zinc-700 min-h-[52px] cursor-pointer"
+                  className="px-6 py-3.5 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-extrabold text-sm border-2 border-zinc-700 min-h-[52px] cursor-pointer touch-action-manipulation active:scale-[0.98]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-7 py-3.5 bg-red-600 hover:bg-red-700 text-white font-extrabold text-sm rounded-2xl shadow-soft border-2 border-red-500 disabled:opacity-50 flex items-center justify-center gap-2 min-h-[52px] cursor-pointer"
+                  className="px-7 py-3.5 bg-red-600 hover:bg-red-700 text-white font-extrabold text-sm rounded-2xl shadow-soft border-2 border-red-500 disabled:opacity-50 flex items-center justify-center gap-2 min-h-[52px] cursor-pointer touch-action-manipulation active:scale-[0.98]"
                 >
-                  <CreditCard className="w-5 h-5" />
-                  {isSubmitting ? "Processing..." : "Confirm Payment & Activate"}
+                  <CreditCard className="w-5 h-5 shrink-0" />
+                  <span>{isSubmitting ? "Processing..." : "Confirm Payment & Activate"}</span>
                 </button>
               </div>
             </form>
@@ -1123,10 +1299,10 @@ export default function MembersPage() {
 
       {/* Delete Confirmation Modal */}
       {deletingMember && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-zinc-900 rounded-3xl p-6 max-w-md w-full shadow-soft-lg border-3 border-zinc-700 space-y-4">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-xs flex items-center justify-center z-50 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-[calc(1rem+env(safe-area-inset-top))]">
+          <div className="bg-zinc-900 rounded-3xl p-6 max-w-md w-full shadow-soft-lg border-3 border-zinc-700 space-y-4 max-h-[90dvh] overflow-y-auto">
             <div className="flex items-center gap-3 text-red-400">
-              <div className="p-3 bg-red-950/80 rounded-2xl border-2 border-red-700">
+              <div className="p-3 bg-red-950/80 rounded-2xl border-2 border-red-700 shrink-0">
                 <AlertTriangle className="w-6 h-6" />
               </div>
               <h2 className="text-lg font-extrabold text-zinc-100">
@@ -1142,19 +1318,22 @@ export default function MembersPage() {
             <form onSubmit={handleDeleteMember} className="space-y-4 pt-2">
               <div>
                 <label className="block text-xs font-extrabold text-zinc-300 uppercase mb-1.5 flex items-center gap-1.5">
-                  <Lock className="w-3.5 h-3.5 text-amber-500" /> Confirm Admin Password
+                  <Lock className="w-3.5 h-3.5 text-amber-500 shrink-0" /> Confirm Admin Password
                 </label>
                 <input
                   type="password"
                   required
                   autoFocus
+                  inputMode="text"
+                  autoComplete="current-password"
+                  enterKeyHint="done"
                   placeholder="Enter admin password (e.g. admin123)"
                   value={deletePassword}
                   onChange={(e) => {
                     setDeletePassword(e.target.value);
                     if (deleteError) setDeleteError(null);
                   }}
-                  className="w-full px-4 py-3.5 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-sm font-extrabold focus:outline-none focus:border-red-500 min-h-[48px]"
+                  className="w-full px-4 py-3.5 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-base sm:text-sm font-extrabold focus:outline-none focus:border-red-500 min-h-[48px] touch-action-manipulation"
                 />
               </div>
 
@@ -1174,17 +1353,17 @@ export default function MembersPage() {
                     setDeletePassword("");
                     setDeleteError(null);
                   }}
-                  className="px-5 py-3 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-extrabold text-sm border-2 border-zinc-700 min-h-[48px] cursor-pointer"
+                  className="px-5 py-3 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-extrabold text-sm border-2 border-zinc-700 min-h-[48px] cursor-pointer touch-action-manipulation active:scale-[0.98]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting || !deletePassword}
-                  className="px-6 py-3 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-extrabold text-sm shadow-soft border-2 border-red-500 disabled:opacity-50 min-h-[48px] cursor-pointer flex items-center gap-1.5"
+                  className="px-6 py-3 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-extrabold text-sm shadow-soft border-2 border-red-500 disabled:opacity-50 min-h-[48px] cursor-pointer touch-action-manipulation active:scale-[0.98] flex items-center gap-1.5"
                 >
-                  <Trash2 className="w-4 h-4" />
-                  {isSubmitting ? "Deleting..." : "Confirm & Delete Member"}
+                  <Trash2 className="w-4 h-4 shrink-0" />
+                  <span>{isSubmitting ? "Deleting..." : "Confirm & Delete Member"}</span>
                 </button>
               </div>
             </form>

@@ -650,6 +650,9 @@ export default function MemberPortalPage() {
               <div className="relative">
                 <input
                   type="text"
+                  inputMode="text"
+                  autoComplete="name"
+                  enterKeyHint="search"
                   required
                   value={inputName}
                   onFocus={() => {
@@ -663,7 +666,7 @@ export default function MemberPortalPage() {
                   }}
                   onKeyDown={handleInputKeyDown}
                   placeholder="e.g. Virgilio Flor E. Guaño"
-                  className="w-full px-5 py-3.5 pl-12 rounded-lg bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-base focus:outline-none focus:ring-2 focus:ring-red-500 font-extrabold min-h-[52px] shadow-xs"
+                  className="w-full px-5 py-3.5 pl-12 rounded-xl bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-base focus:outline-none focus:ring-2 focus:ring-red-500 font-extrabold min-h-[52px] shadow-xs"
                 />
                 <User className="w-5 h-5 text-zinc-500 absolute left-4 top-1/2 -translate-y-1/2" />
               </div>

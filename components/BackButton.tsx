@@ -33,7 +33,7 @@ export function BackButton({ onClick, href, label = "Back" }: BackButtonProps = 
     <button
       type="button"
       onClick={handleBack}
-      className="inline-flex items-center gap-2 border-2 border-zinc-700/80 bg-zinc-800/90 hover:bg-zinc-700 text-zinc-200 rounded-xl px-4 py-2.5 min-h-[44px] font-extrabold text-xs shadow-md transition-all active:scale-95 cursor-pointer shrink-0"
+      className="inline-flex items-center justify-center gap-2 border-2 border-zinc-700/80 bg-zinc-800/90 hover:bg-zinc-700 text-zinc-200 rounded-xl px-4 py-2.5 min-h-[44px] min-w-[44px] font-extrabold text-xs shadow-md transition-all active:scale-[0.98] active:opacity-90 cursor-pointer shrink-0"
     >
       <ArrowLeft className="w-4 h-4 text-red-500" />
       <span>{label}</span>

@@ -154,25 +154,25 @@ export default function Sidebar() {
   return (
     <>
       {/* Mobile Top App Bar */}
-      <div className="lg:hidden flex items-center justify-between bg-zinc-900/95 border-b-2 border-zinc-700/80 px-4 py-3.5 shadow-soft sticky top-0 z-40 backdrop-blur-md">
+      <div className="lg:hidden flex items-center justify-between bg-zinc-900/95 border-b-2 border-zinc-700/80 px-3.5 sm:px-4 py-3 shadow-soft sticky top-0 z-40 backdrop-blur-md pt-[max(0.75rem,env(safe-area-inset-top))]">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold border-2 border-zinc-700 bg-zinc-950 shadow-soft overflow-hidden shrink-0">
+          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-white font-bold border-2 border-zinc-700 bg-zinc-950 shadow-soft overflow-hidden shrink-0">
             {logoUrl ? (
               <img src={logoUrl} alt={gymName} className="w-full h-full object-contain p-1" />
             ) : (
-              <Dumbbell className="w-6 h-6 text-red-500" />
+              <Dumbbell className="w-5 h-5 text-red-500" />
             )}
           </div>
           <div>
-            <h1 className="font-black text-sm text-zinc-100 leading-none">{gymName}</h1>
-            <span className="text-[11px] font-extrabold text-red-500">
+            <h1 className="font-black text-xs sm:text-sm text-zinc-100 leading-none truncate max-w-[170px] sm:max-w-none">{gymName}</h1>
+            <span className="text-[10px] sm:text-[11px] font-extrabold text-red-500">
               Front-Desk Portal
             </span>
           </div>
         </div>
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="p-2.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-2 border-zinc-700 transition min-h-[44px] min-w-[44px] flex items-center justify-center font-bold cursor-pointer"
+          className="p-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-2 border-zinc-700 transition min-h-[44px] min-w-[44px] flex items-center justify-center font-bold cursor-pointer active:scale-95"
           aria-label="Toggle Navigation"
         >
           {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -183,13 +183,13 @@ export default function Sidebar() {
       {mobileOpen && (
         <div
           onClick={() => setMobileOpen(false)}
-          className="fixed inset-0 bg-black/75 backdrop-blur-xs z-40 lg:hidden"
+          className="fixed inset-0 bg-black/75 backdrop-blur-sm z-40 lg:hidden transform-gpu will-change-transform"
         />
       )}
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 w-68 bg-[#101116] border-r-2 border-zinc-800 p-5 flex flex-col justify-between transition-transform duration-300 ease-in-out lg:translate-x-0 shadow-2xl ${
+        className={`fixed top-0 bottom-0 left-0 z-50 w-68 bg-[#101116] border-r-2 border-zinc-800 p-5 flex flex-col justify-between transition-transform duration-300 ease-in-out lg:translate-x-0 shadow-2xl transform-gpu will-change-transform pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1.25rem,env(safe-area-inset-bottom))] ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -204,7 +204,7 @@ export default function Sidebar() {
               )}
             </div>
             <div>
-              <h1 className="font-black text-base text-zinc-100 leading-tight">{gymName}</h1>
+              <h1 className="font-black text-base text-zinc-100 leading-tight truncate max-w-[150px]">{gymName}</h1>
               <div className="flex items-center gap-1 text-[11px] font-extrabold text-red-500">
                 <Sparkles className="w-3 h-3 text-red-500" /> Gym Management
               </div>
@@ -222,7 +222,7 @@ export default function Sidebar() {
                   key={item.href}
                   href={item.href}
                   onClick={() => setMobileOpen(false)}
-                  className={`flex items-center justify-between px-3.5 py-3 min-h-[48px] rounded-lg font-extrabold text-xs sm:text-sm transition-all duration-200 border-2 ${
+                  className={`flex items-center justify-between px-3.5 py-3 min-h-[48px] rounded-xl font-extrabold text-xs sm:text-sm transition-all duration-200 border-2 active:scale-[0.98] ${
                     isActive
                       ? "bg-red-600 text-white border-red-500 shadow-soft"
                       : "text-zinc-300 bg-zinc-950/60 hover:bg-zinc-800/80 border-zinc-800 hover:border-zinc-700"
@@ -257,13 +257,13 @@ export default function Sidebar() {
               setMobileOpen(false);
               startAppTutorial();
             }}
-            className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs shadow-md shadow-blue-600/30 transition-all duration-200 cursor-pointer active:scale-95"
+            className="w-full flex items-center justify-center gap-2 px-3.5 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs shadow-md shadow-blue-600/30 transition-all duration-200 cursor-pointer active:scale-95 min-h-[44px]"
           >
             <HelpCircle className="w-4 h-4 text-white" />
             <span>Interactive Tutorial</span>
           </button>
 
-          <div className="p-3.5 rounded-lg border-2 border-zinc-800 bg-zinc-950 space-y-1.5 shadow-sm">
+          <div className="p-3 rounded-xl border-2 border-zinc-800 bg-zinc-950 space-y-1 shadow-sm">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-extrabold uppercase tracking-wider text-red-500">
                 Gym Active
@@ -275,7 +275,7 @@ export default function Sidebar() {
 
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-lg bg-zinc-900 hover:bg-red-950/80 text-red-400 border-2 border-zinc-800 hover:border-red-800/80 font-extrabold text-xs shadow-sm transition-all duration-200 active:translate-y-0.5 cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 px-3.5 py-3 rounded-xl bg-zinc-900 hover:bg-red-950/80 text-red-400 border-2 border-zinc-800 hover:border-red-800/80 font-extrabold text-xs shadow-sm transition-all duration-200 active:scale-95 min-h-[44px] cursor-pointer"
           >
             <LogOut className="w-4 h-4 text-red-500" />
             <span>Logout</span>
@@ -284,7 +284,7 @@ export default function Sidebar() {
       </aside>
 
       {/* Mobile Sticky Bottom Thumb Navigation Bar */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#101116]/95 backdrop-blur-md border-t-2 border-zinc-800 px-2 py-1.5 shadow-2xl flex items-center justify-around">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#101116]/95 backdrop-blur-md border-t-2 border-zinc-800 px-2 py-1.5 pb-[max(0.375rem,env(safe-area-inset-bottom))] shadow-2xl flex items-center justify-around transform-gpu">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
@@ -292,13 +292,13 @@ export default function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-lg min-w-[64px] min-h-[50px] border-2 transition-all ${
+              className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-xl min-w-[64px] min-h-[48px] border-2 transition-all active:scale-95 ${
                 isActive
                   ? "bg-red-600 text-white border-red-500 shadow-soft"
                   : "bg-zinc-950/80 text-zinc-400 border-zinc-800 hover:bg-zinc-800"
               }`}
             >
-              <Icon className={`w-4 h-4 mb-1 ${isActive ? "text-white" : "text-zinc-400"}`} />
+              <Icon className={`w-4 h-4 mb-0.5 ${isActive ? "text-white" : "text-zinc-400"}`} />
               <span className="text-[10px] font-black truncate max-w-[60px]">{item.name.split(" ")[0]}</span>
             </Link>
           );

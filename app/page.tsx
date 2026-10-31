@@ -161,7 +161,7 @@ export default function LandingGateway() {
           <button
             type="button"
             onClick={() => router.push('/portal')}
-            className="w-full !bg-white hover:!bg-slate-50 p-3.5 sm:p-4 rounded-lg !border-2 !border-slate-300 hover:!border-red-600 shadow-sm active:scale-[0.99] transition-all flex items-center justify-between group text-left cursor-pointer"
+            className="w-full !bg-white hover:!bg-slate-50 p-3.5 sm:p-4 rounded-xl !border-2 !border-slate-300 hover:!border-red-600 shadow-sm active:scale-[0.98] active:opacity-90 transition-all flex items-center justify-between group text-left cursor-pointer min-h-[52px]"
           >
             <div className="flex items-center gap-3">
               <div className="bg-red-50 p-2.5 sm:p-3 rounded-lg border border-red-200 text-red-600 group-hover:bg-red-600 group-hover:text-white group-hover:border-red-600 transition-colors shrink-0">
@@ -184,7 +184,7 @@ export default function LandingGateway() {
             <button
               type="button"
               onClick={() => setShowAdminLogin(true)}
-              className="w-full !bg-white hover:!bg-slate-50 p-3.5 sm:p-4 rounded-lg !border-2 !border-slate-300 hover:!border-amber-600 shadow-sm active:scale-[0.99] transition-all flex items-center justify-between group text-left cursor-pointer"
+              className="w-full !bg-white hover:!bg-slate-50 p-3.5 sm:p-4 rounded-xl !border-2 !border-slate-300 hover:!border-amber-600 shadow-sm active:scale-[0.98] active:opacity-90 transition-all flex items-center justify-between group text-left cursor-pointer min-h-[52px]"
             >
               <div className="flex items-center gap-3">
                 <div className="bg-amber-50 p-2.5 sm:p-3 rounded-lg border border-amber-200 text-amber-600 group-hover:bg-amber-500 group-hover:text-slate-950 group-hover:border-amber-500 transition-colors shrink-0">
@@ -204,7 +204,7 @@ export default function LandingGateway() {
           ) : (
             <form
               onSubmit={handleAdminLogin}
-              className="w-full !bg-white p-4 sm:p-5 rounded-lg !border-2 !border-slate-300 shadow-md space-y-3.5 animate-in fade-in duration-200"
+              className="w-full !bg-white p-4 sm:p-5 rounded-xl !border-2 !border-slate-300 shadow-md space-y-3.5 animate-in fade-in duration-200"
             >
               <div className="flex items-center justify-between text-slate-900 font-extrabold text-xs pb-2 border-b border-slate-200">
                 <div className="flex items-center gap-2 text-amber-600">
@@ -223,16 +223,19 @@ export default function LandingGateway() {
                 </label>
                 <input
                   type="password"
+                  inputMode="text"
+                  autoComplete="current-password"
+                  enterKeyHint="go"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Hint: admin123"
-                  className="w-full !bg-slate-50 px-3.5 py-2.5 !rounded-lg !border-2 !border-slate-300 !text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:!border-amber-600 font-extrabold text-sm placeholder:!text-slate-400 shadow-xs"
+                  className="w-full !bg-slate-50 px-3.5 py-3 !rounded-xl !border-2 !border-slate-300 !text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:!border-amber-600 font-extrabold text-base sm:text-sm placeholder:!text-slate-400 shadow-xs min-h-[44px]"
                   autoFocus
                 />
               </div>
 
               {error && (
-                <div className="p-3 rounded-lg bg-red-50 border-2 border-red-200 text-red-700 font-bold text-xs flex items-center gap-2">
+                <div className="p-3 rounded-xl bg-red-50 border-2 border-red-200 text-red-700 font-bold text-xs flex items-center gap-2">
                   <ShieldAlert className="w-4 h-4 text-red-500 shrink-0" />
                   <span>Incorrect admin password. Please try again.</span>
                 </div>
@@ -246,13 +249,13 @@ export default function LandingGateway() {
                     setPassword('');
                     setError(false);
                   }}
-                  className="flex-1 !bg-slate-200 hover:!bg-slate-300 !text-slate-800 py-2.5 !rounded-lg !border-0 font-extrabold text-xs transition cursor-pointer"
+                  className="flex-1 !bg-slate-200 hover:!bg-slate-300 !text-slate-800 py-3 !rounded-xl !border-0 font-extrabold text-xs transition cursor-pointer min-h-[44px] active:scale-[0.98]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 !bg-red-600 hover:!bg-red-700 !text-white py-2.5 !rounded-lg !border-0 font-extrabold text-xs shadow-sm transition cursor-pointer"
+                  className="flex-1 !bg-red-600 hover:!bg-red-700 !text-white py-3 !rounded-xl !border-0 font-extrabold text-xs shadow-sm transition cursor-pointer min-h-[44px] active:scale-[0.98]"
                 >
                   Log In
                 </button>

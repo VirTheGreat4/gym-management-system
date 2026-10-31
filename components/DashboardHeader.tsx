@@ -165,7 +165,7 @@ export default function DashboardHeader({
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0 pt-2 md:pt-0">
           <Link
             href="/settings"
-            className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-200 font-extrabold text-xs sm:text-sm border-2 border-zinc-700 transition-all cursor-pointer shadow-sm active:scale-95"
+            className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-200 font-extrabold text-xs sm:text-sm border-2 border-zinc-700 transition-all cursor-pointer shadow-sm active:scale-[0.98] min-h-[44px]"
           >
             <Palette className="w-4 h-4 text-red-500" />
             <span>Edit Branding</span>
@@ -173,7 +173,7 @@ export default function DashboardHeader({
 
           <Link
             href="/members"
-            className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs sm:text-sm shadow-soft border-2 border-red-500 transition-all cursor-pointer active:scale-95 min-h-[48px]"
+            className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs sm:text-sm shadow-soft border-2 border-red-500 transition-all cursor-pointer active:scale-[0.98] min-h-[48px]"
           >
             <UserPlus className="w-4 h-4" />
             <span>Add Member</span>

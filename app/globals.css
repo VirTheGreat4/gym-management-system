@@ -2,6 +2,7 @@
 
 body, * {
   font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+  -webkit-tap-highlight-color: transparent;
 }
 
 @layer base {
@@ -20,7 +21,14 @@ body, * {
     color: #F4F4F5 !important;
     font-family: var(--font-family) !important;
     min-height: 100vh;
+    min-height: 100dvh;
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* Touch targets & CSS ergonomics for mobile-first interaction (WCAG 2.1 AA) */
+  button, a, select, summary, [role="button"], input[type="button"], input[type="submit"] {
+    touch-action: manipulation;
   }
 
   /* Rounded corners and bold tactile borders for Red/Black/Grey theme */
@@ -32,6 +40,22 @@ body, * {
     border: 2px solid #3F3F46; /* zinc-700 */
     background-color: #18181B; /* zinc-900 */
     color: #F4F4F5;
+  }
+
+  /* Enforce minimum 16px text on mobile inputs to prevent iOS auto-zoom */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+  @media (min-width: 640px) {
+    input, select, textarea {
+      font-size: 0.875rem !important; /* 14px on sm+ screens if needed */
+    }
+    input.text-base, select.text-base, textarea.text-base {
+      font-size: 1rem !important;
+    }
+    input.text-lg, select.text-lg, textarea.text-lg {
+      font-size: 1.125rem !important;
+    }
   }
 
   input::placeholder, textarea::placeholder {
