@@ -47,6 +47,36 @@ const fallbackSchedule: GymSchedule = {
   special_closed_dates: [],
 };
 
+function sanitizeSchedule(rawSchedule: any): GymSchedule {
+  if (!rawSchedule || typeof rawSchedule !== "object") {
+    return fallbackSchedule;
+  }
+  const regular_hours = Array.isArray(rawSchedule.regular_hours) && rawSchedule.regular_hours.length > 0
+    ? rawSchedule.regular_hours.map((item: any, i: number) => ({
+        day: item?.day || defaultDays[i]?.day || "Monday",
+        open: item?.open || "06:00",
+        close: item?.close || "22:00",
+        is_closed: typeof item?.is_closed === "boolean" ? item.is_closed : false,
+      }))
+    : defaultDays;
+
+  const special_closed_dates = Array.isArray(rawSchedule.special_closed_dates)
+    ? rawSchedule.special_closed_dates.map((item: any) => ({
+        id: item?.id || String(Math.random()),
+        date: item?.date || "",
+        reason: item?.reason || "Holiday Closure",
+      }))
+    : [];
+
+  return {
+    is_open_now: typeof rawSchedule.is_open_now === "boolean" ? rawSchedule.is_open_now : true,
+    manual_override: typeof rawSchedule.manual_override === "boolean" ? rawSchedule.manual_override : false,
+    announcement: rawSchedule.announcement || "",
+    regular_hours,
+    special_closed_dates,
+  };
+}
+
 export interface ComputedGymStatus {
   isOpen: boolean;
   reason: string;
@@ -57,13 +87,11 @@ export function calculateGymOpenStatus(
   schedule: GymSchedule | null,
   now: Date = new Date()
 ): ComputedGymStatus {
-  if (!schedule) {
-    return { isOpen: true, reason: "Standard Operating Hours", todayHoursText: "06:00 - 22:00" };
-  }
+  const safeSchedule = sanitizeSchedule(schedule);
 
   // 1. Manual live override check
-  if (schedule.manual_override) {
-    const isOverrideOpen = !!schedule.is_open_now;
+  if (safeSchedule.manual_override) {
+    const isOverrideOpen = !!safeSchedule.is_open_now;
     return {
       isOpen: isOverrideOpen,
       reason: isOverrideOpen
@@ -79,8 +107,8 @@ export function calculateGymOpenStatus(
   const currentDate = String(now.getDate()).padStart(2, "0");
   const dateStr = `${currentYear}-${currentMonth}-${currentDate}`;
 
-  if (schedule.special_closed_dates && schedule.special_closed_dates.length > 0) {
-    const specialClosed = schedule.special_closed_dates.find((d) => d.date === dateStr);
+  if (safeSchedule.special_closed_dates && safeSchedule.special_closed_dates.length > 0) {
+    const specialClosed = safeSchedule.special_closed_dates.find((d) => d.date === dateStr);
     if (specialClosed) {
       return {
         isOpen: false,
@@ -94,7 +122,7 @@ export function calculateGymOpenStatus(
   const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   const currentDayName = daysOfWeek[now.getDay()];
 
-  const daySchedule = schedule.regular_hours?.find(
+  const daySchedule = safeSchedule.regular_hours?.find(
     (item) => item.day.toLowerCase() === currentDayName.toLowerCase()
   );
 
@@ -354,12 +382,12 @@ export default function MemberPortalPage() {
           } else {
             setLogoUrl(DEFAULT_LOGO_URL);
           }
-          if (parsed.schedule?.regular_hours?.length > 0) setSchedule(parsed.schedule);
+          if (parsed.schedule) setSchedule(sanitizeSchedule(parsed.schedule));
         } else {
           const savedSchedule = localStorage.getItem("gym_schedule_data");
           if (savedSchedule) {
             const parsed = JSON.parse(savedSchedule);
-            if (parsed?.regular_hours?.length > 0) setSchedule(parsed);
+            if (parsed) setSchedule(sanitizeSchedule(parsed));
           }
         }
       } catch (e) {
@@ -387,7 +415,7 @@ export default function MemberPortalPage() {
           } else {
             setLogoUrl(DEFAULT_LOGO_URL);
           }
-          if (settingsRes.data.schedule) setSchedule(settingsRes.data.schedule);
+          if (settingsRes.data.schedule) setSchedule(sanitizeSchedule(settingsRes.data.schedule));
         }
       }
       if (badgesRes.data) {
@@ -443,7 +471,7 @@ export default function MemberPortalPage() {
         } else if (e.detail.logo_url !== undefined) {
           setLogoUrl(DEFAULT_LOGO_URL);
         }
-        if (e.detail.schedule) setSchedule(e.detail.schedule);
+        if (e.detail.schedule) setSchedule(sanitizeSchedule(e.detail.schedule));
       } else {
         loadLocalSettings();
       }
