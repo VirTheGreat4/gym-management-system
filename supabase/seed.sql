@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS custom_badges (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   color TEXT DEFAULT 'blue',
+  discount_type TEXT DEFAULT 'PERCENTAGE',
+  discount_value NUMERIC DEFAULT 0,
   discount_percent NUMERIC DEFAULT 0,
   description TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
@@ -47,6 +49,10 @@ CREATE TABLE IF NOT EXISTS members (
   violation_notes TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Ensure all expected columns exist on custom_badges table if it already existed
+ALTER TABLE custom_badges ADD COLUMN IF NOT EXISTS discount_type TEXT DEFAULT 'PERCENTAGE';
+ALTER TABLE custom_badges ADD COLUMN IF NOT EXISTS discount_value NUMERIC DEFAULT 0;
 
 -- Ensure all expected columns exist on members table if it already existed
 ALTER TABLE members ADD COLUMN IF NOT EXISTS name TEXT;

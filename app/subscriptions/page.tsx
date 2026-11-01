@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { SubscriptionPlan, CustomBadge } from "@/types/database";
 import { BackButton } from "@/components/BackButton";
+import { getBadgeDiscountLabel } from "@/lib/badgeUtils";
 import {
   getSubscriptionPlans,
   createSubscriptionPlan,
@@ -78,7 +79,8 @@ export default function SubscriptionsPage() {
   const [badgeFormData, setBadgeFormData] = useState({
     name: "",
     color: "blue" as CustomBadge["color"],
-    discount_percent: 0,
+    discount_type: "PERCENTAGE" as "PERCENTAGE" | "DIRECT",
+    discount_value: 0,
     description: "",
   });
 
@@ -136,7 +138,8 @@ export default function SubscriptionsPage() {
     setBadgeFormData({
       name: "",
       color: "blue",
-      discount_percent: 0,
+      discount_type: "PERCENTAGE",
+      discount_value: 0,
       description: "",
     });
     setIsBadgeModalOpen(true);
@@ -144,10 +147,13 @@ export default function SubscriptionsPage() {
 
   const handleOpenEditBadgeModal = (badge: CustomBadge) => {
     setEditingBadge(badge);
+    const dType = badge.discount_type || "PERCENTAGE";
+    const dVal = dType === "DIRECT" ? (badge.discount_value ?? 0) : (badge.discount_value ?? badge.discount_percent ?? 0);
     setBadgeFormData({
       name: badge.name,
       color: badge.color,
-      discount_percent: badge.discount_percent ?? 0,
+      discount_type: dType,
+      discount_value: dVal,
       description: badge.description || "",
     });
   };
@@ -213,24 +219,26 @@ export default function SubscriptionsPage() {
       return;
     }
 
+    const isDirect = badgeFormData.discount_type === "DIRECT";
+    const discountVal = Number(badgeFormData.discount_value);
+
+    const payload = {
+      name: badgeFormData.name,
+      color: badgeFormData.color,
+      discount_type: badgeFormData.discount_type,
+      discount_value: discountVal,
+      discount_percent: isDirect ? 0 : discountVal,
+      description: badgeFormData.description,
+    };
+
     try {
       if (editingBadge) {
-        const res = await updateCustomBadge(editingBadge.id, {
-          name: badgeFormData.name,
-          color: badgeFormData.color,
-          discount_percent: Number(badgeFormData.discount_percent),
-          description: badgeFormData.description,
-        });
+        const res = await updateCustomBadge(editingBadge.id, payload);
         if (!res.success) throw new Error(res.error || "Failed to update badge");
         setFeedback({ type: "success", message: `Badge "${badgeFormData.name}" updated successfully!` });
         setEditingBadge(null);
       } else {
-        const res = await createCustomBadge({
-          name: badgeFormData.name,
-          color: badgeFormData.color,
-          discount_percent: Number(badgeFormData.discount_percent),
-          description: badgeFormData.description,
-        });
+        const res = await createCustomBadge(payload);
         if (!res.success) throw new Error(res.error || "Failed to create badge");
         setFeedback({ type: "success", message: `Badge "${badgeFormData.name}" created successfully!` });
         setIsBadgeModalOpen(false);
@@ -280,7 +288,7 @@ export default function SubscriptionsPage() {
       <div className="space-y-6 sm:space-y-8" suppressHydrationWarning>
         <BackButton />
         <div className="bg-zinc-900 p-8 rounded-2xl border-3 border-zinc-700 text-zinc-300 font-bold text-center">
-          Loading subscription plans and database badges...
+          Loading subscription plans and custom badges...
         </div>
       </div>
     );
@@ -316,7 +324,7 @@ export default function SubscriptionsPage() {
             Subscription Plans Management
           </h1>
           <p className="text-zinc-400 font-medium text-xs sm:text-sm mt-1">
-            Configure live database gym plans, pricing tiers, durations, and member benefits.
+            Configure gym plans, pricing tiers, durations, and member benefits.
           </p>
         </div>
 
@@ -387,18 +395,18 @@ export default function SubscriptionsPage() {
         ))}
       </div>
 
-      {/* Custom Database Badges Management Section */}
+      {/* Custom Badges Management Section */}
       <div className="space-y-6 pt-6 border-t-3 border-zinc-700">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-zinc-900 p-5 sm:p-8 rounded-2xl shadow-soft border-3 border-zinc-700">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-zinc-800 text-zinc-300 text-xs font-extrabold mb-2 border-2 border-zinc-700">
-              <Tag className="w-4 h-4 text-red-500 shrink-0" /> Live Database Client Classification
+              <Tag className="w-4 h-4 text-red-500 shrink-0" /> Client Classification
             </div>
             <h2 className="text-xl sm:text-2xl font-extrabold text-zinc-100 tracking-tight">
-              Custom Database Badges Management
+              Custom Badges Management
             </h2>
             <p className="text-zinc-400 font-medium text-xs sm:text-sm mt-1">
-              Configure live database member badges with automatic discount percentages for check-in registrations.
+              Configure member badges with automatic percentage or fixed monetary discounts for check-in registrations.
             </p>
           </div>
 
@@ -422,15 +430,15 @@ export default function SubscriptionsPage() {
                   <span className={`px-3 py-1.5 rounded-xl text-xs font-extrabold border ${getBadgeColorStyle(badge.color)} shadow-xs`}>
                     {badge.name}
                   </span>
-                  <div className="w-10 h-10 rounded-2xl bg-zinc-800 text-zinc-200 border-2 border-zinc-700 flex items-center justify-center shadow-xs font-extrabold text-xs">
-                    {badge.discount_percent ?? 0}%
+                  <div className="px-2.5 py-1 rounded-xl bg-zinc-800 text-emerald-400 border-2 border-zinc-700 font-extrabold text-xs">
+                    {getBadgeDiscountLabel(badge)}
                   </div>
                 </div>
 
                 <div>
                   <h3 className="text-lg font-extrabold text-zinc-100 leading-tight">{badge.name}</h3>
                   <p className="text-xs text-zinc-400 font-medium mt-1 min-h-[32px]">
-                    {badge.description || "Custom database client status badge."}
+                    {badge.description || "Custom client status badge."}
                   </p>
                 </div>
 
@@ -439,7 +447,7 @@ export default function SubscriptionsPage() {
                     <span className="flex items-center gap-1">
                       <Tag className="w-3.5 h-3.5 text-red-500 shrink-0" /> Plan Discount:
                     </span>
-                    <span className="font-extrabold text-emerald-400">{badge.discount_percent ?? 0}% OFF</span>
+                    <span className="font-extrabold text-emerald-400">{getBadgeDiscountLabel(badge)}</span>
                   </div>
                 </div>
               </div>
@@ -612,7 +620,7 @@ export default function SubscriptionsPage() {
             <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
               <h2 className="text-lg sm:text-xl font-extrabold text-zinc-100 flex items-center gap-2">
                 <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-red-500 shrink-0" />
-                {editingBadge ? "Edit Custom Client Badge" : "Create New Custom Badge"}
+                {editingBadge ? "Edit Custom Badge" : "Create New Custom Badge"}
               </h2>
               <button
                 onClick={() => {
@@ -642,36 +650,57 @@ export default function SubscriptionsPage() {
                 />
               </div>
 
+              <div>
+                <label className="block text-xs font-extrabold text-zinc-400 uppercase mb-1">
+                  Badge Color Tone
+                </label>
+                <select
+                  value={badgeFormData.color}
+                  onChange={(e) => setBadgeFormData({ ...badgeFormData, color: e.target.value as any })}
+                  className="w-full px-4 py-3.5 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-base sm:text-sm font-extrabold focus:outline-none focus:border-red-500 min-h-[48px]"
+                >
+                  <option value="blue">Blue Pastel</option>
+                  <option value="green">Green Pastel</option>
+                  <option value="yellow">Yellow Pastel</option>
+                  <option value="purple">Purple Pastel</option>
+                  <option value="rose">Rose Pastel</option>
+                  <option value="slate">Slate</option>
+                </select>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-extrabold text-zinc-400 uppercase mb-1">
-                    Badge Color Tone
+                    Discount Type
                   </label>
                   <select
-                    value={badgeFormData.color}
-                    onChange={(e) => setBadgeFormData({ ...badgeFormData, color: e.target.value as any })}
+                    value={badgeFormData.discount_type}
+                    onChange={(e) =>
+                      setBadgeFormData({
+                        ...badgeFormData,
+                        discount_type: e.target.value as "PERCENTAGE" | "DIRECT",
+                      })
+                    }
                     className="w-full px-4 py-3.5 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-base sm:text-sm font-extrabold focus:outline-none focus:border-red-500 min-h-[48px]"
                   >
-                    <option value="blue">Blue Pastel</option>
-                    <option value="green">Green Pastel</option>
-                    <option value="yellow">Yellow Pastel</option>
-                    <option value="purple">Purple Pastel</option>
-                    <option value="rose">Rose Pastel</option>
-                    <option value="slate">Slate</option>
+                    <option value="PERCENTAGE">PERCENTAGE (% OFF)</option>
+                    <option value="DIRECT">DIRECT DISCOUNT (₱ OFF)</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-xs font-extrabold text-zinc-400 uppercase mb-1">
-                    Discount Percentage (0 - 100%)
+                    {badgeFormData.discount_type === "DIRECT" ? "Discount Amount (₱)" : "Discount Value (%)"}
                   </label>
                   <input
                     type="number"
                     required
                     min={0}
-                    max={100}
-                    value={badgeFormData.discount_percent}
-                    onChange={(e) => setBadgeFormData({ ...badgeFormData, discount_percent: Number(e.target.value) })}
+                    max={badgeFormData.discount_type === "PERCENTAGE" ? 100 : 100000}
+                    value={badgeFormData.discount_value}
+                    onChange={(e) =>
+                      setBadgeFormData({ ...badgeFormData, discount_value: Number(e.target.value) })
+                    }
                     inputMode="numeric"
                     enterKeyHint="next"
                     className="w-full px-4 py-3.5 rounded-2xl bg-zinc-950 border-2 border-zinc-700 text-zinc-100 text-base sm:text-sm font-extrabold focus:outline-none focus:border-red-500 min-h-[48px]"

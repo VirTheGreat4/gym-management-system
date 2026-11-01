@@ -41,6 +41,8 @@ export interface CustomBadge {
   id: string;
   name: string;
   color: 'blue' | 'green' | 'yellow' | 'purple' | 'rose' | 'slate';
+  discount_type?: 'PERCENTAGE' | 'DIRECT';
+  discount_value?: number;
   discount_percent?: number; // e.g. 15 for 15% off plans
   description?: string;
 }

@@ -27,6 +27,7 @@ import { getCustomBadges } from "@/app/actions/badges";
 import { BackButton } from "@/components/BackButton";
 import { Member, GymSchedule, ScheduleDay, CustomBadge } from "@/types/database";
 import { getBadgeColorStyle } from "@/app/subscriptions/page";
+import { getBadgeDiscountLabel } from "@/lib/badgeUtils";
 import { DEFAULT_GYM_NAME, DEFAULT_LOGO_URL } from "@/lib/config";
 import { isSpecialClosedDateExpired } from "@/lib/dateUtils";
 
@@ -227,6 +228,7 @@ export default function MemberPortalPage() {
   const [schedule, setSchedule] = useState<GymSchedule>(fallbackSchedule);
   const [customBadges, setCustomBadges] = useState<CustomBadge[]>([]);
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
+  const [isStatusLoading, setIsStatusLoading] = useState<boolean>(true);
 
   // Dynamic real-time gym open status calculation
   const currentGymStatus = React.useMemo(() => {
@@ -401,58 +403,62 @@ export default function MemberPortalPage() {
     loadLocalSettings();
 
     async function initPortal() {
-      // 1. Fetch gym settings & badges (server-filtered)
-      const [settingsRes, badgesRes] = await Promise.all([
-        getGymSettings(),
-        getCustomBadges(),
-      ]);
-
-      if (settingsRes.data) {
-        if (settingsRes.data.name && settingsRes.data.name !== "JLAB Fitness" && settingsRes.data.name !== "JLAB Fitness Gym") {
-          setGymName(settingsRes.data.name);
-        } else {
-          setGymName(DEFAULT_GYM_NAME);
-        }
-
-        if (settingsRes.data.logo_url) {
-          setLogoUrl(settingsRes.data.logo_url);
-        } else {
-          setLogoUrl(DEFAULT_LOGO_URL);
-        }
-
-        if (settingsRes.data.schedule) {
-          const sanitized = sanitizeSchedule(settingsRes.data.schedule);
-          setSchedule(sanitized);
-          try {
-            localStorage.setItem("gym_schedule_data", JSON.stringify(sanitized));
-          } catch (e) {
-            // ignore
-          }
-        }
-      }
-      if (badgesRes.data) {
-        setCustomBadges(badgesRes.data);
-      }
-
-      // 2. Restore session if stored
       try {
-        const sessionName = localStorage.getItem("gym_member_portal_session");
-        if (sessionName) {
-          setIsSearching(true);
-          const { data: membersList } = await getMembers();
-          if (membersList && membersList.length > 0) {
-            const found = membersList.find(
-              (m) => m.name.trim().toLowerCase() === sessionName.trim().toLowerCase()
-            );
-            if (found) {
-              setActiveMember(found);
+        // 1. Fetch gym settings & badges (server-filtered)
+        const [settingsRes, badgesRes] = await Promise.all([
+          getGymSettings(),
+          getCustomBadges(),
+        ]);
+
+        if (settingsRes.data) {
+          if (settingsRes.data.name && settingsRes.data.name !== "JLAB Fitness" && settingsRes.data.name !== "JLAB Fitness Gym") {
+            setGymName(settingsRes.data.name);
+          } else {
+            setGymName(DEFAULT_GYM_NAME);
+          }
+
+          if (settingsRes.data.logo_url) {
+            setLogoUrl(settingsRes.data.logo_url);
+          } else {
+            setLogoUrl(DEFAULT_LOGO_URL);
+          }
+
+          if (settingsRes.data.schedule) {
+            const sanitized = sanitizeSchedule(settingsRes.data.schedule);
+            setSchedule(sanitized);
+            try {
+              localStorage.setItem("gym_schedule_data", JSON.stringify(sanitized));
+            } catch (e) {
+              // ignore
             }
           }
+        }
+        if (badgesRes.data) {
+          setCustomBadges(badgesRes.data);
+        }
+
+        // 2. Restore session if stored
+        try {
+          const sessionName = localStorage.getItem("gym_member_portal_session");
+          if (sessionName) {
+            setIsSearching(true);
+            const { data: membersList } = await getMembers();
+            if (membersList && membersList.length > 0) {
+              const found = membersList.find(
+                (m) => m.name.trim().toLowerCase() === sessionName.trim().toLowerCase()
+              );
+              if (found) {
+                setActiveMember(found);
+              }
+            }
+            setIsSearching(false);
+          }
+        } catch (e) {
+          console.error("Error restoring session", e);
           setIsSearching(false);
         }
-      } catch (e) {
-        console.error("Error restoring session", e);
-        setIsSearching(false);
+      } finally {
+        setIsStatusLoading(false);
       }
     }
 
@@ -636,7 +642,7 @@ export default function MemberPortalPage() {
                 Welcome to {gymName} Member Portal
               </h1>
               <p className="text-xs sm:text-sm font-medium text-zinc-400 leading-relaxed">
-                Check your active plan status, expiry countdown, database badges, and live operating hours without needing a password.
+                Check your active plan status, expiry countdown, custom badges, and live operating hours without needing a password.
               </p>
             </div>
 
@@ -648,19 +654,26 @@ export default function MemberPortalPage() {
               </span>
             </div>
 
-            {/* Live Gym Status Badge */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-950 border border-zinc-700 text-xs font-extrabold shadow-sm mt-1">
-              <span
-                className={`w-2.5 h-2.5 rounded-full ${
-                  currentGymStatus.isOpen ? "bg-emerald-400 animate-pulse" : "bg-rose-500"
-                }`}
-              />
-              <span className={currentGymStatus.isOpen ? "text-emerald-400" : "text-rose-400"}>
-                Gym is {currentGymStatus.isOpen ? "OPEN NOW" : "CLOSED NOW"}
-              </span>
-              <span className="text-zinc-500">•</span>
-              <span className="text-zinc-300 font-medium">{currentGymStatus.reason}</span>
-            </div>
+            {/* Live Gym Status Badge with FOUC prevention loading state */}
+            {isStatusLoading ? (
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-950 border border-zinc-700 text-xs font-extrabold shadow-sm mt-1 animate-pulse">
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
+                <span className="text-amber-400">Checking Operational Status...</span>
+              </div>
+            ) : (
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-950 border border-zinc-700 text-xs font-extrabold shadow-sm mt-1">
+                <span
+                  className={`w-2.5 h-2.5 rounded-full ${
+                    currentGymStatus.isOpen ? "bg-emerald-400 animate-pulse" : "bg-rose-500"
+                  }`}
+                />
+                <span className={currentGymStatus.isOpen ? "text-emerald-400" : "text-rose-400"}>
+                  Gym is {currentGymStatus.isOpen ? "OPEN NOW" : "CLOSED NOW"}
+                </span>
+                <span className="text-zinc-500">•</span>
+                <span className="text-zinc-300 font-medium">{currentGymStatus.reason}</span>
+              </div>
+            )}
           </div>
 
           {/* Quick-Fill Test Member Helper for Tutorial & Seamless Navigation - Visible strictly during tutorial mode */}
@@ -931,9 +944,9 @@ export default function MemberPortalPage() {
                       >
                         <Tag className="w-3.5 h-3.5 text-red-500 shrink-0" />
                         <span>{foundBadge ? foundBadge.name : badgeName}</span>
-                        {foundBadge?.discount_percent ? (
+                        {foundBadge ? (
                           <span className="text-[10px] bg-red-950 text-red-300 px-1.5 py-0.5 rounded-md border border-red-700">
-                            {foundBadge.discount_percent}% OFF
+                            {getBadgeDiscountLabel(foundBadge)}
                           </span>
                         ) : null}
                       </div>

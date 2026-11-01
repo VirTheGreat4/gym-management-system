@@ -35,6 +35,7 @@ import { BackButton } from "@/components/BackButton";
 import { getSubscriptionPlans } from "@/app/actions/subscriptions";
 import { getCustomBadges } from "@/app/actions/badges";
 import { getBadgeColorStyle } from "@/app/subscriptions/page";
+import { calculateMemberPlanPrice, getBadgeDiscountLabel } from "@/lib/badgeUtils";
 
 export interface UIMember extends Member {
   status: "Active" | "Expired" | "Near Expiry" | "Recently Expired" | "Warnings" | "Banned";
@@ -213,27 +214,16 @@ export default function MembersPage() {
     }
 
     const currentPlan = subscriptionPlans.find((p) => p.name === formData.plan_type) || subscriptionPlans[0];
-    let basePrice = currentPlan ? currentPlan.price : 1500;
+    const basePrice = currentPlan ? currentPlan.price : 1500;
 
-    let maxDiscount = 0;
-    let appliedBadgeName = "";
-    updatedBadges.forEach((bName) => {
-      const bObj = customBadges.find((cb) => cb.name === bName);
-      if (bObj && (bObj.discount_percent || 0) > maxDiscount) {
-        maxDiscount = bObj.discount_percent || 0;
-        appliedBadgeName = bObj.name;
-      }
-    });
-
-    const finalPrice = Math.round(basePrice * (1 - maxDiscount / 100));
-    const indicator = maxDiscount > 0 ? `${maxDiscount}% ${appliedBadgeName} Discount Applied!` : "";
+    const calcResult = calculateMemberPlanPrice(basePrice, updatedBadges, customBadges);
 
     setFormData((prev) => ({
       ...prev,
       badges: updatedBadges,
-      amount_paid: finalPrice,
+      amount_paid: calcResult.finalPrice,
     }));
-    setDiscountIndicator(indicator);
+    setDiscountIndicator(calcResult.indicatorText);
   };
 
   const handlePlanSelection = (selectedPlan: SubscriptionPlan) => {
@@ -242,26 +232,15 @@ export default function MembersPage() {
       .toISOString()
       .split("T")[0];
 
-    let maxDiscount = 0;
-    let appliedBadgeName = "";
-    (formData.badges || []).forEach((bName) => {
-      const bObj = customBadges.find((cb) => cb.name === bName);
-      if (bObj && (bObj.discount_percent || 0) > maxDiscount) {
-        maxDiscount = bObj.discount_percent || 0;
-        appliedBadgeName = bObj.name;
-      }
-    });
-
-    const finalPrice = Math.round(selectedPlan.price * (1 - maxDiscount / 100));
-    const indicator = maxDiscount > 0 ? `${maxDiscount}% ${appliedBadgeName} Discount Applied!` : "";
+    const calcResult = calculateMemberPlanPrice(selectedPlan.price, formData.badges || [], customBadges);
 
     setFormData((prev) => ({
       ...prev,
       plan_type: selectedPlan.name,
-      amount_paid: finalPrice,
+      amount_paid: calcResult.finalPrice,
       expiration_date: calculatedExpiration,
     }));
-    setDiscountIndicator(indicator);
+    setDiscountIndicator(calcResult.indicatorText);
   };
 
   const handleAddMember = async (e: React.FormEvent) => {
@@ -492,7 +471,7 @@ export default function MembersPage() {
             Members Directory
           </h1>
           <p className="text-zinc-400 font-medium text-sm mt-1">
-            Manage subscriptions, live database badges, and enforce disciplinary warnings/bans.
+            Manage subscriptions, custom badges, and enforce disciplinary warnings/bans.
           </p>
         </div>
 
@@ -601,7 +580,7 @@ export default function MembersPage() {
       <div id="tutorial-members-list" className="block md:hidden space-y-3">
         {isLoading ? (
           <div className="bg-zinc-900 rounded-2xl border-3 border-zinc-700 p-8 text-center text-zinc-400 font-medium">
-            Loading members from live database...
+            Loading members...
           </div>
         ) : filteredMembers.length === 0 ? (
           <div className="bg-zinc-900 rounded-2xl border-3 border-zinc-700 p-8 text-center text-zinc-400 font-medium space-y-3">
@@ -775,7 +754,7 @@ export default function MembersPage() {
               {isLoading ? (
                 <tr>
                   <td colSpan={5} className="text-center py-12 text-zinc-400 font-medium">
-                    Loading members from live database...
+                    Loading members...
                   </td>
                 </tr>
               ) : filteredMembers.length === 0 ? (
@@ -1113,7 +1092,7 @@ export default function MembersPage() {
               {/* Client Badges Multi-select Section */}
               <div className="space-y-3 pt-3 border-t border-zinc-800">
                 <span className="text-xs font-extrabold uppercase tracking-wider text-zinc-300 bg-zinc-800 px-3 py-1.5 rounded-2xl inline-block border-2 border-zinc-700">
-                  Live Database Badges & Automatic Discounts
+                  Custom Badges & Automatic Discounts
                 </span>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {customBadges.map((badge) => {
